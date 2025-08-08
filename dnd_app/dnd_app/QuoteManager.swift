@@ -1,5 +1,5 @@
 import Foundation
-import AVFoundation
+
 
 // MARK: - Data models
 
@@ -13,21 +13,11 @@ final class QuoteManager: ObservableObject {
     @Published var categories: [String] = []
     @Published var currentQuote: String = ""
     @Published var favorites: [String] = []
-    @Published var customPrefixes: [String] = [
-        "как сказал один чел",
-        "как спизданул один идиот",
-        "говорили старцы",
-        "моя лапа чует"
-    ]
-    @Published var selectedPrefixIndex: Int = 0
-    @Published var usePrefix: Bool = false
 
     // Persist keys
     private let favoritesKey = "tabaxiFavorites_v2"
     private let customQuotesKey = "tabaxiCustomQuotes_v1"
-    private let prefixKey = "tabaxiPrefixList_v1"
-
-    private var player: AVAudioPlayer?
+    
     private var isInitialized = false
     
     // Lazy initialization for better performance
@@ -36,7 +26,7 @@ final class QuoteManager: ObservableObject {
         isInitialized = true
         loadBundledQuotes()
         loadFavorites()
-        loadCustomPrefixes()
+
         mergeCustomQuotesFromStorage()
         rebuildCategories()
     }
@@ -77,13 +67,8 @@ final class QuoteManager: ObservableObject {
             pool = quotes.values.flatMap { $0 }
         }
         guard !pool.isEmpty else { return }
-        var raw = pool.randomElement() ?? ""
-        if usePrefix, customPrefixes.indices.contains(selectedPrefixIndex) {
-            let prefix = customPrefixes[selectedPrefixIndex]
-            raw = "\(prefix): \(raw)"
-        }
+        let raw = pool.randomElement() ?? ""
         currentQuote = raw
-        playSound()
     }
 
     // MARK: - Add / remove
@@ -140,52 +125,9 @@ final class QuoteManager: ObservableObject {
         UserDefaults.standard.set(favorites, forKey: favoritesKey)
     }
 
-    // MARK: - Custom prefixes
-    func addPrefix(_ prefix: String) {
-        let p = prefix.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !p.isEmpty else { return }
-        customPrefixes.append(p)
-        saveCustomPrefixes()
-    }
 
-    private func loadCustomPrefixes() {
-        if let arr = UserDefaults.standard.array(forKey: prefixKey) as? [String], !arr.isEmpty {
-            customPrefixes = arr
-        }
-    }
 
-    private func saveCustomPrefixes() {
-        UserDefaults.standard.set(customPrefixes, forKey: prefixKey)
-    }
 
-    // MARK: - Sound
-    private func playSound() {
-        // Lazy load audio player once
-        if player == nil {
-            let possiblePaths = [
-                Bundle.main.url(forResource: "kachow", withExtension: "wav"),
-                Bundle.main.url(forResource: "kachow", withExtension: "wav", subdirectory: "Resources"),
-                Bundle.main.url(forResource: "kachow", withExtension: "wav", subdirectory: nil)
-            ]
-            
-            guard let url = possiblePaths.compactMap({ $0 }).first else { 
-                print("❌ kachow.wav not found")
-                return 
-            }
-            
-            do {
-                player = try AVAudioPlayer(contentsOf: url)
-                player?.prepareToPlay() // Pre-load for faster playback
-            } catch {
-                print("❌ sound error: \(error)")
-                return
-            }
-        }
-        
-        player?.stop()
-        player?.currentTime = 0
-        player?.play()
-    }
 
     // MARK: - Custom quotes persistence
     private func mergeCustomQuotesFromStorage() {

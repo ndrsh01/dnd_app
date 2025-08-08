@@ -201,9 +201,16 @@ struct PersonCard: View {
                 VStack(alignment: .leading, spacing: 8) {
                     if isEditing {
                         TextField("Имя", text: $editedName)
-                            .font(.system(.title3, design: .rounded))
+                            .font(.system(.title2, design: .rounded))
                             .fontWeight(.bold)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemBackground))
+                                    .stroke(Color.orange, lineWidth: 2)
+                                    .shadow(color: Color.orange.opacity(0.2), radius: 8, x: 0, y: 2)
+                            )
                             .padding(.horizontal, 20)
                     } else {
                         Text(person.name)
@@ -215,9 +222,16 @@ struct PersonCard: View {
                     if isEditing {
                         TextField("Описание", text: $editedDetails, axis: .vertical)
                             .font(.system(.body, design: .rounded))
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .lineLimit(3...10)
-                            .frame(minHeight: 80)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .lineLimit(4...12)
+                            .frame(minHeight: 120)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemBackground))
+                                    .stroke(Color.orange, lineWidth: 2)
+                                    .shadow(color: Color.orange.opacity(0.2), radius: 8, x: 0, y: 2)
+                            )
                             .padding(.horizontal, 20)
                     } else {
                         Text(person.details)
@@ -341,14 +355,22 @@ struct PersonCard: View {
             }
             
             if isEditing {
-                HStack(spacing: 12) {
+                HStack(spacing: 16) {
                     Button("Отмена") {
                         isEditing = false
                         editedName = person.name
                         editedDetails = person.details
                         editedHearts = person.hearts
                     }
+                    .font(.system(.body, design: .rounded))
+                    .fontWeight(.medium)
                     .foregroundColor(.secondary)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(.systemGray6))
+                    )
                     
                     Spacer()
                     
@@ -362,8 +384,22 @@ struct PersonCard: View {
                         onUpdate(updated)
                         isEditing = false
                     }
-                    .foregroundColor(.orange)
+                    .font(.system(.body, design: .rounded))
                     .fontWeight(.semibold)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.orange, Color.orange.opacity(0.8)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .shadow(color: Color.orange.opacity(0.3), radius: 5, x: 0, y: 2)
+                    )
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
@@ -381,11 +417,12 @@ struct PersonCard: View {
                 .padding(.horizontal, 20)
             }
         }
-        .padding(isEditing ? 0 : 20)
+        .padding(isEditing ? 24 : 20)
         .background(
-            RoundedRectangle(cornerRadius: isEditing ? 0 : 20)
+            RoundedRectangle(cornerRadius: 20)
                 .fill(Color(.systemBackground))
-                .shadow(color: isEditing ? .clear : Color.black.opacity(0.05), radius: isEditing ? 0 : 10, x: 0, y: isEditing ? 0 : 5)
+                .stroke(isEditing ? Color.orange : Color.clear, lineWidth: isEditing ? 3 : 0)
+                .shadow(color: isEditing ? Color.orange.opacity(0.15) : Color.black.opacity(0.05), radius: isEditing ? 15 : 10, x: 0, y: isEditing ? 8 : 5)
         )
         .frame(maxWidth: isEditing ? .infinity : nil)
         .padding(.horizontal, isEditing ? 0 : 0)
