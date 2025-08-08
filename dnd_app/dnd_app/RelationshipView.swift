@@ -346,6 +346,7 @@ struct PersonCard: View {
                             HStack(spacing: 8) {
                                 // Кнопка "Друг"
                                 Button(action: {
+                                    print("🔥 Кнопка Друг нажата!")  // Для отладки
                                     let updated = Person(
                                         id: person.id,
                                         name: person.name,
@@ -369,9 +370,11 @@ struct PersonCard: View {
                                             .stroke(Color.red, lineWidth: 1)
                                     )
                                 }
+                                .buttonStyle(PlainButtonStyle())
                                 
                                 // Кнопка "Враг"
                                 Button(action: {
+                                    print("💀 Кнопка Враг нажата!")  // Для отладки
                                     let updated = Person(
                                         id: person.id,
                                         name: person.name,
@@ -395,6 +398,7 @@ struct PersonCard: View {
                                             .stroke(Color.black, lineWidth: 1)
                                     )
                                 }
+                                .buttonStyle(PlainButtonStyle())
                                 
                                 // Кнопка "Сброс"
                                 Button(action: {
@@ -418,6 +422,7 @@ struct PersonCard: View {
                                                 .stroke(Color.gray, lineWidth: 1)
                                         )
                                 }
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
                     }
@@ -520,6 +525,7 @@ struct PersonCard: View {
             // Кнопка редактирования в правом верхнем углу (единственный способ войти в режим редактирования)
             if !isEditing {
                 Button(action: {
+                    print("✏️ Кнопка редактирования нажата!")  // Для отладки
                     isEditing = true
                 }) {
                     Image(systemName: "pencil.circle.fill")
@@ -533,11 +539,6 @@ struct PersonCard: View {
                 }
                 .padding(12)
             }
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            // Пустой gesture для предотвращения случайного открытия редактирования
-            // Только кнопка карандаша должна открывать редактирование
         }
     }
     
