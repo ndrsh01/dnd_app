@@ -10,7 +10,10 @@
 		27B5E7C32E3EDB7D0042C0AB /* tabaxiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B5E7C22E3EDB7D0042C0AB /* tabaxiTests.swift */; };
 		27B5E7CD2E3EDB7D0042C0AB /* tabaxiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B5E7CC2E3EDB7D0042C0AB /* tabaxiUITests.swift */; };
 		27B5E7CF2E3EDB7D0042C0AB /* tabaxiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B5E7CE2E3EDB7D0042C0AB /* tabaxiUITestsLaunchTests.swift */; };
-
+		27C22AF92E46AEDF00CC864B /* quotes.json in Resources */ = {isa = PBXBuildFile; fileRef = 27C22AF62E46AEDE00CC864B /* quotes.json */; };
+		27C22AFA2E46AEDF00CC864B /* spells.json in Resources */ = {isa = PBXBuildFile; fileRef = 27C22AF72E46AEDF00CC864B /* spells.json */; };
+		27C22AFB2E46AEDF00CC864B /* feats.json in Resources */ = {isa = PBXBuildFile; fileRef = 27C22AF82E46AEDF00CC864B /* feats.json */; };
+		27C22AFD2E46AEEF00CC864B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 27C22AFC2E46AEEF00CC864B /* Assets.xcassets */; };
 		27D1A0012E4700000042C0AB /* tabaxiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0002E4700000042C0AB /* tabaxiApp.swift */; };
 		27D1A0032E4700000042C0AB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0022E4700000042C0AB /* ContentView.swift */; };
 		27D1A0052E4700000042C0AB /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0042E4700000042C0AB /* Models.swift */; };
@@ -49,7 +52,10 @@
 		27B5E7C82E3EDB7D0042C0AB /* tabaxiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tabaxiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27B5E7CC2E3EDB7D0042C0AB /* tabaxiUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tabaxiUITests.swift; sourceTree = "<group>"; };
 		27B5E7CE2E3EDB7D0042C0AB /* tabaxiUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tabaxiUITestsLaunchTests.swift; sourceTree = "<group>"; };
-
+		27C22AF62E46AEDE00CC864B /* quotes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = quotes.json; path = ../../../../tabaxi_test/tabaxi/tabaxi/tabaxi/quotes.json; sourceTree = "<group>"; };
+		27C22AF72E46AEDF00CC864B /* spells.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = spells.json; path = ../../../../tabaxi_test/tabaxi/tabaxi/tabaxi/spells.json; sourceTree = "<group>"; };
+		27C22AF82E46AEDF00CC864B /* feats.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = feats.json; path = ../../../../tabaxi_test/tabaxi/tabaxi/tabaxi/feats.json; sourceTree = "<group>"; };
+		27C22AFC2E46AEEF00CC864B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../../../../tabaxi_test/tabaxi/tabaxi/tabaxi/Assets.xcassets; sourceTree = "<group>"; };
 		27D1A0002E4700000042C0AB /* tabaxiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tabaxiApp.swift; sourceTree = "<group>"; };
 		27D1A0022E4700000042C0AB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		27D1A0042E4700000042C0AB /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -99,25 +105,6 @@
 			);
 			sourceTree = "<group>";
 		};
-		27C22AF32E46AC2100CC864B /* dnd_app */ = {
-			isa = PBXGroup;
-			children = (
-				27D1A0002E4700000042C0AB /* tabaxiApp.swift */,
-				27D1A0022E4700000042C0AB /* ContentView.swift */,
-				27D1A0042E4700000042C0AB /* Models.swift */,
-				27D1A0062E4700000042C0AB /* SpellsView.swift */,
-				27D1A0082E4700000042C0AB /* SpellsStore.swift */,
-				27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */,
-				27D1A00C2E4700000042C0AB /* QuoteView.swift */,
-				27D1A00E2E4700000042C0AB /* QuoteManager.swift */,
-				27D1A0102E4700000042C0AB /* NotesView.swift */,
-				27D1A0122E4700000042C0AB /* RelationshipView.swift */,
-				27D1A0142E4700000042C0AB /* SettingsView.swift */,
-				27D1A0162E4700000042C0AB /* ThemeManager.swift */,
-			);
-			path = dnd_app;
-			sourceTree = "<group>";
-		};
 		27B5E7AE2E3EDB780042C0AB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -143,6 +130,29 @@
 				27B5E7CE2E3EDB7D0042C0AB /* tabaxiUITestsLaunchTests.swift */,
 			);
 			path = tabaxiUITests;
+			sourceTree = "<group>";
+		};
+		27C22AF32E46AC2100CC864B /* dnd_app */ = {
+			isa = PBXGroup;
+			children = (
+				27C22AFC2E46AEEF00CC864B /* Assets.xcassets */,
+				27D1A0002E4700000042C0AB /* tabaxiApp.swift */,
+				27D1A0022E4700000042C0AB /* ContentView.swift */,
+				27D1A0042E4700000042C0AB /* Models.swift */,
+				27D1A0062E4700000042C0AB /* SpellsView.swift */,
+				27D1A0082E4700000042C0AB /* SpellsStore.swift */,
+				27C22AF82E46AEDF00CC864B /* feats.json */,
+				27C22AF62E46AEDE00CC864B /* quotes.json */,
+				27C22AF72E46AEDF00CC864B /* spells.json */,
+				27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */,
+				27D1A00C2E4700000042C0AB /* QuoteView.swift */,
+				27D1A00E2E4700000042C0AB /* QuoteManager.swift */,
+				27D1A0102E4700000042C0AB /* NotesView.swift */,
+				27D1A0122E4700000042C0AB /* RelationshipView.swift */,
+				27D1A0142E4700000042C0AB /* SettingsView.swift */,
+				27D1A0162E4700000042C0AB /* ThemeManager.swift */,
+			);
+			path = dnd_app;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,6 +259,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27C22AFA2E46AEDF00CC864B /* spells.json in Resources */,
+				27C22AF92E46AEDF00CC864B /* quotes.json in Resources */,
+				27C22AFD2E46AEEF00CC864B /* Assets.xcassets in Resources */,
+				27C22AFB2E46AEDF00CC864B /* feats.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -463,7 +477,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.7;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dndapp.tabaxi";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dndapp.tabaxi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -501,7 +515,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.7;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dndapp.tabaxi";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dndapp.tabaxi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -522,7 +536,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				MACOSX_DEPLOYMENT_TARGET = 13.7;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dndapp.tabaxiTests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dndapp.tabaxiTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -544,7 +558,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				MACOSX_DEPLOYMENT_TARGET = 13.7;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dndapp.tabaxiTests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dndapp.tabaxiTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -565,7 +579,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				MACOSX_DEPLOYMENT_TARGET = 13.7;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dndapp.tabaxiUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dndapp.tabaxiUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -586,7 +600,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				MACOSX_DEPLOYMENT_TARGET = 13.7;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dndapp.tabaxiUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dndapp.tabaxiUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";

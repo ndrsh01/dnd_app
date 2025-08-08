@@ -177,13 +177,17 @@ struct SpellSearchView: View {
                         if !store.filteredSpells.isEmpty || !store.filteredFeats.isEmpty {
                             Button(action: {
                                 if !store.filteredSpells.isEmpty {
-                                    favorites.addMultipleSpells(store.filteredSpells)
+                                    favorites.toggleMultipleSpells(store.filteredSpells)
                                 }
                                 if !store.filteredFeats.isEmpty {
-                                    favorites.addMultipleFeats(store.filteredFeats)
+                                    favorites.toggleMultipleFeats(store.filteredFeats)
                                 }
                             }) {
-                                Image(systemName: "heart.fill")
+                                let allSpellsFavorite = store.filteredSpells.isEmpty || favorites.areAllSpellsFavorite(store.filteredSpells)
+                                let allFeatsFavorite = store.filteredFeats.isEmpty || favorites.areAllFeatsFavorite(store.filteredFeats)
+                                let allFavorite = allSpellsFavorite && allFeatsFavorite
+                                
+                                Image(systemName: allFavorite ? "heart.fill" : "heart")
                                     .foregroundColor(.orange)
                             }
                         }

@@ -58,6 +58,19 @@ final class FavoriteSpellsManager: ObservableObject {
         saveSpells()
     }
     
+    func areAllSpellsFavorite(_ spells: [Spell]) -> Bool {
+        guard !spells.isEmpty else { return false }
+        return spells.allSatisfy { favoriteSpells.contains($0.name) }
+    }
+    
+    func toggleMultipleSpells(_ spells: [Spell]) {
+        if areAllSpellsFavorite(spells) {
+            removeMultipleSpells(spells)
+        } else {
+            addMultipleSpells(spells)
+        }
+    }
+    
     // MARK: - Feat Management
     func toggleFeat(_ featName: String) {
         if favoriteFeats.contains(featName) {
@@ -95,6 +108,19 @@ final class FavoriteSpellsManager: ObservableObject {
     func clearFavoriteFeats() {
         favoriteFeats.removeAll()
         saveFeats()
+    }
+    
+    func areAllFeatsFavorite(_ feats: [Feat]) -> Bool {
+        guard !feats.isEmpty else { return false }
+        return feats.allSatisfy { favoriteFeats.contains($0.name) }
+    }
+    
+    func toggleMultipleFeats(_ feats: [Feat]) {
+        if areAllFeatsFavorite(feats) {
+            removeMultipleFeats(feats)
+        } else {
+            addMultipleFeats(feats)
+        }
     }
     
     // MARK: - Persistence
