@@ -689,6 +689,7 @@ struct SpellCard: View {
 struct FeatCard: View {
     let feat: Feat
     @ObservedObject var favorites: FavoriteSpellsManager
+    @State private var isExpanded = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -708,23 +709,36 @@ struct FeatCard: View {
                 
                 Spacer()
                 
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        favorites.toggleFeat(feat.name)
+                HStack(spacing: 8) {
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                            favorites.toggleFeat(feat.name)
+                        }
+                    }) {
+                        Image(systemName: favorites.isFeatFavorite(feat.name) ? "heart.fill" : "heart")
+                            .foregroundColor(favorites.isFeatFavorite(feat.name) ? .red : .gray)
+                            .font(.title2)
+                            .scaleEffect(favorites.isFeatFavorite(feat.name) ? 1.1 : 1.0)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isFeatFavorite(feat.name))
                     }
-                }) {
-                    Image(systemName: favorites.isFeatFavorite(feat.name) ? "heart.fill" : "heart")
-                        .foregroundColor(favorites.isFeatFavorite(feat.name) ? .red : .gray)
-                        .font(.title2)
-                        .scaleEffect(favorites.isFeatFavorite(feat.name) ? 1.1 : 1.0)
-                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isFeatFavorite(feat.name))
+                    
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isExpanded.toggle()
+                        }
+                    }) {
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .foregroundColor(.orange)
+                            .font(.title3)
+                    }
                 }
             }
             
             Text(feat.description)
                 .font(.body)
                 .foregroundColor(.secondary)
-                .lineLimit(3)
+                .lineLimit(isExpanded ? nil : 3)
+                .animation(.easeInOut(duration: 0.2), value: isExpanded)
         }
         .padding()
         .background(Color(.systemBackground))

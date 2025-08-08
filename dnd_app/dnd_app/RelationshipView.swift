@@ -199,10 +199,10 @@ struct PersonCard: View {
         ZStack(alignment: .topTrailing) {
             VStack(alignment: .leading, spacing: isEditing ? 24 : 16) {
 
-                VStack(alignment: .leading, spacing: isEditing ? 20 : 16) {
-                if isEditing {
+        VStack(alignment: .leading, spacing: isEditing ? 20 : 16) {
+                    if isEditing {
                     // Поле имени
-                    TextField("Имя", text: $editedName)
+                        TextField("Имя", text: $editedName)
                             .font(.system(.title2, design: .rounded))
                             .fontWeight(.bold)
                             .padding(.horizontal, 16)
@@ -227,23 +227,23 @@ struct PersonCard: View {
                                     .stroke(Color.orange, lineWidth: 2)
                                     .shadow(color: Color.orange.opacity(0.2), radius: 8, x: 0, y: 2)
                             )
-                } else {
-                    Text(person.name)
-                        .font(.system(.title3, design: .rounded))
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                    } else {
+                        Text(person.name)
+                            .font(.system(.title3, design: .rounded))
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
                     
-                    Text(person.details)
-                        .font(.system(.body, design: .rounded))
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        Text(person.details)
+                            .font(.system(.body, design: .rounded))
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 // Система отношений (только не в режиме редактирования)
                 if !isEditing {
-                    VStack(spacing: 8) {
-                        // Индикатор отношений
-                        HStack(spacing: 4) {
+                VStack(spacing: 8) {
+                    // Индикатор отношений
+                    HStack(spacing: 4) {
                         if person.isPositive {
                             // Положительные отношения - сердечки
                             ForEach(0..<Person.maxHearts, id: \.self) { index in
@@ -251,15 +251,15 @@ struct PersonCard: View {
                                     .foregroundColor(index < person.displayValue ? .red : .gray)
                                     .font(.title3)
                                     .onTapGesture {
-                                        // Прямое редактирование
-                                        let newValue = index + 1
-                                        let updated = Person(
-                                            id: person.id,
-                                            name: person.name,
-                                            details: person.details,
-                                            hearts: newValue
-                                        )
-                                        onUpdate(updated)
+                                            // Прямое редактирование
+                                            let newValue = index + 1
+                                            let updated = Person(
+                                                id: person.id,
+                                                name: person.name,
+                                                details: person.details,
+                                                hearts: newValue
+                                            )
+                                            onUpdate(updated)
                                     }
                                     .onLongPressGesture {
                                         if !isEditing {
@@ -281,15 +281,15 @@ struct PersonCard: View {
                                     .foregroundColor(index < person.displayValue ? .black : .gray)
                                     .font(.title3)
                                     .onTapGesture {
-                                        // Прямое редактирование
-                                        let newValue = -(index + 1)
-                                        let updated = Person(
-                                            id: person.id,
-                                            name: person.name,
-                                            details: person.details,
-                                            hearts: newValue
-                                        )
-                                        onUpdate(updated)
+                                            // Прямое редактирование
+                                            let newValue = -(index + 1)
+                                            let updated = Person(
+                                                id: person.id,
+                                                name: person.name,
+                                                details: person.details,
+                                                hearts: newValue
+                                            )
+                                            onUpdate(updated)
                                     }
                                     .onLongPressGesture {
                                         if !isEditing {
@@ -311,15 +311,15 @@ struct PersonCard: View {
                                     .foregroundColor(.gray)
                                     .font(.title3)
                                     .onTapGesture {
-                                        let newValue = index + 1
-                                        let updated = Person(
-                                            id: person.id,
-                                            name: person.name,
-                                            details: person.details,
-                                            hearts: newValue
-                                        )
-                                        onUpdate(updated)
-                                    }
+                                            let newValue = index + 1
+                                            let updated = Person(
+                                                id: person.id,
+                                                name: person.name,
+                                                details: person.details,
+                                                hearts: newValue
+                                            )
+                                            onUpdate(updated)
+                                        }
                                     .onLongPressGesture {
                                         // Переключение на отрицательные отношения
                                         let newValue = -(index + 1)
@@ -338,20 +338,19 @@ struct PersonCard: View {
                     // Кнопки переключения типа отношений
                     if !isEditing {
                         VStack(spacing: 4) {
-                            Text(statusText)
-                                .font(.system(.caption, design: .rounded))
-                                .foregroundColor(statusColor)
-                                .fontWeight(.medium)
+                        Text(statusText)
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundColor(statusColor)
+                            .fontWeight(.medium)
                             
                             HStack(spacing: 8) {
                                 // Кнопка "Друг"
                                 Button(action: {
-                                    let newValue = person.isPositive ? person.hearts : abs(person.hearts)
                                     let updated = Person(
                                         id: person.id,
                                         name: person.name,
                                         details: person.details,
-                                        hearts: max(1, newValue)
+                                        hearts: 4  // Устанавливаем 4 сердечка
                                     )
                                     onUpdate(updated)
                                 }) {
@@ -373,12 +372,11 @@ struct PersonCard: View {
                                 
                                 // Кнопка "Враг"
                                 Button(action: {
-                                    let newValue = person.isNegative ? abs(person.hearts) : (person.hearts == 0 ? 1 : abs(person.hearts))
                                     let updated = Person(
                                         id: person.id,
                                         name: person.name,
                                         details: person.details,
-                                        hearts: -newValue
+                                        hearts: -4  // Устанавливаем 4 крестика
                                     )
                                     onUpdate(updated)
                                 }) {
@@ -519,7 +517,7 @@ struct PersonCard: View {
         .padding(.horizontal, isEditing ? 0 : 0)
             }
         
-            // Кнопка редактирования в правом верхнем углу
+            // Кнопка редактирования в правом верхнем углу (единственный способ войти в режим редактирования)
             if !isEditing {
                 Button(action: {
                     isEditing = true
@@ -535,6 +533,11 @@ struct PersonCard: View {
                 }
                 .padding(12)
             }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            // Пустой gesture для предотвращения случайного открытия редактирования
+            // Только кнопка карандаша должна открывать редактирование
         }
     }
     
