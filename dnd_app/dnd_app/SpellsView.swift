@@ -229,7 +229,7 @@ struct AdvancedFiltersView: View {
                         
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                             ForEach(0...9, id: \.self) { level in
-                                ModernFilterButton(
+                                FilterButton(
                                     title: level == 0 ? "Заговоры" : "\(level) уровень",
                                     isSelected: store.spellFilters.selectedLevels.contains(level)
                                 ) {
@@ -258,7 +258,7 @@ struct AdvancedFiltersView: View {
                             ]
                             
                             ForEach(schoolNames, id: \.0) { (key, displayName) in
-                                ModernFilterButton(
+                                FilterButton(
                                     title: displayName,
                                     isSelected: store.spellFilters.selectedSchools.contains(key)
                                 ) {
@@ -287,7 +287,7 @@ struct AdvancedFiltersView: View {
                             ]
                             
                             ForEach(classNames, id: \.0) { (key, displayName) in
-                                ModernFilterButton(
+                                FilterButton(
                                     title: displayName,
                                     isSelected: store.spellFilters.selectedClasses.contains(key)
                                 ) {
@@ -352,7 +352,7 @@ struct AdvancedFiltersView: View {
             }
         }
     }
-}
+
 
 // MARK: - All Spells Tab (Favorites)
 struct AllSpellsTab: View {
