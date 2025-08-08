@@ -196,9 +196,10 @@ struct PersonCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: isEditing ? 24 : 16) {
+        ZStack(alignment: .topTrailing) {
+            VStack(alignment: .leading, spacing: isEditing ? 24 : 16) {
 
-            VStack(alignment: .leading, spacing: isEditing ? 20 : 16) {
+                VStack(alignment: .leading, spacing: isEditing ? 20 : 16) {
                 if isEditing {
                     // Поле имени
                     TextField("Имя", text: $editedName)
@@ -474,18 +475,6 @@ struct PersonCard: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
-            } else {
-                HStack {
-                    Button("Редактировать") {
-                        isEditing = true
-                    }
-                    .foregroundColor(.orange)
-                    .font(.system(.caption, design: .rounded))
-                    .fontWeight(.medium)
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
             }
         }
         .padding(isEditing ? 16 : 20)
@@ -528,6 +517,24 @@ struct PersonCard: View {
         .animation(.easeInOut(duration: 0.3), value: isEditing)
         .frame(maxWidth: isEditing ? .infinity : nil)
         .padding(.horizontal, isEditing ? 0 : 0)
+            }
+        
+            // Кнопка редактирования в правом верхнем углу
+            if !isEditing {
+                Button(action: {
+                    isEditing = true
+                }) {
+                    Image(systemName: "pencil.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.orange)
+                        .background(
+                            Circle()
+                                .fill(Color(.systemBackground))
+                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                        )
+                }
+                .padding(12)
+            }
         }
     }
     

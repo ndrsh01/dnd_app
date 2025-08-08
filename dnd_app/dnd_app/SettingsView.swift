@@ -11,7 +11,8 @@ struct SettingsView: View {
                 ThemeManager.adaptiveBackground(for: themeManager.isDarkMode)
                     .ignoresSafeArea()
                 
-                VStack(spacing: 20) {
+                ScrollView {
+                    VStack(spacing: 20) {
                     // Заголовок
                     VStack(spacing: 8) {
                         Image(systemName: "gearshape.fill")
@@ -132,10 +133,10 @@ struct SettingsView: View {
                         .cornerRadius(12)
                     }
                     .padding(.horizontal)
-                    
-                    Spacer()
+                    }
+                    .padding(.top, 30)
+                    .padding(.bottom, 100) // Добавляем отступ снизу для нижнего меню
                 }
-                .padding(.top, 30)
             }
             .navigationTitle("Настройки")
             .navigationBarTitleDisplayMode(.large)
