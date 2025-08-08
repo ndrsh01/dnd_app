@@ -53,16 +53,7 @@ final class NotesStore: ObservableObject {
     
     init() {
         load()
-        if notes.isEmpty {
-            // Добавляем примеры заметок
-            notes = [
-                Note(title: "Таверна 'Кривой кот'", description: "Лучшая таверна в городе, здесь всегда можно узнать последние новости. Хозяин - старый друг.", category: .places, importance: 4, dateCreated: Date(), dateModified: Date()),
-                Note(title: "Магический меч 'Ледяное дыхание'", description: "Древний артефакт, найденный в руинах. Способен замораживать врагов.", category: .artifacts, importance: 5, dateCreated: Date(), dateModified: Date()),
-                Note(title: "Гоблин Грог", description: "Коварный гоблин, лидер банды разбойников. Опасен и хитёр.", category: .enemies, importance: 3, dateCreated: Date(), dateModified: Date()),
-                Note(title: "Зелье лечения", description: "Мощное зелье, восстанавливает здоровье. Хранить в прохладном месте.", category: .items, importance: 4, dateCreated: Date(), dateModified: Date()),
-                Note(title: "Мудрец Элдрик", description: "Древний мудрец, живущий в башне. Знает много тайн и может помочь советом.", category: .people, importance: 5, dateCreated: Date(), dateModified: Date())
-            ]
-        }
+
     }
     
     func add(_ note: Note) { notes.append(note) }

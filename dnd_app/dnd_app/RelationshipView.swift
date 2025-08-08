@@ -196,35 +196,29 @@ struct PersonCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: isEditing ? 20 : 16) {
-            HStack {
-                VStack(alignment: .leading, spacing: 8) {
-                    if isEditing {
-                        TextField("Имя", text: $editedName)
+        VStack(alignment: .leading, spacing: isEditing ? 24 : 16) {
+
+            VStack(alignment: .leading, spacing: isEditing ? 20 : 16) {
+                if isEditing {
+                    // Поле имени
+                    TextField("Имя", text: $editedName)
                             .font(.system(.title2, design: .rounded))
                             .fontWeight(.bold)
                             .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
+                            .padding(.vertical, 14)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
                                     .fill(Color(.systemBackground))
                                     .stroke(Color.orange, lineWidth: 2)
                                     .shadow(color: Color.orange.opacity(0.2), radius: 8, x: 0, y: 2)
                             )
-                            .padding(.horizontal, 20)
-                    } else {
-                        Text(person.name)
-                            .font(.system(.title3, design: .rounded))
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                    }
-                    
-                    if isEditing {
-                        TextField("Описание", text: $editedDetails, axis: .vertical)
+                        
+                    // Поле описания
+                    TextField("Описание", text: $editedDetails, axis: .vertical)
                             .font(.system(.body, design: .rounded))
                             .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .lineLimit(4...12)
+                            .padding(.vertical, 14)
+                            .lineLimit(4...15)
                             .frame(minHeight: 120)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
@@ -232,25 +226,23 @@ struct PersonCard: View {
                                     .stroke(Color.orange, lineWidth: 2)
                                     .shadow(color: Color.orange.opacity(0.2), radius: 8, x: 0, y: 2)
                             )
-                            .padding(.horizontal, 20)
-                    } else {
-                        Text(person.details)
-                            .font(.system(.body, design: .rounded))
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                } else {
+                    Text(person.name)
+                        .font(.system(.title3, design: .rounded))
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Text(person.details)
+                        .font(.system(.body, design: .rounded))
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
-                Spacer()
-                
-                VStack(spacing: 8) {
-                    if isEditing {
-                        Stepper("", value: $editedHearts, in: Person.minHearts...Person.maxHearts)
-                            .labelsHidden()
-                    }
-                    
-                    // Индикатор отношений
-                    HStack(spacing: 4) {
+                // Система отношений (только не в режиме редактирования)
+                if !isEditing {
+                    VStack(spacing: 8) {
+                        // Индикатор отношений
+                        HStack(spacing: 4) {
                         if person.isPositive {
                             // Положительные отношения - сердечки
                             ForEach(0..<Person.maxHearts, id: \.self) { index in
@@ -258,19 +250,15 @@ struct PersonCard: View {
                                     .foregroundColor(index < person.displayValue ? .red : .gray)
                                     .font(.title3)
                                     .onTapGesture {
-                                        if isEditing {
-                                            editedHearts = index + 1
-                                        } else {
-                                            // Прямое редактирование
-                                            let newValue = index + 1
-                                            let updated = Person(
-                                                id: person.id,
-                                                name: person.name,
-                                                details: person.details,
-                                                hearts: newValue
-                                            )
-                                            onUpdate(updated)
-                                        }
+                                        // Прямое редактирование
+                                        let newValue = index + 1
+                                        let updated = Person(
+                                            id: person.id,
+                                            name: person.name,
+                                            details: person.details,
+                                            hearts: newValue
+                                        )
+                                        onUpdate(updated)
                                     }
                                     .onLongPressGesture {
                                         if !isEditing {
@@ -292,19 +280,15 @@ struct PersonCard: View {
                                     .foregroundColor(index < person.displayValue ? .black : .gray)
                                     .font(.title3)
                                     .onTapGesture {
-                                        if isEditing {
-                                            editedHearts = -(index + 1)
-                                        } else {
-                                            // Прямое редактирование
-                                            let newValue = -(index + 1)
-                                            let updated = Person(
-                                                id: person.id,
-                                                name: person.name,
-                                                details: person.details,
-                                                hearts: newValue
-                                            )
-                                            onUpdate(updated)
-                                        }
+                                        // Прямое редактирование
+                                        let newValue = -(index + 1)
+                                        let updated = Person(
+                                            id: person.id,
+                                            name: person.name,
+                                            details: person.details,
+                                            hearts: newValue
+                                        )
+                                        onUpdate(updated)
                                     }
                                     .onLongPressGesture {
                                         if !isEditing {
@@ -326,30 +310,117 @@ struct PersonCard: View {
                                     .foregroundColor(.gray)
                                     .font(.title3)
                                     .onTapGesture {
-                                        if isEditing {
-                                            editedHearts = 0
-                            } else {
-                                            // Прямое редактирование - переключение на положительные отношения
-                                            let newValue = index + 1
-                                            let updated = Person(
-                                                id: person.id,
-                                                name: person.name,
-                                                details: person.details,
-                                                hearts: newValue
-                                            )
-                                            onUpdate(updated)
-                                        }
+                                        let newValue = index + 1
+                                        let updated = Person(
+                                            id: person.id,
+                                            name: person.name,
+                                            details: person.details,
+                                            hearts: newValue
+                                        )
+                                        onUpdate(updated)
+                                    }
+                                    .onLongPressGesture {
+                                        // Переключение на отрицательные отношения
+                                        let newValue = -(index + 1)
+                                        let updated = Person(
+                                            id: person.id,
+                                            name: person.name,
+                                            details: person.details,
+                                            hearts: newValue
+                                        )
+                                        onUpdate(updated)
                                     }
                             }
                         }
                     }
                     
-                    // Текст статуса
+                    // Кнопки переключения типа отношений
                     if !isEditing {
-                        Text(statusText)
-                            .font(.system(.caption, design: .rounded))
-                            .foregroundColor(statusColor)
-                            .fontWeight(.medium)
+                        VStack(spacing: 4) {
+                            Text(statusText)
+                                .font(.system(.caption, design: .rounded))
+                                .foregroundColor(statusColor)
+                                .fontWeight(.medium)
+                            
+                            HStack(spacing: 8) {
+                                // Кнопка "Друг"
+                                Button(action: {
+                                    let newValue = person.isPositive ? person.hearts : abs(person.hearts)
+                                    let updated = Person(
+                                        id: person.id,
+                                        name: person.name,
+                                        details: person.details,
+                                        hearts: max(1, newValue)
+                                    )
+                                    onUpdate(updated)
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "heart.fill")
+                                        Text("Друг")
+                                    }
+                                    .font(.system(.caption2, design: .rounded))
+                                    .fontWeight(.medium)
+                                    .foregroundColor(person.isPositive ? .white : .red)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(person.isPositive ? Color.red : Color.clear)
+                                            .stroke(Color.red, lineWidth: 1)
+                                    )
+                                }
+                                
+                                // Кнопка "Враг"
+                                Button(action: {
+                                    let newValue = person.isNegative ? abs(person.hearts) : (person.hearts == 0 ? 1 : abs(person.hearts))
+                                    let updated = Person(
+                                        id: person.id,
+                                        name: person.name,
+                                        details: person.details,
+                                        hearts: -newValue
+                                    )
+                                    onUpdate(updated)
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "xmark.circle.fill")
+                                        Text("Враг")
+                                    }
+                                    .font(.system(.caption2, design: .rounded))
+                                    .fontWeight(.medium)
+                                    .foregroundColor(person.isNegative ? .white : .black)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(person.isNegative ? Color.black : Color.clear)
+                                            .stroke(Color.black, lineWidth: 1)
+                                    )
+                                }
+                                
+                                // Кнопка "Сброс"
+                                Button(action: {
+                                    let updated = Person(
+                                        id: person.id,
+                                        name: person.name,
+                                        details: person.details,
+                                        hearts: 0
+                                    )
+                                    onUpdate(updated)
+                                }) {
+                                    Text("Сброс")
+                                        .font(.system(.caption2, design: .rounded))
+                                        .fontWeight(.medium)
+                                        .foregroundColor(person.isNeutral ? .white : .gray)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(person.isNeutral ? Color.gray : Color.clear)
+                                                .stroke(Color.gray, lineWidth: 1)
+                                        )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -417,15 +488,47 @@ struct PersonCard: View {
                 .padding(.horizontal, 20)
             }
         }
-        .padding(isEditing ? 24 : 20)
+        .padding(isEditing ? 16 : 20)
         .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.systemBackground))
-                .stroke(isEditing ? Color.orange : Color.clear, lineWidth: isEditing ? 3 : 0)
-                .shadow(color: isEditing ? Color.orange.opacity(0.15) : Color.black.opacity(0.05), radius: isEditing ? 15 : 10, x: 0, y: isEditing ? 8 : 5)
+            RoundedRectangle(cornerRadius: isEditing ? 25 : 20)
+                .fill(
+                    isEditing ? 
+                    LinearGradient(
+                        colors: [
+                            Color(.systemBackground),
+                            Color.orange.opacity(0.02),
+                            Color(.systemBackground)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ) :
+                    LinearGradient(
+                        colors: [Color(.systemBackground)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .stroke(
+                    isEditing ? 
+                    LinearGradient(
+                        colors: [Color.orange.opacity(0.8), Color.orange, Color.orange.opacity(0.6)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ) :
+                    LinearGradient(colors: [Color.clear], startPoint: .top, endPoint: .bottom),
+                    lineWidth: isEditing ? 3 : 0
+                )
+                .shadow(
+                    color: isEditing ? Color.orange.opacity(0.25) : Color.black.opacity(0.05),
+                    radius: isEditing ? 20 : 10,
+                    x: 0,
+                    y: isEditing ? 10 : 5
+                )
         )
+        .animation(.easeInOut(duration: 0.3), value: isEditing)
         .frame(maxWidth: isEditing ? .infinity : nil)
         .padding(.horizontal, isEditing ? 0 : 0)
+        }
     }
     
     private var statusText: String {

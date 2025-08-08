@@ -95,6 +95,31 @@ final class QuoteManager: ObservableObject {
         saveFavorites()
         // (кастомные можно перезаписать, но здесь оставим упрощённо)
     }
+    
+    func editQuote(oldQuote: String, newQuote: String) {
+        for (category, quotesArray) in quotes {
+            if let index = quotesArray.firstIndex(of: oldQuote) {
+                quotes[category]?[index] = newQuote.trimmingCharacters(in: .whitespacesAndNewlines)
+                // Обновить в избранном тоже
+                if let favIndex = favorites.firstIndex(of: oldQuote) {
+                    favorites[favIndex] = newQuote.trimmingCharacters(in: .whitespacesAndNewlines)
+                    saveFavorites()
+                }
+                break
+            }
+        }
+    }
+    
+    func removeQuoteByText(_ quote: String) {
+        for (category, quotesArray) in quotes {
+            if let index = quotesArray.firstIndex(of: quote) {
+                quotes[category]?.remove(at: index)
+                // Удалить из избранного тоже
+                removeFavorite(quote: quote)
+                break
+            }
+        }
+    }
 
     // MARK: - Favorites
     func toggleFavorite(_ quote: String) {
