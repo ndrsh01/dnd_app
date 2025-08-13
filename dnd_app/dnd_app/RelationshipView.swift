@@ -116,9 +116,9 @@ struct RelationshipView: View {
                     } else {
                         List {
                             ForEach(store.people) { person in
-                                PersonCard(person: person) { updated in
+                                PersonCard(person: person, onUpdate: { updated in
                                     store.update(updated)
-                                }
+                                })
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
                                 .padding(.vertical, 4)
@@ -196,19 +196,19 @@ struct PersonCard: View {
                 
                 Spacer()
                 
-                                    // Кнопка редактирования
-                    if !isEditing {
-                        Button(action: {
-                            isEditing = true
-                        }) {
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(.orange)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        .allowsHitTesting(true)
-                        .contentShape(Rectangle())
+                // Кнопка редактирования (только не в режиме редактирования)
+                if !isEditing {
+                    Button(action: {
+                        isEditing = true
+                    }) {
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.orange)
                     }
+                    .buttonStyle(PlainButtonStyle())
+                    .allowsHitTesting(true)
+                    .contentShape(Rectangle())
+                }
             }
             
             // Поле описания в режиме редактирования

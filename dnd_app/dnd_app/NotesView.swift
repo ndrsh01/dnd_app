@@ -48,9 +48,9 @@ final class NotesStore: ObservableObject {
     @Published var notes: [Note] = [] {
         didSet { save() }
     }
-    
+
     private let key = "notes_v1"
-    
+
     init() {
         load()
 
@@ -308,10 +308,12 @@ struct NoteCard: View {
                         .font(.headline)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     
-                    TextField("Описание", text: $editedDescription, axis: .vertical)
-                        .lineLimit(3...10)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(minHeight: 80)
+                    ZStack(alignment: .bottomTrailing) {
+                        TextField("Описание", text: $editedDescription, axis: .vertical)
+                            .lineLimit(3...10)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(minHeight: 80)
+                    }
                     
                     // Категория
                     HStack {
@@ -563,6 +565,7 @@ struct AddNoteView: View {
                     .disabled(title.isEmpty || description.isEmpty)
                 }
             }
+
         }
     }
     
