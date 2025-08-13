@@ -21,14 +21,12 @@ final class SpellsStore: ObservableObject {
     }
     
     private func loadData() {
-        Task {
-            await loadSpells()
-            await loadFeats()
-        }
+        loadSpells()
+        loadFeats()
     }
     
     // MARK: - Spells Loading
-    func loadSpells() async {
+    private func loadSpells() {
         guard let url = Bundle.main.url(forResource: "spells", withExtension: "json") else {
             print("❌ [SPELLS] Не найден файл spells.json")
             return
@@ -38,11 +36,9 @@ final class SpellsStore: ObservableObject {
             let data = try Data(contentsOf: url)
             let spells = try JSONDecoder().decode([Spell].self, from: data)
             
-            await MainActor.run {
-                self.spells = spells
-                self.updateAvailableFilters()
-                self.applySpellFilters()
-            }
+            self.spells = spells
+            self.updateAvailableFilters()
+            self.applySpellFilters()
             
             print("✅ [SPELLS] Загружено \(spells.count) заклинаний")
         } catch {
@@ -51,7 +47,7 @@ final class SpellsStore: ObservableObject {
     }
     
     // MARK: - Feats Loading
-    func loadFeats() async {
+    private func loadFeats() {
         guard let url = Bundle.main.url(forResource: "feats", withExtension: "json") else {
             print("❌ [FEATS] Не найден файл feats.json")
             return
@@ -74,11 +70,9 @@ final class SpellsStore: ObservableObject {
                 }
             }
             
-            await MainActor.run {
-                self.feats = allFeats
-                self.availableFeatCategories = Array(categories).sorted()
-                self.applyFeatFilters()
-            }
+            self.feats = allFeats
+            self.availableFeatCategories = Array(categories).sorted()
+            self.applyFeatFilters()
             
             print("✅ [FEATS] Загружено \(allFeats.count) умений из \(categories.count) категорий")
         } catch {
