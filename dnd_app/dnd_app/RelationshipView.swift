@@ -239,18 +239,24 @@ struct PersonCard: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
-                // Система отношений (только не в режиме редактирования)
-                if !isEditing {
+                // Система отношений
                 VStack(spacing: 8) {
-                    // Индикатор отношений
-                    HStack(spacing: 4) {
-                        if person.isPositive {
-                            // Положительные отношения - сердечки
-                            ForEach(0..<Person.maxHearts, id: \.self) { index in
-                                Image(systemName: index < person.displayValue ? "heart.fill" : "heart")
-                                    .foregroundColor(index < person.displayValue ? .red : .gray)
-                                    .font(.title3)
-                                    .onTapGesture {
+                    // Индикатор отношений (только не в режиме редактирования)
+                    if !isEditing {
+                        HStack(spacing: 4) {
+                            if person.isPositive {
+                                // Положительные отношения - сердечки
+                                ForEach(0..<Person.maxHearts, id: \.self) { index in
+                                                                            Image(systemName: index < person.displayValue ? "heart.fill" : "heart")
+                                            .foregroundColor(index < person.displayValue ? .red : .gray)
+                                            .font(.title3)
+                                            .scaleEffect(index < person.displayValue ? 1.1 : 1.0)
+                                            .animation(.easeInOut(duration: 0.2), value: person.displayValue)
+                                        .onTapGesture {
+                                            // Haptic feedback
+                                            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                            impactFeedback.impactOccurred()
+                                            
                                             // Прямое редактирование
                                             let newValue = index + 1
                                             let updated = Person(
@@ -260,9 +266,12 @@ struct PersonCard: View {
                                                 hearts: newValue
                                             )
                                             onUpdate(updated)
-                                    }
-                                    .onLongPressGesture {
-                                        if !isEditing {
+                                        }
+                                        .onLongPressGesture {
+                                            // Haptic feedback
+                                            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                                            impactFeedback.impactOccurred()
+                                            
                                             // Переключение на отрицательные отношения
                                             let updated = Person(
                                                 id: person.id,
@@ -272,15 +281,20 @@ struct PersonCard: View {
                                             )
                                             onUpdate(updated)
                                         }
-                                    }
-                            }
-                        } else if person.isNegative {
-                            // Отрицательные отношения - черепки
-                            ForEach(0..<Person.maxHearts, id: \.self) { index in
-                                Image(systemName: index < person.displayValue ? "xmark.circle.fill" : "xmark.circle")
-                                    .foregroundColor(index < person.displayValue ? .black : .gray)
-                                    .font(.title3)
-                                    .onTapGesture {
+                                }
+                            } else if person.isNegative {
+                                // Отрицательные отношения - черепки
+                                ForEach(0..<Person.maxHearts, id: \.self) { index in
+                                    Image(systemName: index < person.displayValue ? "xmark.circle.fill" : "xmark.circle")
+                                        .foregroundColor(index < person.displayValue ? .black : .gray)
+                                        .font(.title3)
+                                        .scaleEffect(index < person.displayValue ? 1.1 : 1.0)
+                                        .animation(.easeInOut(duration: 0.2), value: person.displayValue)
+                                        .onTapGesture {
+                                            // Haptic feedback
+                                            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                            impactFeedback.impactOccurred()
+                                            
                                             // Прямое редактирование
                                             let newValue = -(index + 1)
                                             let updated = Person(
@@ -290,9 +304,12 @@ struct PersonCard: View {
                                                 hearts: newValue
                                             )
                                             onUpdate(updated)
-                                    }
-                                    .onLongPressGesture {
-                                        if !isEditing {
+                                        }
+                                        .onLongPressGesture {
+                                            // Haptic feedback
+                                            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                                            impactFeedback.impactOccurred()
+                                            
                                             // Переключение на положительные отношения
                                             let updated = Person(
                                                 id: person.id,
@@ -302,15 +319,18 @@ struct PersonCard: View {
                                             )
                                             onUpdate(updated)
                                         }
-                                    }
-                            }
-                        } else {
-                            // Нейтральные отношения - пустые круги
-                            ForEach(0..<Person.maxHearts, id: \.self) { index in
-                                Image(systemName: "circle")
-                                    .foregroundColor(.gray)
-                                    .font(.title3)
-                                    .onTapGesture {
+                                }
+                            } else {
+                                // Нейтральные отношения - пустые круги
+                                ForEach(0..<Person.maxHearts, id: \.self) { index in
+                                    Image(systemName: "circle")
+                                        .foregroundColor(.gray)
+                                        .font(.title3)
+                                        .onTapGesture {
+                                            // Haptic feedback
+                                            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                            impactFeedback.impactOccurred()
+                                            
                                             let newValue = index + 1
                                             let updated = Person(
                                                 id: person.id,
@@ -320,105 +340,128 @@ struct PersonCard: View {
                                             )
                                             onUpdate(updated)
                                         }
-                                    .onLongPressGesture {
-                                        // Переключение на отрицательные отношения
-                                        let newValue = -(index + 1)
-                                        let updated = Person(
-                                            id: person.id,
-                                            name: person.name,
-                                            details: person.details,
-                                            hearts: newValue
-                                        )
-                                        onUpdate(updated)
-                                    }
+                                        .onLongPressGesture {
+                                            // Haptic feedback
+                                            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                                            impactFeedback.impactOccurred()
+                                            
+                                            // Переключение на отрицательные отношения
+                                            let newValue = -(index + 1)
+                                            let updated = Person(
+                                                id: person.id,
+                                                name: person.name,
+                                                details: person.details,
+                                                hearts: newValue
+                                            )
+                                            onUpdate(updated)
+                                        }
+                                }
                             }
                         }
                     }
                     
-                    // Кнопки переключения типа отношений
-                    if !isEditing {
-                        VStack(spacing: 4) {
+                    // Кнопки переключения типа отношений (всегда видны)
+                    VStack(spacing: 4) {
                         Text(statusText)
                             .font(.system(.caption, design: .rounded))
                             .foregroundColor(statusColor)
                             .fontWeight(.medium)
-                            
-                            HStack(spacing: 8) {
-                                // Кнопка "Друг"
-                                Button(action: {
-                                    let updated = Person(
-                                        id: person.id,
-                                        name: person.name,
-                                        details: person.details,
-                                        hearts: 4  // Устанавливаем 4 сердечка
-                                    )
-                                    onUpdate(updated)
-                                }) {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "heart.fill")
-                                        Text("Друг")
-                                    }
-                                    .font(.system(.caption2, design: .rounded))
-                                    .fontWeight(.medium)
-                                    .foregroundColor(person.isPositive ? .white : .red)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(person.isPositive ? Color.red : Color.clear)
-                                            .stroke(Color.red, lineWidth: 1)
-                                    )
-                                }
+                        
+                        HStack(spacing: 8) {
+                            // Кнопка "Друг"
+                            Button(action: {
+                                // Haptic feedback
+                                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                impactFeedback.impactOccurred()
                                 
-                                // Кнопка "Враг"
-                                Button(action: {
-                                    let updated = Person(
-                                        id: person.id,
-                                        name: person.name,
-                                        details: person.details,
-                                        hearts: -4  // Устанавливаем 4 крестика
-                                    )
-                                    onUpdate(updated)
-                                }) {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "xmark.circle.fill")
-                                        Text("Враг")
-                                    }
-                                    .font(.system(.caption2, design: .rounded))
-                                    .fontWeight(.medium)
-                                    .foregroundColor(person.isNegative ? .white : .black)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(person.isNegative ? Color.black : Color.clear)
-                                            .stroke(Color.black, lineWidth: 1)
-                                    )
+                                let updated = Person(
+                                    id: person.id,
+                                    name: person.name,
+                                    details: person.details,
+                                    hearts: 4  // Устанавливаем 4 сердечка
+                                )
+                                onUpdate(updated)
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "heart.fill")
+                                        .foregroundColor(.red)
+                                    Text("Друг")
+                                        .foregroundColor(.red)
                                 }
-                                
-                                // Кнопка "Сброс"
-                                Button(action: {
-                                    let updated = Person(
-                                        id: person.id,
-                                        name: person.name,
-                                        details: person.details,
-                                        hearts: 0
-                                    )
-                                    onUpdate(updated)
-                                }) {
-                                    Text("Сброс")
-                                        .font(.system(.caption2, design: .rounded))
-                                        .fontWeight(.medium)
-                                        .foregroundColor(person.isNeutral ? .white : .gray)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .fill(person.isNeutral ? Color.gray : Color.clear)
-                                                .stroke(Color.gray, lineWidth: 1)
-                                        )
-                                }
+                                .font(.system(.caption2, design: .rounded))
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(person.isPositive ? Color.red.opacity(0.2) : Color.clear)
+                                        .stroke(Color.red, lineWidth: 1)
+                                )
                             }
+                            .scaleEffect(person.isPositive ? 1.05 : 1.0)
+                            .animation(.easeInOut(duration: 0.2), value: person.isPositive)
+                            
+                            // Кнопка "Враг"
+                            Button(action: {
+                                // Haptic feedback
+                                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                impactFeedback.impactOccurred()
+                                
+                                let updated = Person(
+                                    id: person.id,
+                                    name: person.name,
+                                    details: person.details,
+                                    hearts: -4  // Устанавливаем 4 крестика
+                                )
+                                onUpdate(updated)
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.black)
+                                    Text("Враг")
+                                        .foregroundColor(.black)
+                                }
+                                .font(.system(.caption2, design: .rounded))
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(person.isNegative ? Color.black.opacity(0.2) : Color.clear)
+                                        .stroke(Color.black, lineWidth: 1)
+                                )
+                            }
+                            .scaleEffect(person.isNegative ? 1.05 : 1.0)
+                            .animation(.easeInOut(duration: 0.2), value: person.isNegative)
+                            
+                            // Кнопка "Сброс"
+                            Button(action: {
+                                // Haptic feedback
+                                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                                impactFeedback.impactOccurred()
+                                
+                                let updated = Person(
+                                    id: person.id,
+                                    name: person.name,
+                                    details: person.details,
+                                    hearts: 0
+                                )
+                                onUpdate(updated)
+                            }) {
+                                Text("Сброс")
+                                    .font(.system(.caption2, design: .rounded))
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(person.isNeutral ? Color.gray.opacity(0.2) : Color.clear)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
+                            }
+                            .scaleEffect(person.isNeutral ? 1.05 : 1.0)
+                            .animation(.easeInOut(duration: 0.2), value: person.isNeutral)
                         }
                     }
                 }
@@ -520,6 +563,10 @@ struct PersonCard: View {
             // Кнопка редактирования в правом верхнем углу (единственный способ войти в режим редактирования)
             if !isEditing {
                 Button(action: {
+                    // Haptic feedback
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                    impactFeedback.impactOccurred()
+                    
                     isEditing = true
                 }) {
                     Image(systemName: "pencil.circle.fill")
@@ -532,6 +579,8 @@ struct PersonCard: View {
                         )
                 }
                 .padding(12)
+                .scaleEffect(1.0)
+                .animation(.easeInOut(duration: 0.2), value: isEditing)
             }
         }
         .contentShape(Rectangle())

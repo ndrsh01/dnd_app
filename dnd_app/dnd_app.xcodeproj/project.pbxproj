@@ -7,12 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2792B75C2E4CC10F0064FC97 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2792B75B2E4CC10F0064FC97 /* Assets.xcassets */; };
+		2792B75E2E4CC2EF0064FC97 /* quotes.json in Resources */ = {isa = PBXBuildFile; fileRef = 2792B75D2E4CC2EF0064FC97 /* quotes.json */; };
+		2792B7602E4CC3540064FC97 /* spells.json in Resources */ = {isa = PBXBuildFile; fileRef = 2792B75F2E4CC3540064FC97 /* spells.json */; };
+		2792B7622E4CC35C0064FC97 /* feats.json in Resources */ = {isa = PBXBuildFile; fileRef = 2792B7612E4CC35B0064FC97 /* feats.json */; };
 		27B5E7C32E3EDB7D0042C0AB /* tabaxiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B5E7C22E3EDB7D0042C0AB /* tabaxiTests.swift */; };
 		27B5E7CD2E3EDB7D0042C0AB /* tabaxiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B5E7CC2E3EDB7D0042C0AB /* tabaxiUITests.swift */; };
 		27B5E7CF2E3EDB7D0042C0AB /* tabaxiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B5E7CE2E3EDB7D0042C0AB /* tabaxiUITestsLaunchTests.swift */; };
-		27C22AF92E46AEDF00CC864B /* quotes.json in Resources */ = {isa = PBXBuildFile; fileRef = 27C22AF62E46AEDE00CC864B /* quotes.json */; };
-		27C22AFA2E46AEDF00CC864B /* spells.json in Resources */ = {isa = PBXBuildFile; fileRef = 27C22AF72E46AEDF00CC864B /* spells.json */; };
-		27C22AFB2E46AEDF00CC864B /* feats.json in Resources */ = {isa = PBXBuildFile; fileRef = 27C22AF82E46AEDF00CC864B /* feats.json */; };
 		27C22AFD2E46AEEF00CC864B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 27C22AFC2E46AEEF00CC864B /* Assets.xcassets */; };
 		27D1A0012E4700000042C0AB /* tabaxiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0002E4700000042C0AB /* tabaxiApp.swift */; };
 		27D1A0032E4700000042C0AB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0022E4700000042C0AB /* ContentView.swift */; };
@@ -46,15 +47,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2792B75B2E4CC10F0064FC97 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2792B75D2E4CC2EF0064FC97 /* quotes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = quotes.json; sourceTree = "<group>"; };
+		2792B75F2E4CC3540064FC97 /* spells.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = spells.json; sourceTree = "<group>"; };
+		2792B7612E4CC35B0064FC97 /* feats.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = feats.json; sourceTree = "<group>"; };
 		27B5E7AD2E3EDB780042C0AB /* tabaxi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tabaxi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27B5E7BE2E3EDB7D0042C0AB /* tabaxiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tabaxiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27B5E7C22E3EDB7D0042C0AB /* tabaxiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tabaxiTests.swift; sourceTree = "<group>"; };
 		27B5E7C82E3EDB7D0042C0AB /* tabaxiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tabaxiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27B5E7CC2E3EDB7D0042C0AB /* tabaxiUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tabaxiUITests.swift; sourceTree = "<group>"; };
 		27B5E7CE2E3EDB7D0042C0AB /* tabaxiUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tabaxiUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		27C22AF62E46AEDE00CC864B /* quotes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = quotes.json; path = ../../../../tabaxi_test/tabaxi/tabaxi/tabaxi/quotes.json; sourceTree = "<group>"; };
-		27C22AF72E46AEDF00CC864B /* spells.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = spells.json; path = ../../../../tabaxi_test/tabaxi/tabaxi/tabaxi/spells.json; sourceTree = "<group>"; };
-		27C22AF82E46AEDF00CC864B /* feats.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = feats.json; path = ../../../../tabaxi_test/tabaxi/tabaxi/tabaxi/feats.json; sourceTree = "<group>"; };
 		27C22AFC2E46AEEF00CC864B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../../../../tabaxi_test/tabaxi/tabaxi/tabaxi/Assets.xcassets; sourceTree = "<group>"; };
 		27D1A0002E4700000042C0AB /* tabaxiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tabaxiApp.swift; sourceTree = "<group>"; };
 		27D1A0022E4700000042C0AB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -136,14 +138,15 @@
 			isa = PBXGroup;
 			children = (
 				27C22AFC2E46AEEF00CC864B /* Assets.xcassets */,
+				2792B75B2E4CC10F0064FC97 /* Assets.xcassets */,
 				27D1A0002E4700000042C0AB /* tabaxiApp.swift */,
 				27D1A0022E4700000042C0AB /* ContentView.swift */,
+				2792B75D2E4CC2EF0064FC97 /* quotes.json */,
 				27D1A0042E4700000042C0AB /* Models.swift */,
+				2792B75F2E4CC3540064FC97 /* spells.json */,
+				2792B7612E4CC35B0064FC97 /* feats.json */,
 				27D1A0062E4700000042C0AB /* SpellsView.swift */,
 				27D1A0082E4700000042C0AB /* SpellsStore.swift */,
-				27C22AF82E46AEDF00CC864B /* feats.json */,
-				27C22AF62E46AEDE00CC864B /* quotes.json */,
-				27C22AF72E46AEDF00CC864B /* spells.json */,
 				27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */,
 				27D1A00C2E4700000042C0AB /* QuoteView.swift */,
 				27D1A00E2E4700000042C0AB /* QuoteManager.swift */,
@@ -259,10 +262,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				27C22AFA2E46AEDF00CC864B /* spells.json in Resources */,
-				27C22AF92E46AEDF00CC864B /* quotes.json in Resources */,
+				2792B75C2E4CC10F0064FC97 /* Assets.xcassets in Resources */,
 				27C22AFD2E46AEEF00CC864B /* Assets.xcassets in Resources */,
-				27C22AFB2E46AEDF00CC864B /* feats.json in Resources */,
+				2792B7602E4CC3540064FC97 /* spells.json in Resources */,
+				2792B7622E4CC35C0064FC97 /* feats.json in Resources */,
+				2792B75E2E4CC2EF0064FC97 /* quotes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
