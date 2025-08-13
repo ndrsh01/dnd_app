@@ -14,8 +14,16 @@ struct SpellsView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "#fceeda")
-                .ignoresSafeArea()
+            LinearGradient(
+                colors: [
+                    Color(hex: "#fceeda"),
+                    Color(hex: "#fceeda").opacity(0.9),
+                    Color(hex: "#fceeda")
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 SearchAndFilterSection(store: store, favorites: favorites, themeManager: themeManager, currentTab: 0)
@@ -47,21 +55,42 @@ struct SearchAndFilterSection: View {
                 Button(action: { showingFilters = true }) {
                     HStack {
                         Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
                         Text("Поиск заклинаний...")
+                            .foregroundColor(.secondary)
                         Spacer()
                         if getActiveFiltersCount() > 0 {
                             Text("\(getActiveFiltersCount())")
                                 .font(.caption)
+                                .fontWeight(.semibold)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color.orange)
+                                .background(
+                                    LinearGradient(
+                                        colors: [.orange, .orange.opacity(0.8)],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
+                                .shadow(color: .orange.opacity(0.3), radius: 4, x: 0, y: 2)
                         }
                     }
                     .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemGray6))
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+                    .cornerRadius(12)
                 }
                 .padding(.horizontal)
                 .padding(.top)
@@ -88,7 +117,15 @@ struct SpellSearchView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                LinearGradient(
+                    colors: [
+                        Color(hex: "#fceeda"),
+                        Color(hex: "#fceeda").opacity(0.9),
+                        Color(hex: "#fceeda")
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
                 .ignoresSafeArea()
 
                 VStack(spacing: 0) {

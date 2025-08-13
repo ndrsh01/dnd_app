@@ -128,8 +128,16 @@ struct NotesView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
-                    .ignoresSafeArea()
+                LinearGradient(
+                    colors: [
+                        Color(hex: "#fceeda"),
+                        Color(hex: "#fceeda").opacity(0.9),
+                        Color(hex: "#fceeda")
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     // Поиск
@@ -141,8 +149,19 @@ struct NotesView: View {
                             .textFieldStyle(PlainTextFieldStyle())
                     }
                     .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemGray6))
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+                    .cornerRadius(12)
                     .padding(.horizontal)
                     .padding(.top)
                     

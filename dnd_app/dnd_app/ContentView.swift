@@ -62,7 +62,18 @@ struct ContentView: View {
                     Label("Настройки", systemImage: "gearshape.fill")
                 }
         }
-        .background(Color(hex: "#fceeda"))
+        .background(
+            LinearGradient(
+                colors: [
+                    Color(hex: "#fceeda"),
+                    Color(hex: "#fceeda").opacity(0.8),
+                    Color(hex: "#fceeda")
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
         .preferredColorScheme(themeManager.preferredColorScheme)
+        .accentColor(.orange)
     }
 }
