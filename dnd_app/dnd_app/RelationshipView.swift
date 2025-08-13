@@ -147,12 +147,22 @@ struct RelationshipView: View {
                                 }
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
-                                .padding(.vertical, 4)
+                                .padding(.vertical, 8)
                             }
                             .onDelete(perform: store.remove)
                         }
                         .listStyle(PlainListStyle())
-                        .background(Color.clear)
+                        .background(
+                            LinearGradient(
+                                colors: [
+                                    Color(.systemBackground),
+                                    Color(.systemGray6).opacity(0.3),
+                                    Color(.systemBackground)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                     }
                 }
             }
@@ -163,7 +173,18 @@ struct RelationshipView: View {
                     Button(action: { showingAdd = true }) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
-                            .foregroundColor(.orange)
+                            .foregroundColor(.white)
+                            .background(
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [.orange, .red],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .shadow(color: .orange.opacity(0.3), radius: 8, x: 0, y: 4)
+                            )
                     }
                 }
             }
@@ -194,49 +215,101 @@ struct PersonCard: View {
         self._editedDetails = State(initialValue: person.details)
         self._editedHearts = State(initialValue: person.hearts)
     }
+    
+    // Цвета градиента карточки в зависимости от отношений
+    private var cardGradientColors: [Color] {
+        if person.isPositive {
+            return [Color.purple, Color.pink, Color.orange]
+        } else if person.isNegative {
+            return [Color.red, Color.orange, Color.yellow]
+        } else {
+            return [Color.blue, Color.cyan, Color.teal]
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            VStack(alignment: .leading, spacing: isEditing ? 24 : 16) {
-
-        VStack(alignment: .leading, spacing: isEditing ? 20 : 16) {
-                    if isEditing {
-                    // Поле имени
-                        TextField("Имя", text: $editedName)
+            // Фон карточки в стиле Apple Music
+            RoundedRectangle(cornerRadius: 20)
+                .fill(
+                    LinearGradient(
+                        colors: cardGradientColors,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 10)
+                .overlay(
+                    // Дополнительный градиентный слой для глубины
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                colors: [.white.opacity(0.1), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                )
+            
+            // Основная карточка в стиле Apple Music
+            VStack(alignment: .leading, spacing: 0) {
+                if isEditing {
+                    // Режим редактирования
+                    VStack(spacing: 20) {
+                        // Поле имени
+                        TextField("Имя персонажа", text: $editedName)
                             .font(.system(.title2, design: .rounded))
                             .fontWeight(.bold)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 14)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 16)
                             .background(
-                                RoundedRectangle(cornerRadius: 12)
+                                RoundedRectangle(cornerRadius: 16)
                                     .fill(Color(.systemBackground))
-                                    .stroke(Color.orange, lineWidth: 2)
-                                    .shadow(color: Color.orange.opacity(0.2), radius: 8, x: 0, y: 2)
+                                    .stroke(LinearGradient(
+                                        colors: [.orange, .red],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ), lineWidth: 2)
+                                    .shadow(color: .orange.opacity(0.3), radius: 12, x: 0, y: 4)
                             )
                         
-                    // Поле описания
-                    TextField("Описание", text: $editedDetails, axis: .vertical)
+                        // Поле описания
+                        TextField("Описание персонажа", text: $editedDetails, axis: .vertical)
                             .font(.system(.body, design: .rounded))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 14)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 16)
                             .lineLimit(4...15)
                             .frame(minHeight: 120)
                             .background(
-                                RoundedRectangle(cornerRadius: 12)
+                                RoundedRectangle(cornerRadius: 16)
                                     .fill(Color(.systemBackground))
-                                    .stroke(Color.orange, lineWidth: 2)
-                                    .shadow(color: Color.orange.opacity(0.2), radius: 8, x: 0, y: 2)
+                                    .stroke(LinearGradient(
+                                        colors: [.orange, .red],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ), lineWidth: 2)
+                                    .shadow(color: .orange.opacity(0.3), radius: 12, x: 0, y: 4)
                             )
-                    } else {
+                    }
+                    .padding(24)
+                } else {
+                    // Обычный режим просмотра
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Имя персонажа
                         Text(person.name)
-                            .font(.system(.title3, design: .rounded))
+                            .font(.system(.title2, design: .rounded))
                             .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                    
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                        
+                        // Описание персонажа
                         Text(person.details)
                             .font(.system(.body, design: .rounded))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.white.opacity(0.9))
+                            .lineLimit(3)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(24)
                 }
                 
                 // Система отношений (только не в режиме редактирования)
@@ -335,70 +408,97 @@ struct PersonCard: View {
                         }
                     }
                     
-                    // Кнопки переключения типа отношений
+                    // Кнопки управления отношениями в стиле Apple Music
                     if !isEditing {
-                        VStack(spacing: 4) {
-                        Text(statusText)
-                            .font(.system(.caption, design: .rounded))
-                            .foregroundColor(statusColor)
-                            .fontWeight(.medium)
+                        VStack(spacing: 12) {
+                            // Статус отношений
+                            Text(statusText)
+                                .font(.system(.caption, design: .rounded))
+                                .foregroundColor(.white.opacity(0.9))
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule()
+                                        .fill(.white.opacity(0.2))
+                                        .blur(radius: 0.5)
+                                )
                             
-                            HStack(spacing: 8) {
+                            // Кнопки действий
+                            HStack(spacing: 12) {
                                 // Кнопка "Друг"
                                 Button(action: {
-                                    print("🔥 Кнопка Друг нажата!")  // Для отладки
+                                    print("🔥 Кнопка Друг нажата!")
                                     let updated = Person(
                                         id: person.id,
                                         name: person.name,
                                         details: person.details,
-                                        hearts: 4  // Устанавливаем 4 сердечка
+                                        hearts: 4
                                     )
                                     onUpdate(updated)
                                 }) {
-                                    HStack(spacing: 4) {
+                                    HStack(spacing: 6) {
                                         Image(systemName: "heart.fill")
+                                            .font(.system(.caption, design: .rounded))
                                         Text("Друг")
+                                            .font(.system(.caption, design: .rounded))
+                                            .fontWeight(.semibold)
                                     }
-                                    .font(.system(.caption2, design: .rounded))
-                                    .fontWeight(.medium)
-                                    .foregroundColor(person.isPositive ? .white : .red)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
                                     .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(person.isPositive ? Color.red : Color.clear)
-                                            .stroke(Color.red, lineWidth: 1)
+                                        Capsule()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: person.isPositive ? [.red, .pink] : [.red.opacity(0.7), .pink.opacity(0.7)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .shadow(color: .red.opacity(0.3), radius: 8, x: 0, y: 4)
                                     )
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                .scaleEffect(person.isPositive ? 1.05 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: person.isPositive)
                                 
                                 // Кнопка "Враг"
                                 Button(action: {
-                                    print("💀 Кнопка Враг нажата!")  // Для отладки
+                                    print("💀 Кнопка Враг нажата!")
                                     let updated = Person(
                                         id: person.id,
                                         name: person.name,
                                         details: person.details,
-                                        hearts: -4  // Устанавливаем 4 крестика
+                                        hearts: -4
                                     )
                                     onUpdate(updated)
                                 }) {
-                                    HStack(spacing: 4) {
+                                    HStack(spacing: 6) {
                                         Image(systemName: "xmark.circle.fill")
+                                            .font(.system(.caption, design: .rounded))
                                         Text("Враг")
+                                            .font(.system(.caption, design: .rounded))
+                                            .fontWeight(.semibold)
                                     }
-                                    .font(.system(.caption2, design: .rounded))
-                                    .fontWeight(.medium)
-                                    .foregroundColor(person.isNegative ? .white : .black)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
                                     .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(person.isNegative ? Color.black : Color.clear)
-                                            .stroke(Color.black, lineWidth: 1)
+                                        Capsule()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: person.isNegative ? [.black, .gray] : [.black.opacity(0.7), .gray.opacity(0.7)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
                                     )
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                .scaleEffect(person.isNegative ? 1.05 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: person.isNegative)
                                 
                                 // Кнопка "Сброс"
                                 Button(action: {
@@ -410,46 +510,76 @@ struct PersonCard: View {
                                     )
                                     onUpdate(updated)
                                 }) {
-                                    Text("Сброс")
-                                        .font(.system(.caption2, design: .rounded))
-                                        .fontWeight(.medium)
-                                        .foregroundColor(person.isNeutral ? .white : .gray)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .fill(person.isNeutral ? Color.gray : Color.clear)
-                                                .stroke(Color.gray, lineWidth: 1)
-                                        )
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "circle")
+                                            .font(.system(.caption, design: .rounded))
+                                        Text("Сброс")
+                                            .font(.system(.caption, design: .rounded))
+                                            .fontWeight(.semibold)
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(
+                                        Capsule()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: person.isNeutral ? [.blue, .cyan] : [.blue.opacity(0.7), .cyan.opacity(0.7)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .shadow(color: .blue.opacity(0.3), radius: 8, x: 0, y: 4)
+                                    )
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                .scaleEffect(person.isNeutral ? 1.05 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: person.isNeutral)
                             }
                         }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
                     }
                 }
             }
             
             if isEditing {
-                HStack(spacing: 16) {
-                    Button("Отмена") {
+                HStack(spacing: 20) {
+                    // Кнопка "Отмена"
+                    Button(action: {
                         isEditing = false
                         editedName = person.name
                         editedDetails = person.details
                         editedHearts = person.hearts
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(.body, design: .rounded))
+                            Text("Отмена")
+                                .font(.system(.body, design: .rounded))
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.gray.opacity(0.8), .gray.opacity(0.6)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .shadow(color: .gray.opacity(0.3), radius: 8, x: 0, y: 4)
+                        )
                     }
-                    .font(.system(.body, design: .rounded))
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(.systemGray6))
-                    )
+                    .buttonStyle(PlainButtonStyle())
                     
                     Spacer()
                     
-                    Button("Сохранить") {
+                    // Кнопка "Сохранить"
+                    Button(action: {
                         let updated = Person(
                             id: person.id,
                             name: editedName,
@@ -458,86 +588,67 @@ struct PersonCard: View {
                         )
                         onUpdate(updated)
                         isEditing = false
-                    }
-                    .font(.system(.body, design: .rounded))
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.orange, Color.orange.opacity(0.8)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(.body, design: .rounded))
+                            Text("Сохранить")
+                                .font(.system(.body, design: .rounded))
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.green, .green.opacity(0.8)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
                                 )
-                            )
-                            .shadow(color: Color.orange.opacity(0.3), radius: 5, x: 0, y: 2)
-                    )
+                                .shadow(color: .green.opacity(0.3), radius: 8, x: 0, y: 4)
+                        )
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
             }
         }
-        .padding(isEditing ? 16 : 20)
-        .background(
-            RoundedRectangle(cornerRadius: isEditing ? 25 : 20)
-                .fill(
-                    isEditing ? 
-                    LinearGradient(
-                        colors: [
-                            Color(.systemBackground),
-                            Color.orange.opacity(0.02),
-                            Color(.systemBackground)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ) :
-                    LinearGradient(
-                        colors: [Color(.systemBackground)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .stroke(
-                    isEditing ? 
-                    LinearGradient(
-                        colors: [Color.orange.opacity(0.8), Color.orange, Color.orange.opacity(0.6)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ) :
-                    LinearGradient(colors: [Color.clear], startPoint: .top, endPoint: .bottom),
-                    lineWidth: isEditing ? 3 : 0
-                )
-                .shadow(
-                    color: isEditing ? Color.orange.opacity(0.25) : Color.black.opacity(0.05),
-                    radius: isEditing ? 20 : 10,
-                    x: 0,
-                    y: isEditing ? 10 : 5
-                )
-        )
-        .animation(.easeInOut(duration: 0.3), value: isEditing)
-        .frame(maxWidth: isEditing ? .infinity : nil)
-        .padding(.horizontal, isEditing ? 0 : 0)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isEditing)
+        .frame(maxWidth: .infinity)
             }
         
-            // Кнопка редактирования в правом верхнем углу (единственный способ войти в режим редактирования)
+            // Кнопка редактирования в стиле Apple Music
             if !isEditing {
                 Button(action: {
-                    print("✏️ Кнопка редактирования нажата!")  // Для отладки
+                    print("✏️ Кнопка редактирования нажата!")
                     isEditing = true
                 }) {
                     Image(systemName: "pencil.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.orange)
+                        .font(.title)
+                        .foregroundColor(.white)
                         .background(
                             Circle()
-                                .fill(Color(.systemBackground))
-                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.3), .white.opacity(0.1)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                        )
+                        .overlay(
+                            Circle()
+                                .stroke(.white.opacity(0.5), lineWidth: 1)
                         )
                 }
-                .padding(12)
+                .padding(16)
+                .scaleEffect(1.0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isEditing)
             }
         }
     }
@@ -551,6 +662,8 @@ struct PersonCard: View {
             return "Нейтрально"
         }
     }
+
+
     
     private var statusColor: Color {
         if person.isPositive {
@@ -561,7 +674,7 @@ struct PersonCard: View {
             return .gray
         }
     }
-}
+
 
 // MARK: - Add Person View
 struct AddPersonView: View {
@@ -575,7 +688,6 @@ struct AddPersonView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Современный светлый градиентный фон
                 Color(hex: "#fceeda")
                     .ignoresSafeArea()
                 
@@ -725,3 +837,4 @@ struct RelationshipView_Previews: PreviewProvider {
     RelationshipView()
     }
 }
+
