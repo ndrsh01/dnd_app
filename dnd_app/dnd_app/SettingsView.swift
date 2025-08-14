@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var themeManager: ThemeManager
     @StateObject private var quoteManager = QuoteManager()
+    @StateObject private var cacheManager = CacheManager.shared
     @State private var showingQuoteManager = false
     
     var body: some View {
@@ -236,6 +237,62 @@ struct SettingsView: View {
                                 .stroke(
                                     LinearGradient(
                                         colors: [.purple.opacity(0.3), .purple.opacity(0.1)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.5
+                                )
+                                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                        )
+                        .cornerRadius(20)
+                        
+                        // Управление кэшем
+                        VStack(spacing: 12) {
+                            HStack {
+                                Image(systemName: "memorychip.fill")
+                                    .foregroundColor(.blue)
+                                
+                                Text("Кэш приложения")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                Spacer()
+                                
+                                Button(action: {
+                                    cacheManager.clearAllCaches()
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Text("Очистить")
+                                        Image(systemName: "trash")
+                                    }
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                                }
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                InfoRow(title: "Использование памяти", value: "\(cacheManager.cacheStats.totalMemoryUsage / 1024 / 1024) MB")
+                                InfoRow(title: "Процент попаданий", value: "\(String(format: "%.1f", cacheManager.getCacheHitRate() * 100))%")
+                                InfoRow(title: "Всего обращений", value: "\(cacheManager.cacheStats.cacheHits + cacheManager.cacheStats.cacheMisses)")
+                                InfoRow(title: "Успешных обращений", value: "\(cacheManager.cacheStats.cacheHits)")
+                            }
+                        }
+                        .padding(20)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color(.systemBackground),
+                                            Color(.systemBackground).opacity(0.8)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [.blue.opacity(0.3), .blue.opacity(0.1)],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ),

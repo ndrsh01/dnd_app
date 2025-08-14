@@ -42,14 +42,14 @@ struct Spell: Identifiable, Codable, Equatable {
 
 // MARK: - Feat Models
 struct Feat: Identifiable, Codable, Equatable {
-    let id = UUID()
+    var id = UUID()
     let name: String
     let description: String
     let category: String
 }
 
 // MARK: - Filter Models
-struct SpellFilters {
+struct SpellFilters: Codable {
     var searchText: String = ""
     var selectedLevels: Set<Int> = []
     var selectedSchools: Set<String> = []
@@ -96,7 +96,7 @@ struct SpellFilters {
     }
 }
 
-struct FeatFilters {
+struct FeatFilters: Codable {
     var searchText: String = ""
     var selectedCategories: Set<String> = []
     

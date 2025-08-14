@@ -15,6 +15,8 @@ final class SpellsStore: ObservableObject {
     @Published var availableSchools: [String] = []
     @Published var availableClasses: [String] = []
     @Published var availableFeatCategories: [String] = []
+    
+    private let cacheManager = CacheManager.shared
 
     init() {
         loadData()
@@ -23,10 +25,21 @@ final class SpellsStore: ObservableObject {
     private func loadData() {
         loadSpells()
         loadFeats()
+        loadCachedFilters()
     }
     
     // MARK: - Spells Loading
     private func loadSpells() {
+        // Сначала пытаемся загрузить из кэша
+        if let cachedSpells = cacheManager.getCachedSpells() {
+            self.spells = cachedSpells
+            self.updateAvailableFilters()
+            self.applySpellFilters()
+            print("✅ [SPELLS] Загружено \(cachedSpells.count) заклинаний из кэша")
+            return
+        }
+        
+        // Если кэша нет, загружаем из файла
         guard let url = Bundle.main.url(forResource: "spells", withExtension: "json") else {
             print("❌ [SPELLS] Не найден файл spells.json")
             return
@@ -40,7 +53,10 @@ final class SpellsStore: ObservableObject {
             self.updateAvailableFilters()
             self.applySpellFilters()
             
-            print("✅ [SPELLS] Загружено \(spells.count) заклинаний")
+            // Кэшируем заклинания
+            cacheManager.cacheSpells(spells)
+            
+            print("✅ [SPELLS] Загружено \(spells.count) заклинаний из файла и закэшировано")
         } catch {
             print("❌ [SPELLS] Ошибка загрузки заклинаний: \(error)")
         }
@@ -48,6 +64,17 @@ final class SpellsStore: ObservableObject {
     
     // MARK: - Feats Loading
     private func loadFeats() {
+        // Сначала пытаемся загрузить из кэша
+        if let cachedFeats = cacheManager.getCachedFeats() {
+            self.feats = cachedFeats
+            let categories = Set(cachedFeats.map { $0.category })
+            self.availableFeatCategories = Array(categories).sorted()
+            self.applyFeatFilters()
+            print("✅ [FEATS] Загружено \(cachedFeats.count) умений из кэша")
+            return
+        }
+        
+        // Если кэша нет, загружаем из файла
         guard let url = Bundle.main.url(forResource: "feats", withExtension: "json") else {
             print("❌ [FEATS] Не найден файл feats.json")
             return
@@ -74,7 +101,10 @@ final class SpellsStore: ObservableObject {
             self.availableFeatCategories = Array(categories).sorted()
             self.applyFeatFilters()
             
-            print("✅ [FEATS] Загружено \(allFeats.count) умений из \(categories.count) категорий")
+            // Кэшируем умения
+            cacheManager.cacheFeats(allFeats)
+            
+            print("✅ [FEATS] Загружено \(allFeats.count) умений из \(categories.count) категорий и закэшировано")
         } catch {
             print("❌ [FEATS] Ошибка загрузки умений: \(error)")
         }
@@ -167,6 +197,9 @@ final class SpellsStore: ObservableObject {
             
             return true
         }
+        
+        // Кэшируем фильтры заклинаний
+        cacheManager.cacheSpellFilters(spellFilters)
     }
     
     // MARK: - Feat Filters
@@ -203,5 +236,28 @@ final class SpellsStore: ObservableObject {
             
             return true
         }
+        
+        // Кэшируем фильтры умений
+        cacheManager.cacheFeatFilters(featFilters)
+    }
+    
+    // MARK: - Cache Management
+    private func loadCachedFilters() {
+        // Загружаем кэшированные фильтры заклинаний
+        if let cachedSpellFilters = cacheManager.getCachedSpellFilters() {
+            spellFilters = cachedSpellFilters
+            print("✅ [CACHE] Загружены кэшированные фильтры заклинаний")
+        }
+        
+        // Загружаем кэшированные фильтры умений
+        if let cachedFeatFilters = cacheManager.getCachedFeatFilters() {
+            featFilters = cachedFeatFilters
+            print("✅ [CACHE] Загружены кэшированные фильтры умений")
+        }
+    }
+    
+    func clearAllCaches() {
+        cacheManager.clearAllCaches()
+        print("✅ [CACHE] Все кэши очищены")
     }
 }

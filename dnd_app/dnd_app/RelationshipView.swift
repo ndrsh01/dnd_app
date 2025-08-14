@@ -30,12 +30,14 @@ struct Person: Identifiable, Codable, Equatable, Hashable {
 
 // MARK: - Store
 
+@MainActor
 final class RelationshipStore: ObservableObject {
     @Published var people: [Person] = [] {
         didSet { save() }
     }
 
     private let key = "relationships_v3"
+    private let cacheManager = CacheManager.shared
 
     init() {
         load()
@@ -63,15 +65,28 @@ final class RelationshipStore: ObservableObject {
         do {
             let data = try JSONEncoder().encode(people)
             UserDefaults.standard.set(data, forKey: key)
+            // Обновляем кэш
+            cacheManager.cacheRelationships(people)
         } catch {
             print("❌ Failed to encode relationships: \(error)")
         }
     }
 
     private func load() {
+        // Сначала пытаемся загрузить из кэша
+        if let cachedPeople = cacheManager.getCachedRelationships() {
+            people = cachedPeople
+            print("✅ [RELATIONSHIPS] Загружено \(cachedPeople.count) персонажей из кэша")
+            return
+        }
+        
+        // Если кэша нет, загружаем из UserDefaults
         guard let data = UserDefaults.standard.data(forKey: key) else { return }
         do {
             people = try JSONDecoder().decode([Person].self, from: data)
+            // Кэшируем персонажей
+            cacheManager.cacheRelationships(people)
+            print("✅ [RELATIONSHIPS] Загружено \(people.count) персонажей из UserDefaults и закэшировано")
         } catch {
             print("❌ Failed to decode relationships: \(error)")
         }

@@ -2,7 +2,14 @@ import SwiftUI
 
 @MainActor
 final class ThemeManager: ObservableObject {
-    @AppStorage("isDarkMode") var isDarkMode = false
+    @AppStorage("isDarkMode") var isDarkMode = false {
+        didSet {
+            // Кэшируем настройки темы при изменении
+            cacheThemeSettings()
+        }
+    }
+    
+    private let cacheManager = CacheManager.shared
     
     var preferredColorScheme: ColorScheme? {
         return isDarkMode ? .dark : .light
@@ -50,4 +57,22 @@ final class ThemeManager: ObservableObject {
     static func adaptiveBorderColor(for isDark: Bool) -> Color {
         return isDark ? Color(.systemGray4) : Color(.systemGray5)
     }
+    
+    // MARK: - Cache Management
+    private func cacheThemeSettings() {
+        let settings = ThemeSettings(isDarkMode: isDarkMode)
+        cacheManager.cacheThemeSettings(settings)
+    }
+    
+    func loadCachedThemeSettings() {
+        if let cachedSettings = cacheManager.getCachedThemeSettings() {
+            isDarkMode = cachedSettings.isDarkMode
+            print("✅ [THEME] Загружены кэшированные настройки темы")
+        }
+    }
+}
+
+// MARK: - Theme Settings Model
+struct ThemeSettings: Codable {
+    let isDarkMode: Bool
 }

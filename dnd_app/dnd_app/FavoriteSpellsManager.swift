@@ -14,6 +14,7 @@ final class FavoriteSpellsManager: ObservableObject {
     
     private let spellsStorageKey = "favoriteSpells"
     private let featsStorageKey = "favoriteFeats"
+    private let cacheManager = CacheManager.shared
     
     init() {
         load()
@@ -126,15 +127,29 @@ final class FavoriteSpellsManager: ObservableObject {
     // MARK: - Persistence
     private func saveSpells() {
         UserDefaults.standard.set(Array(favoriteSpells), forKey: spellsStorageKey)
+        // Кэшируем избранные заклинания
+        cacheManager.cacheFavorites(Array(favoriteSpells))
     }
     
     private func saveFeats() {
         UserDefaults.standard.set(Array(favoriteFeats), forKey: featsStorageKey)
+        // Кэшируем избранные умения
+        cacheManager.cacheFavorites(Array(favoriteFeats))
     }
     
     private func load() {
-        if let spellsArray = UserDefaults.standard.array(forKey: spellsStorageKey) as? [String] {
-            favoriteSpells = Set(spellsArray)
+        // Сначала пытаемся загрузить из кэша
+        if let cachedSpells = cacheManager.getCachedFavorites() {
+            favoriteSpells = Set(cachedSpells)
+            print("✅ [FAVORITES] Загружено \(cachedSpells.count) избранных заклинаний из кэша")
+        } else {
+            // Если кэша нет, загружаем из UserDefaults
+            if let spellsArray = UserDefaults.standard.array(forKey: spellsStorageKey) as? [String] {
+                favoriteSpells = Set(spellsArray)
+                // Кэшируем избранные заклинания
+                cacheManager.cacheFavorites(Array(favoriteSpells))
+                print("✅ [FAVORITES] Загружено \(favoriteSpells.count) избранных заклинаний из UserDefaults и закэшировано")
+            }
         }
         
         if let featsArray = UserDefaults.standard.array(forKey: featsStorageKey) as? [String] {

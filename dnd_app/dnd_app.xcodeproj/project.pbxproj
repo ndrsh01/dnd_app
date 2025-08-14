@@ -27,6 +27,8 @@
 		27D1A0132E4700000042C0AB /* RelationshipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0122E4700000042C0AB /* RelationshipView.swift */; };
 		27D1A0152E4700000042C0AB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0142E4700000042C0AB /* SettingsView.swift */; };
 		27D1A0172E4700000042C0AB /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0162E4700000042C0AB /* ThemeManager.swift */; };
+		27D304A32E4DBD9100CEDEF1 /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A22E4DBD9000CEDEF1 /* CacheManager.swift */; };
+		27D304A52E4DBD9800CEDEF1 /* CharacterSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +72,8 @@
 		27D1A0122E4700000042C0AB /* RelationshipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationshipView.swift; sourceTree = "<group>"; };
 		27D1A0142E4700000042C0AB /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		27D1A0162E4700000042C0AB /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		27D304A22E4DBD9000CEDEF1 /* CacheManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
+		27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterSheetView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,8 +150,10 @@
 				2792B75F2E4CC3540064FC97 /* spells.json */,
 				2792B7612E4CC35B0064FC97 /* feats.json */,
 				27D1A0062E4700000042C0AB /* SpellsView.swift */,
+				27D304A22E4DBD9000CEDEF1 /* CacheManager.swift */,
 				27D1A0082E4700000042C0AB /* SpellsStore.swift */,
 				27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */,
+				27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */,
 				27D1A00C2E4700000042C0AB /* QuoteView.swift */,
 				27D1A00E2E4700000042C0AB /* QuoteManager.swift */,
 				27D1A0102E4700000042C0AB /* NotesView.swift */,
@@ -291,6 +297,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27D304A32E4DBD9100CEDEF1 /* CacheManager.swift in Sources */,
 				27D1A0012E4700000042C0AB /* tabaxiApp.swift in Sources */,
 				27D1A0032E4700000042C0AB /* ContentView.swift in Sources */,
 				27D1A0052E4700000042C0AB /* Models.swift in Sources */,
@@ -300,6 +307,7 @@
 				27D1A00D2E4700000042C0AB /* QuoteView.swift in Sources */,
 				27D1A00F2E4700000042C0AB /* QuoteManager.swift in Sources */,
 				27D1A0112E4700000042C0AB /* NotesView.swift in Sources */,
+				27D304A52E4DBD9800CEDEF1 /* CharacterSheetView.swift in Sources */,
 				27D1A0132E4700000042C0AB /* RelationshipView.swift in Sources */,
 				27D1A0152E4700000042C0AB /* SettingsView.swift in Sources */,
 				27D1A0172E4700000042C0AB /* ThemeManager.swift in Sources */,

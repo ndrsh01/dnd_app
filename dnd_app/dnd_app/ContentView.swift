@@ -57,10 +57,15 @@ struct ContentView: View {
                     Label("Заметки", systemImage: "note.text")
                 }
 
-            SettingsView(themeManager: themeManager)
+            CharacterSheetView()
                 .tabItem {
-                    Label("Настройки", systemImage: "gearshape.fill")
+                    Label("Персонаж", systemImage: "person.text.rectangle")
                 }
+
+            // SettingsView(themeManager: themeManager)
+            //     .tabItem {
+            //         Label("Настройки", systemImage: "gearshape.fill")
+            //     }
         }
         .background(
             LinearGradient(

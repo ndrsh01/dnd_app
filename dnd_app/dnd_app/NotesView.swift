@@ -44,16 +44,17 @@ struct Note: Identifiable, Codable, Equatable {
 
 // MARK: - Store
 
+@MainActor
 final class NotesStore: ObservableObject {
     @Published var notes: [Note] = [] {
         didSet { save() }
     }
 
     private let key = "notes_v1"
+    private let cacheManager = CacheManager.shared
 
     init() {
         load()
-
     }
     
     func add(_ note: Note) { notes.append(note) }
@@ -81,15 +82,28 @@ final class NotesStore: ObservableObject {
         do {
             let data = try JSONEncoder().encode(notes)
             UserDefaults.standard.set(data, forKey: key)
+            // Обновляем кэш
+            cacheManager.cacheNotes(notes)
         } catch {
             print("❌ Failed to encode notes: \(error)")
         }
     }
     
     private func load() {
+        // Сначала пытаемся загрузить из кэша
+        if let cachedNotes = cacheManager.getCachedNotes() {
+            notes = cachedNotes
+            print("✅ [NOTES] Загружено \(cachedNotes.count) заметок из кэша")
+            return
+        }
+        
+        // Если кэша нет, загружаем из UserDefaults
         guard let data = UserDefaults.standard.data(forKey: key) else { return }
         do {
             notes = try JSONDecoder().decode([Note].self, from: data)
+            // Кэшируем заметки
+            cacheManager.cacheNotes(notes)
+            print("✅ [NOTES] Загружено \(notes.count) заметок из UserDefaults и закэшировано")
         } catch {
             print("❌ Failed to decode notes: \(error)")
         }
@@ -440,6 +454,7 @@ struct NoteCard: View {
         editedImportance = note.importance
     }
     
+    @MainActor
     private func saveChanges() {
         var updatedNote = note
         updatedNote.title = editedTitle
@@ -569,6 +584,7 @@ struct AddNoteView: View {
         }
     }
     
+    @MainActor
     private func addNote() {
         let note = Note(
             title: title,

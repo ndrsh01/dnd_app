@@ -4,7 +4,7 @@ import Foundation
 // MARK: - Data models
 
 struct Quote: Codable, Identifiable, Equatable, Hashable {
-    let id = UUID()
+    var id = UUID()
     let text: String
     let isCustom: Bool
     let category: String
@@ -28,7 +28,7 @@ struct Quote: Codable, Identifiable, Equatable, Hashable {
 }
 
 struct Category: Codable, Identifiable, Equatable {
-    let id = UUID()
+    var id = UUID()
     let name: String
     let isCustom: Bool
     let dateCreated: Date
@@ -44,6 +44,7 @@ struct QuotesData: Codable {
     let categories: [String: [String]]
 }
 
+@MainActor
 final class QuoteManager: ObservableObject {
     // Published
     @Published private(set) var quotes: [String: [Quote]] = [:]
@@ -57,16 +58,27 @@ final class QuoteManager: ObservableObject {
     private let customCategoriesKey = "tabaxiCustomCategories_v1"
     
     private var isInitialized = false
+    private let cacheManager = CacheManager.shared
     
     // Lazy initialization for better performance
     private func ensureInitialized() {
         guard !isInitialized else { return }
         isInitialized = true
+        
+        // Сначала пытаемся загрузить из кэша
+        if loadFromCache() {
+            print("✅ [QUOTES] Загружено из кэша")
+            return
+        }
+        
         loadBundledQuotes()
         loadFavorites()
-
         mergeCustomQuotesFromStorage()
         rebuildCategories()
+        
+        // Кэшируем данные
+        cacheManager.cacheQuotes(quotes)
+        cacheManager.cacheFavorites(favorites)
     }
 
     // Init
@@ -349,5 +361,31 @@ final class QuoteManager: ObservableObject {
         if let data = try? JSONEncoder().encode(customCategories) {
             UserDefaults.standard.set(data, forKey: customCategoriesKey)
         }
+    }
+    
+    // MARK: - Cache Management
+    private func loadFromCache() -> Bool {
+        // Загружаем цитаты из кэша
+        if let cachedQuotes = cacheManager.getCachedQuotes() {
+            quotes = cachedQuotes
+        } else {
+            return false
+        }
+        
+        // Загружаем избранное из кэша
+        if let cachedFavorites = cacheManager.getCachedFavorites() {
+            favorites = cachedFavorites
+        }
+        
+        // Перестраиваем категории
+        rebuildCategories()
+        
+        return true
+    }
+    
+    func clearCache() {
+        cacheManager.clearCache(for: CacheManager.CacheKey.quotes.rawValue)
+        cacheManager.clearCache(for: CacheManager.CacheKey.favorites.rawValue)
+        print("✅ [QUOTES] Кэш очищен")
     }
 }
