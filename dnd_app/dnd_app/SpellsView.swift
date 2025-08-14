@@ -200,7 +200,7 @@ struct SpellSearchView: View {
                     .padding(.top)
                 }
             }
-            .navigationTitle("🔮 Поиск заклинаний и умений")
+            .navigationTitle("Поиск заклинаний и умений")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

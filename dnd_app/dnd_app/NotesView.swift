@@ -273,11 +273,12 @@ struct NotesView: View {
                     }
                 }
             }
-            .navigationTitle("📝 Заметки")
+            .navigationTitle("Заметки")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAdd = true }) {
                         Image(systemName: "plus.circle.fill")
+                            .font(.title2)
                             .foregroundColor(.orange)
                     }
                 }
@@ -314,74 +315,132 @@ struct NoteCard: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             if isEditing {
                 // Режим редактирования
-                VStack(alignment: .leading, spacing: 12) {
-                    TextField("Название", text: $editedTitle)
-                        .font(.headline)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    
-                    ZStack(alignment: .bottomTrailing) {
-                        TextField("Описание", text: $editedDescription, axis: .vertical)
-                            .lineLimit(3...10)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(minHeight: 80)
-                    }
-                    
-                    // Категория
-                    HStack {
-                        Text("Категория:")
+                VStack(alignment: .leading, spacing: 16) {
+                    // Заголовок
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Название")
                             .font(.subheadline)
+                            .fontWeight(.medium)
                             .foregroundColor(.secondary)
                         
-                        Spacer()
+                        TextField("Введите название", text: $editedTitle)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemGray6))
+                                    .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                            )
+                            .submitLabel(.done)
+                            .onSubmit {
+                                // Скрываем клавиатуру при нажатии "Готово"
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                    }
+                    
+                    // Описание
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Описание")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
                         
-                        Menu {
-                            ForEach(NoteCategory.allCases, id: \.self) { category in
-                                Button(action: { editedCategory = category }) {
-                                    HStack {
-                                        Image(systemName: category.icon)
-                                        Text(category.rawValue)
+                        TextEditor(text: $editedDescription)
+                            .font(.body)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemGray6))
+                                    .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                            )
+                            .frame(minHeight: 100)
+                            .submitLabel(.done)
+                            .onSubmit {
+                                // Скрываем клавиатуру при нажатии "Готово"
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                    }
+                    
+                    // Категория и важность
+                    HStack(spacing: 16) {
+                        // Категория
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Категория")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
+                            
+                            Menu {
+                                ForEach(NoteCategory.allCases, id: \.self) { category in
+                                    Button(action: { editedCategory = category }) {
+                                        HStack {
+                                            Image(systemName: category.icon)
+                                            Text(category.rawValue)
+                                        }
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Image(systemName: editedCategory.icon)
+                                    Text(editedCategory.rawValue)
+                                    Spacer()
+                                    Image(systemName: "chevron.down")
+                                        .font(.caption)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(editedCategory.color.opacity(0.15))
+                                        .stroke(editedCategory.color.opacity(0.3), lineWidth: 1)
+                                )
+                                .foregroundColor(editedCategory.color)
+                            }
+                        }
+                        
+                        // Важность
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Важность")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
+                            
+                            HStack(spacing: 4) {
+                                ForEach(1...Note.maxImportance, id: \.self) { star in
+                                    Button(action: { editedImportance = star }) {
+                                        Image(systemName: star <= editedImportance ? "star.fill" : "star")
+                                            .foregroundColor(star <= editedImportance ? .yellow : .gray)
+                                            .font(.title3)
                                     }
                                 }
                             }
-                        } label: {
-                            HStack {
-                                Image(systemName: editedCategory.icon)
-                                Text(editedCategory.rawValue)
-                            }
-                            .padding(.horizontal, 12)
+                            .padding(.horizontal, 8)
                             .padding(.vertical, 6)
-                            .background(editedCategory.color.opacity(0.2))
-                            .cornerRadius(8)
-                        }
-                    }
-                    
-                    // Важность
-                    HStack {
-                        Text("Важность:")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        Spacer()
-                        
-                        HStack(spacing: 4) {
-                            ForEach(1...Note.maxImportance, id: \.self) { star in
-                                Button(action: { editedImportance = star }) {
-                                    Image(systemName: star <= editedImportance ? "star.fill" : "star")
-                                        .foregroundColor(star <= editedImportance ? .yellow : .gray)
-                                }
-                            }
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color(.systemGray6))
+                            )
                         }
                     }
                     
                     // Кнопки
-                    HStack {
+                    HStack(spacing: 12) {
                         Button("Отмена") {
                             isEditing = false
                             resetEditing()
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color(.systemGray5))
+                        )
                         .foregroundColor(.secondary)
                         
                         Spacer()
@@ -390,20 +449,49 @@ struct NoteCard: View {
                             saveChanges()
                             isEditing = false
                         }
-                        .foregroundColor(.orange)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.orange, .orange.opacity(0.8)],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                        )
+                        .foregroundColor(.white)
                         .fontWeight(.semibold)
                     }
                 }
             } else {
                 // Режим просмотра
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Image(systemName: note.category.icon)
-                            .foregroundColor(note.category.color)
-                        
-                        Text(note.title)
-                            .font(.headline)
-                            .lineLimit(1)
+                VStack(alignment: .leading, spacing: 12) {
+                    // Заголовок и важность
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Image(systemName: note.category.icon)
+                                    .foregroundColor(note.category.color)
+                                    .font(.title3)
+                                
+                                Text(note.title)
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                    .lineLimit(2)
+                            }
+                            
+                            Text(note.category.rawValue)
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(note.category.color.opacity(0.15))
+                                )
+                                .foregroundColor(note.category.color)
+                        }
                         
                         Spacer()
                         
@@ -415,36 +503,49 @@ struct NoteCard: View {
                                     .foregroundColor(star <= note.importance ? .yellow : .gray)
                             }
                         }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(.systemGray6))
+                        )
                     }
                     
+                    // Описание
                     Text(note.description)
                         .font(.body)
                         .foregroundColor(.secondary)
-                        .lineLimit(3)
+                        .lineLimit(4)
                     
+                    // Кнопка редактирования
                     HStack {
-                        Button("Редактировать") {
-                            isEditing = true
-                        }
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                        
                         Spacer()
                         
-                        Text(note.category.rawValue)
+                        Button(action: { isEditing = true }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "pencil.circle.fill")
+                                Text("Редактировать")
+                            }
                             .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(note.category.color.opacity(0.2))
-                            .cornerRadius(8)
+                            .fontWeight(.medium)
+                            .foregroundColor(.orange)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.orange.opacity(0.1))
+                            )
+                        }
                     }
                 }
             }
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
+        )
     }
     
     private func resetEditing() {
@@ -479,98 +580,165 @@ struct AddNoteView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
-                    .ignoresSafeArea()
+                LinearGradient(
+                    colors: [
+                        Color(hex: "#fceeda"),
+                        Color(hex: "#fceeda").opacity(0.9),
+                        Color(hex: "#fceeda")
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
-                VStack(spacing: 20) {
-                    // Название
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Название")
-                            .font(.headline)
-                        
-                        TextField("Введите название", text: $title)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
-                    
-                    // Описание
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Описание")
-                            .font(.headline)
-                        
-                        TextField("Введите описание", text: $description, axis: .vertical)
-                            .lineLimit(3...10)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(minHeight: 80)
-                    }
-                    
-                    // Категория
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Категория")
-                            .font(.headline)
-                        
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
-                            ForEach(NoteCategory.allCases, id: \.self) { category in
-                                Button(action: { selectedCategory = category }) {
-                                    HStack {
-                                        Image(systemName: category.icon)
-                                        Text(category.rawValue)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .fill(selectedCategory == category ? 
-                                                  LinearGradient(colors: [category.color, category.color.opacity(0.8)], startPoint: .leading, endPoint: .trailing) :
-                                                  LinearGradient(colors: [Color(.systemGray5), Color(.systemGray5)], startPoint: .leading, endPoint: .trailing)
-                                            )
-                                    )
-                                    .foregroundColor(selectedCategory == category ? .white : .primary)
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Название
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Название")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            
+                            TextField("Введите название заметки", text: $title)
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(.systemBackground))
+                                        .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                                )
+                                .submitLabel(.done)
+                                .onSubmit {
+                                    // Скрываем клавиатуру при нажатии "Готово"
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                 }
-                            }
                         }
-                    }
-                    
-                    // Важность
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Важность")
-                            .font(.headline)
                         
-                        HStack {
-                            HStack(spacing: 4) {
-                                ForEach(1...Note.maxImportance, id: \.self) { star in
-                                    Image(systemName: star <= importance ? "star.fill" : "star")
-                                        .foregroundColor(star <= importance ? .yellow : .gray)
-                                        .onTapGesture {
-                                            importance = star
+                        // Описание
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Описание")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            
+                            TextEditor(text: $description)
+                                .font(.body)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(.systemBackground))
+                                        .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                                )
+                                .frame(minHeight: 120)
+                                .submitLabel(.done)
+                                .onSubmit {
+                                    // Скрываем клавиатуру при нажатии "Готово"
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                }
+                        }
+                        
+                        // Категория
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Категория")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+                                ForEach(NoteCategory.allCases, id: \.self) { category in
+                                    Button(action: { selectedCategory = category }) {
+                                        VStack(spacing: 8) {
+                                            Image(systemName: category.icon)
+                                                .font(.title2)
+                                                .foregroundColor(selectedCategory == category ? .white : category.color)
+                                            
+                                            Text(category.rawValue)
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(selectedCategory == category ? .white : .primary)
                                         }
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 16)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(selectedCategory == category ? 
+                                                      LinearGradient(colors: [category.color, category.color.opacity(0.8)], startPoint: .leading, endPoint: .trailing) :
+                                                      LinearGradient(colors: [Color(.systemBackground), Color(.systemBackground)], startPoint: .leading, endPoint: .trailing)
+                                                )
+                                                .stroke(selectedCategory == category ? Color.clear : category.color.opacity(0.3), lineWidth: 1)
+                                        )
+                                        .shadow(color: selectedCategory == category ? category.color.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
+                                    }
                                 }
                             }
-                            
-                            Spacer()
-                            
-                            Text("\(importance)/\(Note.maxImportance)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
                         }
                         
-                        Slider(value: Binding(
-                            get: { Double(importance) },
-                            set: { importance = Int($0) }
-                        ), in: 1...Double(Note.maxImportance), step: 1)
-                        .accentColor(.orange)
+                        // Важность
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Важность")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            
+                            VStack(spacing: 12) {
+                                HStack {
+                                    HStack(spacing: 8) {
+                                        ForEach(1...Note.maxImportance, id: \.self) { star in
+                                            Button(action: { importance = star }) {
+                                                Image(systemName: star <= importance ? "star.fill" : "star")
+                                                    .font(.title2)
+                                                    .foregroundColor(star <= importance ? .yellow : .gray)
+                                            }
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text("\(importance)/\(Note.maxImportance)")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.secondary)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(Color(.systemGray6))
+                                        )
+                                }
+                                
+                                Slider(value: Binding(
+                                    get: { Double(importance) },
+                                    set: { importance = Int($0) }
+                                ), in: 1...Double(Note.maxImportance), step: 1)
+                                .accentColor(.orange)
+                            }
+                            .padding(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemBackground))
+                                    .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+                            )
+                        }
+                        
+                        Spacer(minLength: 100)
                     }
-                    
-                    Spacer()
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
                 }
-                .padding()
             }
             .navigationTitle("Новая заметка")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Отмена") {
                         dismiss()
                     }
+                    .foregroundColor(.orange)
+                    .fontWeight(.medium)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -578,9 +746,10 @@ struct AddNoteView: View {
                         addNote()
                     }
                     .disabled(title.isEmpty || description.isEmpty)
+                    .foregroundColor(title.isEmpty || description.isEmpty ? .gray : .orange)
+                    .fontWeight(.semibold)
                 }
             }
-
         }
     }
     

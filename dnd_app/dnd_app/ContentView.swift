@@ -36,8 +36,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            QuoteView()
-                .environmentObject(manager)
+            JSONQuoteView()
                 .tabItem {
                     Label("Цитаты", systemImage: "quote.bubble")
                 }

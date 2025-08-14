@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2792B75C2E4CC10F0064FC97 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2792B75B2E4CC10F0064FC97 /* Assets.xcassets */; };
+		275B2C182E4E2F89008AA77B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 275B2C172E4E2F89008AA77B /* Assets.xcassets */; };
 		2792B75E2E4CC2EF0064FC97 /* quotes.json in Resources */ = {isa = PBXBuildFile; fileRef = 2792B75D2E4CC2EF0064FC97 /* quotes.json */; };
 		2792B7602E4CC3540064FC97 /* spells.json in Resources */ = {isa = PBXBuildFile; fileRef = 2792B75F2E4CC3540064FC97 /* spells.json */; };
 		2792B7622E4CC35C0064FC97 /* feats.json in Resources */ = {isa = PBXBuildFile; fileRef = 2792B7612E4CC35B0064FC97 /* feats.json */; };
@@ -21,7 +21,6 @@
 		27D1A0072E4700000042C0AB /* SpellsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0062E4700000042C0AB /* SpellsView.swift */; };
 		27D1A0092E4700000042C0AB /* SpellsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0082E4700000042C0AB /* SpellsStore.swift */; };
 		27D1A00B2E4700000042C0AB /* FavoriteSpellsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */; };
-		27D1A00D2E4700000042C0AB /* QuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A00C2E4700000042C0AB /* QuoteView.swift */; };
 		27D1A00F2E4700000042C0AB /* QuoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A00E2E4700000042C0AB /* QuoteManager.swift */; };
 		27D1A0112E4700000042C0AB /* NotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0102E4700000042C0AB /* NotesView.swift */; };
 		27D1A0132E4700000042C0AB /* RelationshipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0122E4700000042C0AB /* RelationshipView.swift */; };
@@ -29,6 +28,9 @@
 		27D1A0172E4700000042C0AB /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0162E4700000042C0AB /* ThemeManager.swift */; };
 		27D304A32E4DBD9100CEDEF1 /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A22E4DBD9000CEDEF1 /* CacheManager.swift */; };
 		27D304A52E4DBD9800CEDEF1 /* CharacterSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */; };
+		27D304A72E4DF91300CEDEF1 /* JSONQuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A62E4DF91200CEDEF1 /* JSONQuoteView.swift */; };
+		27D304A92E4DF91900CEDEF1 /* QuoteModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A82E4DF91900CEDEF1 /* QuoteModels.swift */; };
+		27D304AB2E4DF92000CEDEF1 /* CommonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304AA2E4DF92000CEDEF1 /* CommonStyles.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,7 +51,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2792B75B2E4CC10F0064FC97 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		275B2C172E4E2F89008AA77B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2792B75D2E4CC2EF0064FC97 /* quotes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = quotes.json; sourceTree = "<group>"; };
 		2792B75F2E4CC3540064FC97 /* spells.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = spells.json; sourceTree = "<group>"; };
 		2792B7612E4CC35B0064FC97 /* feats.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = feats.json; sourceTree = "<group>"; };
@@ -66,7 +68,6 @@
 		27D1A0062E4700000042C0AB /* SpellsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpellsView.swift; sourceTree = "<group>"; };
 		27D1A0082E4700000042C0AB /* SpellsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpellsStore.swift; sourceTree = "<group>"; };
 		27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteSpellsManager.swift; sourceTree = "<group>"; };
-		27D1A00C2E4700000042C0AB /* QuoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteView.swift; sourceTree = "<group>"; };
 		27D1A00E2E4700000042C0AB /* QuoteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteManager.swift; sourceTree = "<group>"; };
 		27D1A0102E4700000042C0AB /* NotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesView.swift; sourceTree = "<group>"; };
 		27D1A0122E4700000042C0AB /* RelationshipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationshipView.swift; sourceTree = "<group>"; };
@@ -74,6 +75,9 @@
 		27D1A0162E4700000042C0AB /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		27D304A22E4DBD9000CEDEF1 /* CacheManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
 		27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterSheetView.swift; sourceTree = "<group>"; };
+		27D304A62E4DF91200CEDEF1 /* JSONQuoteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONQuoteView.swift; sourceTree = "<group>"; };
+		27D304A82E4DF91900CEDEF1 /* QuoteModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuoteModels.swift; sourceTree = "<group>"; };
+		27D304AA2E4DF92000CEDEF1 /* CommonStyles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonStyles.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,19 +146,21 @@
 			isa = PBXGroup;
 			children = (
 				27C22AFC2E46AEEF00CC864B /* Assets.xcassets */,
-				2792B75B2E4CC10F0064FC97 /* Assets.xcassets */,
 				27D1A0002E4700000042C0AB /* tabaxiApp.swift */,
 				27D1A0022E4700000042C0AB /* ContentView.swift */,
+				275B2C172E4E2F89008AA77B /* Assets.xcassets */,
 				2792B75D2E4CC2EF0064FC97 /* quotes.json */,
 				27D1A0042E4700000042C0AB /* Models.swift */,
 				2792B75F2E4CC3540064FC97 /* spells.json */,
 				2792B7612E4CC35B0064FC97 /* feats.json */,
 				27D1A0062E4700000042C0AB /* SpellsView.swift */,
+				27D304A62E4DF91200CEDEF1 /* JSONQuoteView.swift */,
+				27D304A82E4DF91900CEDEF1 /* QuoteModels.swift */,
 				27D304A22E4DBD9000CEDEF1 /* CacheManager.swift */,
+				27D304AA2E4DF92000CEDEF1 /* CommonStyles.swift */,
 				27D1A0082E4700000042C0AB /* SpellsStore.swift */,
 				27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */,
 				27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */,
-				27D1A00C2E4700000042C0AB /* QuoteView.swift */,
 				27D1A00E2E4700000042C0AB /* QuoteManager.swift */,
 				27D1A0102E4700000042C0AB /* NotesView.swift */,
 				27D1A0122E4700000042C0AB /* RelationshipView.swift */,
@@ -268,11 +274,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2792B75C2E4CC10F0064FC97 /* Assets.xcassets in Resources */,
 				27C22AFD2E46AEEF00CC864B /* Assets.xcassets in Resources */,
 				2792B7602E4CC3540064FC97 /* spells.json in Resources */,
 				2792B7622E4CC35C0064FC97 /* feats.json in Resources */,
 				2792B75E2E4CC2EF0064FC97 /* quotes.json in Resources */,
+				275B2C182E4E2F89008AA77B /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,13 +310,15 @@
 				27D1A0072E4700000042C0AB /* SpellsView.swift in Sources */,
 				27D1A0092E4700000042C0AB /* SpellsStore.swift in Sources */,
 				27D1A00B2E4700000042C0AB /* FavoriteSpellsManager.swift in Sources */,
-				27D1A00D2E4700000042C0AB /* QuoteView.swift in Sources */,
+				27D304AB2E4DF92000CEDEF1 /* CommonStyles.swift in Sources */,
 				27D1A00F2E4700000042C0AB /* QuoteManager.swift in Sources */,
 				27D1A0112E4700000042C0AB /* NotesView.swift in Sources */,
 				27D304A52E4DBD9800CEDEF1 /* CharacterSheetView.swift in Sources */,
 				27D1A0132E4700000042C0AB /* RelationshipView.swift in Sources */,
 				27D1A0152E4700000042C0AB /* SettingsView.swift in Sources */,
 				27D1A0172E4700000042C0AB /* ThemeManager.swift in Sources */,
+				27D304A92E4DF91900CEDEF1 /* QuoteModels.swift in Sources */,
+				27D304A72E4DF91300CEDEF1 /* JSONQuoteView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

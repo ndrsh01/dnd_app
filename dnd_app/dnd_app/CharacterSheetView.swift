@@ -801,7 +801,7 @@ struct CharacterSheetView: View {
                     }
                 }
             }
-            .navigationTitle("📋 Лист персонажа")
+            .navigationTitle("Лист персонажа")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
@@ -814,6 +814,7 @@ struct CharacterSheetView: View {
                         }
                     } label: {
                         Image(systemName: "plus.circle.fill")
+                            .font(.title2)
                             .foregroundColor(.orange)
                     }
                 }

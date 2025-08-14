@@ -202,6 +202,10 @@ final class QuoteManager: ObservableObject {
         }
     }
     
+    func removeQuote(_ quote: Quote) {
+        removeQuoteByText(quote.text)
+    }
+    
     func removeQuoteByText(_ quote: String) {
         for (category, quotesArray) in quotes {
             if let index = quotesArray.firstIndex(where: { $0.text == quote }) {
