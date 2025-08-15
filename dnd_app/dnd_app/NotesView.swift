@@ -287,10 +287,7 @@ struct NotesView: View {
     }
     
     private func deleteNotes(at offsets: IndexSet) {
-        for index in offsets {
-            let note = filteredNotes[index]
-            store.remove(note: note)
-        }
+        store.remove(at: offsets)
     }
 }
 
