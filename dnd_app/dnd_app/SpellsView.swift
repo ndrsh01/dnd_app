@@ -207,6 +207,7 @@ struct SpellSearchView: View {
                     Button("Закрыть") {
                         dismiss()
                     }
+                    .foregroundColor(.orange)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {

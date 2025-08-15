@@ -259,19 +259,16 @@ struct NotesView: View {
                                     .listRowSeparator(.hidden)
                                     .listRowBackground(Color.clear)
                                     .padding(.vertical, 4)
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                        Button(role: .destructive) {
-                                            deleteNote(note)
-                                        } label: {
-                                            Label("Удалить", systemImage: "trash")
-                                        }
-                                    }
                             }
+                            .onDelete(perform: deleteNotes)
                         }
                         .listStyle(PlainListStyle())
                         .background(Color.clear)
                     }
                 }
+            }
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             }
             .navigationTitle("Заметки")
             .toolbar {
@@ -289,8 +286,11 @@ struct NotesView: View {
         }
     }
     
-    private func deleteNote(_ note: Note) {
-        store.remove(note: note)
+    private func deleteNotes(at offsets: IndexSet) {
+        for index in offsets {
+            let note = filteredNotes[index]
+            store.remove(note: note)
+        }
     }
 }
 
@@ -432,8 +432,9 @@ struct NoteCard: View {
                     // Кнопки
                     HStack(spacing: 12) {
                         Button("Отмена") {
-                            isEditing = false
+                            print("🔄 [NOTES] Нажата кнопка 'Отмена' для заметки: \(note.title)")
                             resetEditing()
+                            isEditing = false
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
@@ -446,6 +447,7 @@ struct NoteCard: View {
                         Spacer()
                         
                         Button("Сохранить") {
+                            print("💾 [NOTES] Нажата кнопка 'Сохранить' для заметки: \(note.title)")
                             saveChanges()
                             isEditing = false
                         }
@@ -468,7 +470,7 @@ struct NoteCard: View {
             } else {
                 // Режим просмотра
                 VStack(alignment: .leading, spacing: 12) {
-                    // Заголовок и важность
+                    // Заголовок и кнопка редактирования
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
@@ -495,20 +497,15 @@ struct NoteCard: View {
                         
                         Spacer()
                         
-                        // Звезды важности
-                        HStack(spacing: 2) {
-                            ForEach(1...Note.maxImportance, id: \.self) { star in
-                                Image(systemName: star <= note.importance ? "star.fill" : "star")
-                                    .font(.caption)
-                                    .foregroundColor(star <= note.importance ? .yellow : .gray)
-                            }
+                        // Кнопка редактирования в стиле карточки персонажа
+                        Button(action: { isEditing = true }) {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.orange)
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color(.systemGray6))
-                        )
+                        .buttonStyle(PlainButtonStyle())
+                        .allowsHitTesting(true)
+                        .contentShape(Rectangle())
                     }
                     
                     // Описание
@@ -517,26 +514,20 @@ struct NoteCard: View {
                         .foregroundColor(.secondary)
                         .lineLimit(4)
                     
-                    // Кнопка редактирования
-                    HStack {
-                        Spacer()
-                        
-                        Button(action: { isEditing = true }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "pencil.circle.fill")
-                                Text("Редактировать")
-                            }
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.orange.opacity(0.1))
-                            )
+                    // Важность внизу карточки
+                    HStack(spacing: 2) {
+                        ForEach(1...Note.maxImportance, id: \.self) { star in
+                            Image(systemName: star <= note.importance ? "star.fill" : "star")
+                                .font(.caption)
+                                .foregroundColor(star <= note.importance ? .yellow : .gray)
                         }
                     }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemGray6))
+                    )
                 }
             }
         }
@@ -549,14 +540,20 @@ struct NoteCard: View {
     }
     
     private func resetEditing() {
+        print("🔄 [NOTES] Сброс изменений заметки: \(note.title)")
+        
         editedTitle = note.title
         editedDescription = note.description
         editedCategory = note.category
         editedImportance = note.importance
+        
+        print("✅ [NOTES] Изменения сброшены")
     }
     
     @MainActor
     private func saveChanges() {
+        print("💾 [NOTES] Сохранение изменений заметки: \(note.title)")
+        
         var updatedNote = note
         updatedNote.title = editedTitle
         updatedNote.description = editedDescription
@@ -565,6 +562,7 @@ struct NoteCard: View {
         updatedNote.dateModified = Date()
         
         store.update(updatedNote)
+        print("✅ [NOTES] Изменения сохранены")
     }
 }
 

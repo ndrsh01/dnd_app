@@ -138,14 +138,14 @@ struct RelationshipView: View {
                                 .listRowBackground(Color.clear)
                                 .padding(.vertical, 4)
                             }
-                            .onDelete(perform: store.remove)
+                            .onDelete(perform: deletePeople)
                         }
                         .listStyle(PlainListStyle())
                         .background(Color.clear)
                     }
                 }
             }
-            .navigationTitle("💖 Отношения")
+            .navigationTitle("Отношения")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -163,6 +163,10 @@ struct RelationshipView: View {
                 }
             }
         }
+    }
+    
+    private func deletePeople(at offsets: IndexSet) {
+        store.remove(at: offsets)
     }
 }
 
@@ -194,6 +198,11 @@ struct PersonCard: View {
                             .font(.title2)
                             .fontWeight(.bold)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .submitLabel(.done)
+                            .onSubmit {
+                                // Скрываем клавиатуру при нажатии "Готово"
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
                     } else {
                         Text(person.name)
                             .font(.title2)
@@ -211,7 +220,7 @@ struct PersonCard: View {
                 
                 Spacer()
                 
-                // Кнопка редактирования (только не в режиме редактирования)
+                // Кнопка редактирования 
                 if !isEditing {
                     Button(action: {
                         isEditing = true
@@ -233,6 +242,11 @@ struct PersonCard: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .lineLimit(3...6)
                     .frame(minHeight: 80)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        // Скрываем клавиатуру при нажатии "Готово"
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
             }
             
             // Система отношений
@@ -466,6 +480,10 @@ struct PersonCard: View {
                 .fill(Color(.systemBackground))
                 .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
         )
+        .onTapGesture {
+            // Скрываем клавиатуру при нажатии вне текстовых полей
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .animation(.easeInOut(duration: 0.3), value: isEditing)
     }
     
@@ -517,6 +535,11 @@ struct AddPersonView: View {
                                 
                                 TextField("Введите имя", text: $name)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .submitLabel(.done)
+                                    .onSubmit {
+                                        // Скрываем клавиатуру при нажатии "Готово"
+                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                    }
                             }
                         
                         // Поле описания
@@ -529,6 +552,11 @@ struct AddPersonView: View {
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .lineLimit(3...6)
                                 .frame(minHeight: 80)
+                                .submitLabel(.done)
+                                .onSubmit {
+                                    // Скрываем клавиатуру при нажатии "Готово"
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                }
                         }
                         
                         // Слайдер отношений
@@ -595,6 +623,10 @@ struct AddPersonView: View {
                             .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
                     )
                     .padding(.horizontal, 20)
+                    .onTapGesture {
+                        // Скрываем клавиатуру при нажатии вне текстовых полей
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
                     
                     Spacer(minLength: 100)
                 }

@@ -503,8 +503,14 @@ final class CharacterStore: ObservableObject {
     }
     
     func remove(character: Character) {
+        print("🗑️ [CHARACTER] Попытка удаления персонажа: \(character.name) (ID: \(character.id))")
+        print("🗑️ [CHARACTER] Всего персонажей до удаления: \(characters.count)")
+        
         if let idx = characters.firstIndex(where: { $0.id == character.id }) {
             characters.remove(at: idx)
+            print("✅ [CHARACTER] Персонаж успешно удален. Осталось персонажей: \(characters.count)")
+        } else {
+            print("❌ [CHARACTER] Персонаж не найден для удаления")
         }
     }
     
@@ -787,19 +793,16 @@ struct CharacterSheetView: View {
                                     .listRowSeparator(.hidden)
                                     .listRowBackground(Color.clear)
                                     .padding(.vertical, 4)
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                        Button(role: .destructive) {
-                                            deleteCharacter(character)
-                                        } label: {
-                                            Label("Удалить", systemImage: "trash")
-                                        }
-                                    }
                             }
+                            .onDelete(perform: deleteCharacters)
                         }
                         .listStyle(PlainListStyle())
                         .background(Color.clear)
                     }
                 }
+            }
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             }
             .navigationTitle("Лист персонажа")
             .toolbar {
@@ -828,8 +831,11 @@ struct CharacterSheetView: View {
         }
     }
     
-    private func deleteCharacter(_ character: Character) {
-        store.remove(character: character)
+    private func deleteCharacters(at offsets: IndexSet) {
+        for index in offsets {
+            let character = filteredCharacters[index]
+            store.remove(character: character)
+        }
     }
 }
 
@@ -944,21 +950,8 @@ struct CharacterImportView: View {
                 }
                 .padding(.top)
                 
-                // Кнопки выбора файла
+                // Кнопка открытия документа
                 VStack(spacing: 12) {
-                    Button(action: { showingFilePicker = true }) {
-                        HStack {
-                            Image(systemName: "folder")
-                            Text("Выбрать файл")
-                        }
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(12)
-                    }
-                    
                     Button(action: { showingDocumentPicker = true }) {
                         HStack {
                             Image(systemName: "doc.text")
@@ -2001,6 +1994,7 @@ struct CharacterEditorView: View {
                     Button("Отмена") {
                         dismiss()
                     }
+                    .foregroundColor(.orange)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -2008,6 +2002,7 @@ struct CharacterEditorView: View {
                         saveCharacter()
                     }
                     .fontWeight(.semibold)
+                    .foregroundColor(.orange)
                 }
             }
         }

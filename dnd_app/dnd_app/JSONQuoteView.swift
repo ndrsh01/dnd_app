@@ -18,7 +18,7 @@ struct JSONQuoteView: View {
     @State private var currentTabaxiPose = "tabaxi_pose3"
     @State private var showManagement = false
     
-    private let tabaxiPoses = ["tabaxi_pose1", "tabaxi_pose2", "tabaxi_pose3", "tabaxi_pose4", "tabaxi_pose5", "tabaxi_pose6", "tabaxi_pose7", "tabaxi_pose8", "tabaxi_pose9", "tabaxi_pose10", "tabaxi_pose11", "tabaxi_pose12", "tabaxi_pose13", "tabaxi_pose14", "tabaxi_pose15", "tabaxi_pose16", "tabaxi_pose17"]
+    private let tabaxiPoses = ["tabaxi_pose1", "tabaxi_pose2", "tabaxi_pose3", "tabaxi_pose4", "tabaxi_pose5", "tabaxi_pose6", "tabaxi_pose7", "tabaxi_pose8", "tabaxi_pose9", "tabaxi_pose10", "tabaxi_pose11", "tabaxi_pose12", "tabaxi_pose13", "tabaxi_pose14", "tabaxi_pose15", "tabaxi_pose16", "tabaxi_pose17", "tabaxi_pose18", "tabaxi_pose19", "tabaxi_pose20", "tabaxi_pose21", "tabaxi_pose22", "tabaxi_pose23", "tabaxi_pose24"]
     
     var body: some View {
         NavigationStack {
@@ -272,14 +272,8 @@ struct JSONQuoteManagementView: View {
                             }
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button(role: .destructive) {
-                                    jsonQuoteManager.removeCategory(category)
-                                } label: {
-                                    Label("Удалить", systemImage: "trash")
-                                }
-                            }
                         }
+                        .onDelete(perform: deleteCategories)
                     }
                     .listStyle(PlainListStyle())
                     .background(Color.clear)
@@ -314,6 +308,13 @@ struct JSONQuoteManagementView: View {
                     }
                 }
             }
+        }
+    }
+    
+    private func deleteCategories(at offsets: IndexSet) {
+        for index in offsets {
+            let category = jsonQuoteManager.categories[index]
+            jsonQuoteManager.removeCategory(category)
         }
     }
 }
@@ -401,14 +402,8 @@ struct JSONCategoryQuotesView: View {
                             JSONQuoteCard(quote: quote, category: category, jsonQuoteManager: jsonQuoteManager)
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
-                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                    Button(role: .destructive) {
-                                        jsonQuoteManager.removeQuote(quote, from: category)
-                                    } label: {
-                                        Label("Удалить", systemImage: "trash")
-                                    }
-                                }
                         }
+                        .onDelete(perform: deleteQuotes)
                     }
                     .listStyle(PlainListStyle())
                     .background(Color.clear)
@@ -435,6 +430,13 @@ struct JSONCategoryQuotesView: View {
                     newQuoteText = ""
                 }
             }
+        }
+    }
+    
+    private func deleteQuotes(at offsets: IndexSet) {
+        for index in offsets {
+            let quote = category.quotes[index]
+            jsonQuoteManager.removeQuote(quote, from: category)
         }
     }
 }

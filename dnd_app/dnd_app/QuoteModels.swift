@@ -6,7 +6,7 @@ struct JSONQuotes: Codable {
     let categories: [String: [String]]
 }
 
-struct QuoteCategory: Identifiable, Codable {
+struct QuoteCategory: Identifiable, Codable, Equatable {
     let id = UUID()
     let name: String
     var quotes: [String]
@@ -14,6 +14,10 @@ struct QuoteCategory: Identifiable, Codable {
     init(name: String, quotes: [String]) {
         self.name = name
         self.quotes = quotes
+    }
+    
+    static func == (lhs: QuoteCategory, rhs: QuoteCategory) -> Bool {
+        return lhs.id == rhs.id && lhs.name == rhs.name
     }
 }
 
@@ -28,12 +32,43 @@ class JSONQuoteManager: ObservableObject {
     
     init() {
         loadQuotesFromJSON()
+        // При первом запуске копируем данные из Bundle в Documents
+        initializeQuotesFile()
     }
     
     func loadQuotesFromJSON() {
         isLoading = true
         errorMessage = nil
         
+        // Сначала пытаемся загрузить из Documents directory (пользовательские изменения)
+        if let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let quotesPath = documentsPath.appendingPathComponent("quotes.json")
+            
+            if FileManager.default.fileExists(atPath: quotesPath.path) {
+                do {
+                    let data = try Data(contentsOf: quotesPath)
+                    let jsonQuotes = try JSONDecoder().decode(JSONQuotes.self, from: data)
+                    
+                    categories = jsonQuotes.categories.map { (name, quotes) in
+                        QuoteCategory(name: name, quotes: quotes)
+                    }.sorted { $0.name < $1.name }
+                    
+                    if let firstCategory = categories.first {
+                        selectedCategory = firstCategory
+                        getRandomQuote(from: firstCategory)
+                    }
+                    
+                    isLoading = false
+                    print("✅ Цитаты загружены из Documents directory")
+                    return
+                } catch {
+                    print("⚠️ Ошибка загрузки из Documents: \(error.localizedDescription)")
+                    // Продолжаем с загрузкой из Bundle
+                }
+            }
+        }
+        
+        // Если файл в Documents не найден или произошла ошибка, загружаем из Bundle
         guard let url = Bundle.main.url(forResource: "quotes", withExtension: "json") else {
             errorMessage = "Файл quotes.json не найден"
             isLoading = false
@@ -54,9 +89,11 @@ class JSONQuoteManager: ObservableObject {
             }
             
             isLoading = false
+            print("✅ Цитаты загружены из Bundle")
         } catch {
             errorMessage = "Ошибка загрузки цитат: \(error.localizedDescription)"
             isLoading = false
+            print("❌ Ошибка загрузки из Bundle: \(error.localizedDescription)")
         }
     }
     
@@ -114,14 +151,27 @@ class JSONQuoteManager: ObservableObject {
         guard !cleanQuote.isEmpty else { return }
         
         if let index = categories.firstIndex(where: { $0.name == categoryName }) {
-            categories[index].quotes.append(cleanQuote)
+            var updatedCategory = categories[index]
+            updatedCategory.quotes.append(cleanQuote)
+            categories[index] = updatedCategory
             saveCustomQuotes()
         }
     }
     
     func removeQuote(_ quote: String, from category: QuoteCategory) {
         if let categoryIndex = categories.firstIndex(where: { $0.name == category.name }) {
-            categories[categoryIndex].quotes.removeAll { $0 == quote }
+            var updatedCategory = categories[categoryIndex]
+            updatedCategory.quotes.removeAll { $0 == quote }
+            categories[categoryIndex] = updatedCategory
+            saveCustomQuotes()
+        }
+    }
+    
+    func removeQuotes(at offsets: IndexSet, from category: QuoteCategory) {
+        if let categoryIndex = categories.firstIndex(where: { $0.name == category.name }) {
+            var updatedCategory = categories[categoryIndex]
+            updatedCategory.quotes.remove(atOffsets: offsets)
+            categories[categoryIndex] = updatedCategory
             saveCustomQuotes()
         }
     }
@@ -132,7 +182,9 @@ class JSONQuoteManager: ObservableObject {
         
         if let categoryIndex = categories.firstIndex(where: { $0.name == category.name }) {
             if let quoteIndex = categories[categoryIndex].quotes.firstIndex(of: oldQuote) {
-                categories[categoryIndex].quotes[quoteIndex] = cleanText
+                var updatedCategory = categories[categoryIndex]
+                updatedCategory.quotes[quoteIndex] = cleanText
+                categories[categoryIndex] = updatedCategory
                 saveCustomQuotes()
             }
         }
@@ -159,6 +211,31 @@ class JSONQuoteManager: ObservableObject {
         // Сохраняем изменения в quotes.json
         saveToJSON()
         objectWillChange.send()
+    }
+    
+    private func initializeQuotesFile() {
+        // Проверяем, существует ли файл в Documents directory
+        guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("❌ Не удалось получить путь к documents directory")
+            return
+        }
+        
+        let quotesPath = documentsPath.appendingPathComponent("quotes.json")
+        
+        // Если файл не существует, копируем из Bundle
+        if !FileManager.default.fileExists(atPath: quotesPath.path) {
+            guard let bundleUrl = Bundle.main.url(forResource: "quotes", withExtension: "json") else {
+                print("❌ Файл quotes.json не найден в Bundle")
+                return
+            }
+            
+            do {
+                try FileManager.default.copyItem(at: bundleUrl, to: quotesPath)
+                print("✅ Файл quotes.json скопирован из Bundle в Documents directory")
+            } catch {
+                print("❌ Ошибка копирования файла: \(error)")
+            }
+        }
     }
     
     private func saveToJSON() {
