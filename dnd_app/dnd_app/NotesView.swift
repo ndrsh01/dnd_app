@@ -410,11 +410,15 @@ struct NoteCard: View {
                             
                             HStack(spacing: 4) {
                                 ForEach(1...Note.maxImportance, id: \.self) { star in
-                                    Button(action: { editedImportance = star }) {
+                                    Button(action: { 
+                                        editedImportance = star
+                                        print("⭐ [NOTES] Установлена важность: \(star) для заметки: \(note.title)")
+                                    }) {
                                         Image(systemName: star <= editedImportance ? "star.fill" : "star")
                                             .foregroundColor(star <= editedImportance ? .yellow : .gray)
                                             .font(.title3)
                                     }
+                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
                             .padding(.horizontal, 8)
@@ -428,10 +432,24 @@ struct NoteCard: View {
                     
                     // Кнопки
                     HStack(spacing: 12) {
-                        Button("Отмена") {
+                        Button(action: {
                             print("🔄 [NOTES] Нажата кнопка 'Отмена' для заметки: \(note.title)")
-                            resetEditing()
+                            print("🔄 [NOTES] Текущее состояние: isEditing=\(isEditing)")
+                            
+                            // Сброс изменений
+                            editedTitle = note.title
+                            editedDescription = note.description
+                            editedCategory = note.category
+                            editedImportance = note.importance
+                            
+                            print("🔄 [NOTES] Изменения сброшены")
+                            
+                            // Выход из режима редактирования
                             isEditing = false
+                            print("🔄 [NOTES] Режим редактирования отключен")
+                        }) {
+                            Text("Отмена")
+                                .fontWeight(.medium)
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
@@ -440,13 +458,33 @@ struct NoteCard: View {
                                 .fill(Color(.systemGray5))
                         )
                         .foregroundColor(.secondary)
+                        .buttonStyle(PlainButtonStyle())
                         
                         Spacer()
                         
-                        Button("Сохранить") {
+                        Button(action: {
                             print("💾 [NOTES] Нажата кнопка 'Сохранить' для заметки: \(note.title)")
-                            saveChanges()
+                            print("💾 [NOTES] Текущее состояние: isEditing=\(isEditing)")
+                            print("💾 [NOTES] Новые значения: title=\(editedTitle), importance=\(editedImportance)")
+                            
+                            // Создание обновленной заметки
+                            var updatedNote = note
+                            updatedNote.title = editedTitle
+                            updatedNote.description = editedDescription
+                            updatedNote.category = editedCategory
+                            updatedNote.importance = editedImportance
+                            updatedNote.dateModified = Date()
+                            
+                            // Сохранение в store
+                            store.update(updatedNote)
+                            print("💾 [NOTES] Изменения сохранены: title=\(updatedNote.title), importance=\(updatedNote.importance)")
+                            
+                            // Выход из режима редактирования
                             isEditing = false
+                            print("💾 [NOTES] Режим редактирования отключен")
+                        }) {
+                            Text("Сохранить")
+                                .fontWeight(.semibold)
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
@@ -461,7 +499,7 @@ struct NoteCard: View {
                                 )
                         )
                         .foregroundColor(.white)
-                        .fontWeight(.semibold)
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             } else {
@@ -536,20 +574,23 @@ struct NoteCard: View {
         )
     }
     
+    @MainActor
     private func resetEditing() {
         print("🔄 [NOTES] Сброс изменений заметки: \(note.title)")
+        print("🔄 [NOTES] Текущие значения: title=\(editedTitle), importance=\(editedImportance)")
         
         editedTitle = note.title
         editedDescription = note.description
         editedCategory = note.category
         editedImportance = note.importance
         
-        print("✅ [NOTES] Изменения сброшены")
+        print("✅ [NOTES] Изменения сброшены: title=\(editedTitle), importance=\(editedImportance)")
     }
     
     @MainActor
     private func saveChanges() {
         print("💾 [NOTES] Сохранение изменений заметки: \(note.title)")
+        print("💾 [NOTES] Новые значения: title=\(editedTitle), importance=\(editedImportance)")
         
         var updatedNote = note
         updatedNote.title = editedTitle
@@ -559,7 +600,7 @@ struct NoteCard: View {
         updatedNote.dateModified = Date()
         
         store.update(updatedNote)
-        print("✅ [NOTES] Изменения сохранены")
+        print("✅ [NOTES] Изменения сохранены: title=\(updatedNote.title), importance=\(updatedNote.importance)")
     }
 }
 
