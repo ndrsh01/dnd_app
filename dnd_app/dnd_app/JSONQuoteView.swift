@@ -327,14 +327,14 @@ struct JSONCategoryCard: View {
         HStack(spacing: 16) {
             // Иконка категории
             Image(systemName: "quote.bubble.fill")
-                .font(.title2)
+                .font(.title)
                 .foregroundColor(.orange)
-                .frame(width: 40, height: 40)
+                .padding(8)
                 .background(
                     Circle()
                         .fill(Color.orange.opacity(0.1))
                 )
-            
+
             // Информация о категории
             VStack(alignment: .leading, spacing: 4) {
                 Text(category.name)
@@ -349,6 +349,7 @@ struct JSONCategoryCard: View {
             
             Spacer()
         }
+        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 16)
