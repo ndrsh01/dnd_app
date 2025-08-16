@@ -169,7 +169,10 @@ struct ModernStatBadge: View {
             // Иконка с градиентным фоном
             Image(systemName: icon)
                 .font(.title2)
+ codex/update-font-styles-in-spellsview
                 .dynamicTypeSize(.medium ... .xxLarge)
+
+ main
                 .foregroundColor(.white)
                 .padding(8)
                 .background(
@@ -181,9 +184,14 @@ struct ModernStatBadge: View {
                                 endPoint: .bottomTrailing
                             )
                         )
+ codex/update-font-styles-in-spellsview
                 )
                 .frame(width: 36, height: 36)
                 .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
+
+                        .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
+                )
+ main
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
