@@ -26,9 +26,8 @@ struct CompendiumView: View {
                             HStack {
                                 Image(systemName: "wand.and.stars")
                                     .foregroundColor(.purple)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Заклинания")
                                         .font(.headline)
@@ -37,25 +36,25 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: BackgroundsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "person.3.sequence")
                                     .foregroundColor(.blue)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Предыстории")
                                         .font(.headline)
@@ -64,25 +63,25 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: FeatsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "star.circle")
                                     .foregroundColor(.orange)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Черты")
                                         .font(.headline)
@@ -91,25 +90,25 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: BestiaryTabView()) {
                             HStack {
                                 Image(systemName: "pawprint.circle")
                                     .foregroundColor(.green)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Бестиарий")
                                         .font(.headline)
@@ -118,25 +117,25 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: FavoritesTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "heart.circle")
                                     .foregroundColor(.red)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Избранное")
                                         .font(.headline)
@@ -145,13 +144,14 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))

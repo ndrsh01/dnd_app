@@ -874,23 +874,22 @@ struct ModernStatBadge: View {
     var body: some View {
         HStack(spacing: 12) {
             // Иконка с градиентным фоном
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [color, color.opacity(0.8)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [color, color.opacity(0.8)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                    )
-                    .frame(width: 36, height: 36)
-                    .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
-                
-                Image(systemName: icon)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
-            }
-            
+                        .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
+                )
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.caption)
