@@ -46,63 +46,90 @@ struct Note: Identifiable, Codable, Equatable {
 
 @MainActor
 final class NotesStore: ObservableObject {
-    @Published var notes: [Note] = [] {
-        didSet { save() }
-    }
+    @Published var notes: [Note] = []
 
     private let key = "notes_v1"
     private let cacheManager = CacheManager.shared
+    private var saveWorkItem: DispatchWorkItem?
+    private var lastSavedData: Data?
+    private(set) var saveCallCount = 0
 
     init() {
         load()
+        lastSavedData = try? JSONEncoder().encode(notes)
     }
-    
-    func add(_ note: Note) { notes.append(note) }
-    func remove(at offsets: IndexSet) { notes.remove(atOffsets: offsets) }
+
+    func add(_ note: Note) {
+        notes.append(note)
+        scheduleSave()
+    }
+
+    func remove(at offsets: IndexSet) {
+        notes.remove(atOffsets: offsets)
+        scheduleSave()
+    }
+
     func remove(note: Note) {
         if let idx = notes.firstIndex(where: { $0.id == note.id }) {
             notes.remove(at: idx)
+            scheduleSave()
         }
     }
+
     func update(_ note: Note) {
         if let idx = notes.firstIndex(where: { $0.id == note.id }) {
             notes[idx] = note
+            scheduleSave()
         }
     }
-    
+
     func notesByCategory(_ category: NoteCategory) -> [Note] {
         return notes.filter { $0.category == category }
     }
-    
+
     func notesByImportance(_ importance: Int) -> [Note] {
         return notes.filter { $0.importance == importance }
     }
-    
+
+    private func scheduleSave() {
+        saveWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.save()
+        }
+        saveWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: workItem)
+    }
+
     private func save() {
         do {
             let data = try JSONEncoder().encode(notes)
+            guard data != lastSavedData else { return }
             UserDefaults.standard.set(data, forKey: key)
             // Обновляем кэш
             cacheManager.cacheNotes(notes)
+            lastSavedData = data
+            saveCallCount += 1
         } catch {
             print("❌ Failed to encode notes: \(error)")
         }
     }
-    
+
     private func load() {
         // Сначала пытаемся загрузить из кэша
         if let cachedNotes = cacheManager.getCachedNotes() {
             notes = cachedNotes
+            lastSavedData = try? JSONEncoder().encode(notes)
             print("✅ [NOTES] Загружено \(cachedNotes.count) заметок из кэша")
             return
         }
-        
+
         // Если кэша нет, загружаем из UserDefaults
         guard let data = UserDefaults.standard.data(forKey: key) else { return }
         do {
             notes = try JSONDecoder().decode([Note].self, from: data)
             // Кэшируем заметки
             cacheManager.cacheNotes(notes)
+            lastSavedData = data
             print("✅ [NOTES] Загружено \(notes.count) заметок из UserDefaults и закэшировано")
         } catch {
             print("❌ Failed to decode notes: \(error)")
