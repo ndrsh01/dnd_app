@@ -10,9 +10,9 @@ struct CompendiumView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -26,9 +26,8 @@ struct CompendiumView: View {
                             HStack {
                                 Image(systemName: "wand.and.stars")
                                     .foregroundColor(.purple)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Заклинания")
                                         .font(.headline)
@@ -37,25 +36,25 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: BackgroundsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "person.3.sequence")
                                     .foregroundColor(.blue)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Предыстории")
                                         .font(.headline)
@@ -64,25 +63,25 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: FeatsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "star.circle")
                                     .foregroundColor(.orange)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Черты")
                                         .font(.headline)
@@ -91,25 +90,25 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: BestiaryTabView()) {
                             HStack {
                                 Image(systemName: "pawprint.circle")
                                     .foregroundColor(.green)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Бестиарий")
                                         .font(.headline)
@@ -118,25 +117,25 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: FavoritesTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "heart.circle")
                                     .foregroundColor(.red)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
+                                    .font(.title)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Избранное")
                                         .font(.headline)
@@ -145,13 +144,14 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 8)
                         }
                         .listRowBackground(Color(.systemBackground))
@@ -339,7 +339,7 @@ struct SpellFiltersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                Color("BackgroundColor")
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -350,7 +350,7 @@ struct SpellFiltersView: View {
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
                                 ForEach(0...9, id: \.self) { level in
                                     FilterButton(
                                         title: level == 0 ? "Заговоры" : "\(level) уровень",
@@ -368,7 +368,7 @@ struct SpellFiltersView: View {
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                                 let schoolNames = [
                                     ("evocation", "Воплощение"),
                                     ("conjuration", "Вызов"),
@@ -397,7 +397,7 @@ struct SpellFiltersView: View {
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                                 let classNames = [
                                     ("bard", "Бард"),
                                     ("sorcerer", "Волшебник"),
@@ -484,7 +484,7 @@ struct FeatFiltersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                Color("BackgroundColor")
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -495,7 +495,7 @@ struct FeatFiltersView: View {
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                                 ForEach(store.availableFeatCategories, id: \.self) { category in
                                     FilterButton(
                                         title: category,
@@ -576,9 +576,9 @@ struct FavoritesTabView: View {
         ZStack {
             LinearGradient(
                 colors: [
-                    Color(hex: "#fceeda"),
-                    Color(hex: "#fceeda").opacity(0.9),
-                    Color(hex: "#fceeda")
+                    Color("BackgroundColor"),
+                    Color("BackgroundColor").opacity(0.9),
+                    Color("BackgroundColor")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing

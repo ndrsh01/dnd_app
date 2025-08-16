@@ -14,17 +14,9 @@ struct SpellsView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [
-                    Color(hex: "#fceeda"),
-                    Color(hex: "#fceeda").opacity(0.9),
-                    Color(hex: "#fceeda")
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
+            ThemeManager.adaptiveBackground(for: themeManager.preferredColorScheme)
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
                 SearchAndFilterSection(store: store, favorites: favorites, themeManager: themeManager, currentTab: 0)
                 AllSpellsTab(store: store, favorites: favorites, themeManager: themeManager)
@@ -117,16 +109,8 @@ struct SpellSearchView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(
-                    colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                ThemeManager.adaptiveBackground(for: themeManager.preferredColorScheme)
+                    .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                 // Search bar
@@ -258,7 +242,7 @@ struct AdvancedFiltersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                Color("BackgroundColor")
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -269,7 +253,7 @@ struct AdvancedFiltersView: View {
                             .font(.headline)
                             .fontWeight(.semibold)
                         
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
                             ForEach(0...9, id: \.self) { level in
                                 FilterButton(
                                     title: level == 0 ? "Заговоры" : "\(level) уровень",
@@ -287,7 +271,7 @@ struct AdvancedFiltersView: View {
                             .font(.headline)
                             .fontWeight(.semibold)
                         
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                             let schoolNames = [
                                 ("evocation", "Воплощение"),
                                 ("conjuration", "Вызов"),
@@ -316,7 +300,7 @@ struct AdvancedFiltersView: View {
                             .font(.headline)
                             .fontWeight(.semibold)
                         
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                             let classNames = [
                                 ("bard", "Бард"),
                                 ("sorcerer", "Волшебник"),

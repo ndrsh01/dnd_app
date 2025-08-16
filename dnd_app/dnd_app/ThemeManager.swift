@@ -19,8 +19,8 @@ final class ThemeManager: ObservableObject {
         return isDarkMode ? .dark : .light
     }
     
-    // Цвета для светлой темы
-    static let lightBackgroundColor = Color(hex: "#fceeda")
+    // Базовый цвет из ассетов
+    static let backgroundColor = Color("BackgroundColor")
     
     // Цвета для темной темы  
     static let darkBackgroundGradient = LinearGradient(
@@ -34,28 +34,29 @@ final class ThemeManager: ObservableObject {
     )
     
     // Адаптивные цвета
-    static func adaptiveBackground(for isDark: Bool) -> AnyView {
-        if isDark {
-            return AnyView(darkBackgroundGradient)
+    @ViewBuilder
+    static func adaptiveBackground(for colorScheme: ColorScheme?) -> some View {
+        if colorScheme == .dark {
+            darkBackgroundGradient
         } else {
-            return AnyView(lightBackgroundColor)
+            backgroundColor
         }
     }
-    
-    static func adaptiveCardBackground(for isDark: Bool) -> Color {
-        return isDark ? Color(.systemGray6) : Color(.systemBackground)
+
+    static func adaptiveCardBackground(for colorScheme: ColorScheme?) -> Color {
+        colorScheme == .dark ? Color(.systemGray6) : Color(.systemBackground)
     }
-    
-    static func adaptiveTextColor(for isDark: Bool) -> Color {
-        return isDark ? .white : .primary
+
+    static func adaptiveTextColor(for colorScheme: ColorScheme?) -> Color {
+        colorScheme == .dark ? .white : .primary
     }
-    
-    static func adaptiveSecondaryTextColor(for isDark: Bool) -> Color {
-        return isDark ? .gray : .secondary
+
+    static func adaptiveSecondaryTextColor(for colorScheme: ColorScheme?) -> Color {
+        colorScheme == .dark ? .gray : .secondary
     }
-    
-    static func adaptiveBorderColor(for isDark: Bool) -> Color {
-        return isDark ? Color(.systemGray4) : Color(.systemGray5)
+
+    static func adaptiveBorderColor(for colorScheme: ColorScheme?) -> Color {
+        colorScheme == .dark ? Color(.systemGray4) : Color(.systemGray5)
     }
     
     // MARK: - Cache Management

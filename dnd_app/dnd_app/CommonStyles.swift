@@ -216,7 +216,7 @@ struct CommonColors {
     static let success = Color.green
     static let warning = Color.yellow
     static let error = Color.red
-    static let background = Color(hex: "#fceeda")
+    static let background = Color("BackgroundColor")
     static let cardBackground = Color(.systemBackground)
     static let textPrimary = Color(.label)
     static let textSecondary = Color(.secondaryLabel)

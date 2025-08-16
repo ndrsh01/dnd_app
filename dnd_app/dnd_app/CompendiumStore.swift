@@ -25,113 +25,104 @@ final class CompendiumStore: ObservableObject {
     init() {
         loadData()
     }
-    
+
     private func loadData() {
         loadSpells()
         loadBackgrounds()
         loadFeats()
         loadCachedFilters()
     }
-    
+
+    // MARK: - Generic Loader
+    /// Asynchronously loads a decodable array either from cache or from a JSON file in the bundle.
+    /// - Returns: Tuple containing the loaded array and a flag indicating whether the data came from cache.
+    private func loadDecodableArray<T: Decodable>(
+        fileName: String,
+        cacheGetter: () -> [T]?,
+        cacheSetter: @escaping ([T]) -> Void
+    ) async -> ([T], Bool)? {
+        if let cached = cacheGetter() {
+            return (cached, true)
+        }
+
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: "json") else {
+            print("❌ [\(fileName.uppercased())] Не найден файл \(fileName).json")
+            return nil
+        }
+
+        do {
+            let data = try await Task.detached(priority: .background) {
+                try Data(contentsOf: url)
+            }.value
+            let items = try JSONDecoder().decode([T].self, from: data)
+            cacheSetter(items)
+            return (items, false)
+        } catch {
+            print("❌ [\(fileName.uppercased())] Ошибка загрузки: \(error)")
+            return nil
+        }
+    }
+
     // MARK: - Spells Loading
     private func loadSpells() {
-        // Сначала пытаемся загрузить из кэша
-        if let cachedSpells = cacheManager.getCachedSpells() {
-            self.spells = cachedSpells
-            self.updateAvailableFilters()
-            self.applySpellFilters()
-            print("✅ [SPELLS] Загружено \(cachedSpells.count) заклинаний из кэша")
-            return
-        }
-        
-        // Если кэша нет, загружаем из файла
-        guard let url = Bundle.main.url(forResource: "spells", withExtension: "json") else {
-            print("❌ [SPELLS] Не найден файл spells.json")
-            return
-        }
-        
-        do {
-            let data = try Data(contentsOf: url)
-            let spells = try JSONDecoder().decode([Spell].self, from: data)
-            
-            self.spells = spells
-            self.updateAvailableFilters()
-            self.applySpellFilters()
-            
-            // Кэшируем заклинания
-            cacheManager.cacheSpells(spells)
-            
-            print("✅ [SPELLS] Загружено \(spells.count) заклинаний из файла и закэшировано")
-        } catch {
-            print("❌ [SPELLS] Ошибка загрузки заклинаний: \(error)")
+        Task {
+            if let (spells, fromCache) = await loadDecodableArray(
+                fileName: "spells",
+                cacheGetter: cacheManager.getCachedSpells,
+                cacheSetter: cacheManager.cacheSpells
+            ) {
+                await MainActor.run {
+                    self.spells = spells
+                    self.updateAvailableFilters()
+                    self.applySpellFilters()
+                    let message = fromCache
+                        ? "✅ [SPELLS] Загружено \(spells.count) заклинаний из кэша"
+                        : "✅ [SPELLS] Загружено \(spells.count) заклинаний из файла и закэшировано"
+                    print(message)
+                }
+            }
         }
     }
-    
+
     // MARK: - Backgrounds Loading
     private func loadBackgrounds() {
-        // Сначала пытаемся загрузить из кэша
-        if let cachedBackgrounds = cacheManager.getCachedBackgrounds() {
-            self.backgrounds = cachedBackgrounds
-            self.applyBackgroundFilters()
-            print("✅ [BACKGROUNDS] Загружено \(cachedBackgrounds.count) предысторий из кэша")
-            return
-        }
-        
-        // Если кэша нет, загружаем из файла
-        guard let url = Bundle.main.url(forResource: "backgrounds", withExtension: "json") else {
-            print("❌ [BACKGROUNDS] Не найден файл backgrounds.json")
-            return
-        }
-        
-        do {
-            let data = try Data(contentsOf: url)
-            let backgrounds = try JSONDecoder().decode([Background].self, from: data)
-            
-            self.backgrounds = backgrounds
-            self.applyBackgroundFilters()
-            
-            // Кэшируем предыстории
-            cacheManager.cacheBackgrounds(backgrounds)
-            
-            print("✅ [BACKGROUNDS] Загружено \(backgrounds.count) предысторий из файла и закэшировано")
-        } catch {
-            print("❌ [BACKGROUNDS] Ошибка загрузки предысторий: \(error)")
+        Task {
+            if let (backgrounds, fromCache) = await loadDecodableArray(
+                fileName: "backgrounds",
+                cacheGetter: cacheManager.getCachedBackgrounds,
+                cacheSetter: cacheManager.cacheBackgrounds
+            ) {
+                await MainActor.run {
+                    self.backgrounds = backgrounds
+                    self.applyBackgroundFilters()
+                    let message = fromCache
+                        ? "✅ [BACKGROUNDS] Загружено \(backgrounds.count) предысторий из кэша"
+                        : "✅ [BACKGROUNDS] Загружено \(backgrounds.count) предысторий из файла и закэшировано"
+                    print(message)
+                }
+            }
         }
     }
-    
+
     // MARK: - Feats Loading
     private func loadFeats() {
-        // Сначала пытаемся загрузить из кэша
-        if let cachedFeats = cacheManager.getCachedFeats() {
-            self.feats = cachedFeats
-            let categories = Set(cachedFeats.map { $0.category })
-            self.availableFeatCategories = Array(categories).sorted()
-            self.applyFeatFilters()
-            print("✅ [FEATS] Загружено \(cachedFeats.count) черт из кэша")
-            return
-        }
-        
-        // Если кэша нет, загружаем из файла
-        guard let url = Bundle.main.url(forResource: "feats", withExtension: "json") else {
-            print("❌ [FEATS] Не найден файл feats.json")
-            return
-        }
-        
-        do {
-            let data = try Data(contentsOf: url)
-            let feats = try JSONDecoder().decode([Feat].self, from: data)
-            
-            self.feats = feats
-            let categories = Set(feats.map { $0.category })
-            self.availableFeatCategories = Array(categories).sorted()
-            self.applyFeatFilters()
-            
-            // Кэшируем черты
-            cacheManager.cacheFeats(feats)
-            
-            print("✅ [FEATS] Загружено \(feats.count) черт из \(categories.count) категорий и закэшировано")
-        } catch {
-            print("❌ [FEATS] Ошибка загрузки черт: \(error)")
+        Task {
+            if let (feats, fromCache) = await loadDecodableArray(
+                fileName: "feats",
+                cacheGetter: cacheManager.getCachedFeats,
+                cacheSetter: cacheManager.cacheFeats
+            ) {
+                let categories = Set(feats.map { $0.category })
+                await MainActor.run {
+                    self.feats = feats
+                    self.availableFeatCategories = Array(categories).sorted()
+                    self.applyFeatFilters()
+                    let message = fromCache
+                        ? "✅ [FEATS] Загружено \(feats.count) черт из кэша"
+                        : "✅ [FEATS] Загружено \(feats.count) черт из \(categories.count) категорий и закэшировано"
+                    print(message)
+                }
+            }
         }
     }
     
@@ -154,19 +145,20 @@ final class CompendiumStore: ObservableObject {
         backgroundFilters.clear()
         applyBackgroundFilters()
     }
-    
+
     func applyBackgroundFilters() {
+        let searchText = backgroundFilters.searchText.lowercased()
+
         filteredBackgrounds = backgrounds.filter { background in
             // Поиск по тексту
-            if !backgroundFilters.searchText.isEmpty {
-                let searchText = backgroundFilters.searchText.lowercased()
-                if !background.name.lowercased().contains(searchText) && 
+            if !searchText.isEmpty {
+                if !background.name.lowercased().contains(searchText) &&
                    !background.description.lowercased().contains(searchText) &&
                    !background.trait.lowercased().contains(searchText) {
                     return false
                 }
             }
-            
+
             return true
         }
     }
@@ -206,50 +198,55 @@ final class CompendiumStore: ObservableObject {
         spellFilters.clear()
         applySpellFilters()
     }
-    
+
     func applySpellFilters() {
+        let searchText = spellFilters.searchText.lowercased()
+        let selectedLevels = spellFilters.selectedLevels
+        let selectedSchools = spellFilters.selectedSchools
+        let selectedClasses = spellFilters.selectedClasses
+        let concentrationOnly = spellFilters.concentrationOnly
+        let ritualOnly = spellFilters.ritualOnly
+
         filteredSpells = spells.filter { spell in
             // Поиск по тексту
-            if !spellFilters.searchText.isEmpty {
-                let searchText = spellFilters.searchText.lowercased()
-                if !spell.name.lowercased().contains(searchText) && 
+            if !searchText.isEmpty {
+                if !spell.name.lowercased().contains(searchText) &&
                    !spell.description.lowercased().contains(searchText) {
                     return false
                 }
             }
-            
+
             // Фильтр по уровню
-            if !spellFilters.selectedLevels.isEmpty && !spellFilters.selectedLevels.contains(spell.level) {
+            if !selectedLevels.isEmpty && !selectedLevels.contains(spell.level) {
                 return false
             }
-            
+
             // Фильтр по школе
-            if !spellFilters.selectedSchools.isEmpty && !spellFilters.selectedSchools.contains(spell.school) {
+            if !selectedSchools.isEmpty && !selectedSchools.contains(spell.school) {
                 return false
             }
-            
+
             // Фильтр по классу
-            if !spellFilters.selectedClasses.isEmpty {
+            if !selectedClasses.isEmpty {
                 let spellClasses = Set(spell.classes)
-                let selectedClasses = spellFilters.selectedClasses
                 if spellClasses.intersection(selectedClasses).isEmpty {
                     return false
                 }
             }
-            
+
             // Фильтр концентрации
-            if spellFilters.concentrationOnly && !spell.concentration {
+            if concentrationOnly && !spell.concentration {
                 return false
             }
-            
+
             // Фильтр ритуала
-            if spellFilters.ritualOnly && !spell.ritual {
+            if ritualOnly && !spell.ritual {
                 return false
             }
-            
+
             return true
         }
-        
+
         // Кэшируем фильтры заклинаний
         cacheManager.cacheSpellFilters(spellFilters)
     }
@@ -269,26 +266,28 @@ final class CompendiumStore: ObservableObject {
         featFilters.clear()
         applyFeatFilters()
     }
-    
+
     func applyFeatFilters() {
+        let searchText = featFilters.searchText.lowercased()
+        let selectedCategories = featFilters.selectedCategories
+
         filteredFeats = feats.filter { feat in
             // Поиск по тексту
-            if !featFilters.searchText.isEmpty {
-                let searchText = featFilters.searchText.lowercased()
-                if !feat.name.lowercased().contains(searchText) && 
+            if !searchText.isEmpty {
+                if !feat.name.lowercased().contains(searchText) &&
                    !feat.description.lowercased().contains(searchText) {
                     return false
                 }
             }
-            
+
             // Фильтр по категории
-            if !featFilters.selectedCategories.isEmpty && !featFilters.selectedCategories.contains(feat.category) {
+            if !selectedCategories.isEmpty && !selectedCategories.contains(feat.category) {
                 return false
             }
-            
+
             return true
         }
-        
+
         // Кэшируем фильтры черт
         cacheManager.cacheFeatFilters(featFilters)
     }
