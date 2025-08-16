@@ -46,6 +46,9 @@ final class CacheManager: ObservableObject {
         case featFilters = "feat_filters_cache"
         case themeSettings = "theme_settings_cache"
         case favorites = "favorites_cache"
+        case favoritesSpells = "favorites_spells"
+        case favoritesFeats = "favorites_feats"
+        case favoritesBackgrounds = "favorites_backgrounds"
     }
     
     // MARK: - Cache Statistics
@@ -391,5 +394,29 @@ extension CacheManager {
     
     func getCachedFavorites() -> [String]? {
         return getCodable(for: CacheKey.favorites.rawValue)
+    }
+
+    func cacheFavoriteSpells(_ favorites: [String]) {
+        cacheCodable(favorites, for: CacheKey.favoritesSpells.rawValue)
+    }
+
+    func getCachedFavoriteSpells() -> [String]? {
+        return getCodable(for: CacheKey.favoritesSpells.rawValue)
+    }
+
+    func cacheFavoriteFeats(_ favorites: [String]) {
+        cacheCodable(favorites, for: CacheKey.favoritesFeats.rawValue)
+    }
+
+    func getCachedFavoriteFeats() -> [String]? {
+        return getCodable(for: CacheKey.favoritesFeats.rawValue)
+    }
+
+    func cacheFavoriteBackgrounds(_ favorites: [String]) {
+        cacheCodable(favorites, for: CacheKey.favoritesBackgrounds.rawValue)
+    }
+
+    func getCachedFavoriteBackgrounds() -> [String]? {
+        return getCodable(for: CacheKey.favoritesBackgrounds.rawValue)
     }
 }
