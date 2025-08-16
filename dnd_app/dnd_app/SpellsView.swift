@@ -16,9 +16,9 @@ struct SpellsView: View {
         ZStack {
             LinearGradient(
                 colors: [
-                    Color(hex: "#fceeda"),
-                    Color(hex: "#fceeda").opacity(0.9),
-                    Color(hex: "#fceeda")
+                    Color("BackgroundColor"),
+                    Color("BackgroundColor").opacity(0.9),
+                    Color("BackgroundColor")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -119,9 +119,9 @@ struct SpellSearchView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -258,7 +258,7 @@ struct AdvancedFiltersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                Color("BackgroundColor")
                     .ignoresSafeArea()
                 
                 ScrollView {
