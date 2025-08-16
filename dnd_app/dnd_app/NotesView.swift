@@ -684,7 +684,7 @@ struct AddNoteView: View {
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
                                 ForEach(NoteCategory.allCases, id: \.self) { category in
                                     Button(action: { selectedCategory = category }) {
                                         VStack(spacing: 8) {
