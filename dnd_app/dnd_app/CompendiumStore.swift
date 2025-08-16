@@ -154,19 +154,20 @@ final class CompendiumStore: ObservableObject {
         backgroundFilters.clear()
         applyBackgroundFilters()
     }
-    
+
     func applyBackgroundFilters() {
+        let searchText = backgroundFilters.searchText.lowercased()
+
         filteredBackgrounds = backgrounds.filter { background in
             // Поиск по тексту
-            if !backgroundFilters.searchText.isEmpty {
-                let searchText = backgroundFilters.searchText.lowercased()
-                if !background.name.lowercased().contains(searchText) && 
+            if !searchText.isEmpty {
+                if !background.name.lowercased().contains(searchText) &&
                    !background.description.lowercased().contains(searchText) &&
                    !background.trait.lowercased().contains(searchText) {
                     return false
                 }
             }
-            
+
             return true
         }
     }
@@ -206,50 +207,55 @@ final class CompendiumStore: ObservableObject {
         spellFilters.clear()
         applySpellFilters()
     }
-    
+
     func applySpellFilters() {
+        let searchText = spellFilters.searchText.lowercased()
+        let selectedLevels = spellFilters.selectedLevels
+        let selectedSchools = spellFilters.selectedSchools
+        let selectedClasses = spellFilters.selectedClasses
+        let concentrationOnly = spellFilters.concentrationOnly
+        let ritualOnly = spellFilters.ritualOnly
+
         filteredSpells = spells.filter { spell in
             // Поиск по тексту
-            if !spellFilters.searchText.isEmpty {
-                let searchText = spellFilters.searchText.lowercased()
-                if !spell.name.lowercased().contains(searchText) && 
+            if !searchText.isEmpty {
+                if !spell.name.lowercased().contains(searchText) &&
                    !spell.description.lowercased().contains(searchText) {
                     return false
                 }
             }
-            
+
             // Фильтр по уровню
-            if !spellFilters.selectedLevels.isEmpty && !spellFilters.selectedLevels.contains(spell.level) {
+            if !selectedLevels.isEmpty && !selectedLevels.contains(spell.level) {
                 return false
             }
-            
+
             // Фильтр по школе
-            if !spellFilters.selectedSchools.isEmpty && !spellFilters.selectedSchools.contains(spell.school) {
+            if !selectedSchools.isEmpty && !selectedSchools.contains(spell.school) {
                 return false
             }
-            
+
             // Фильтр по классу
-            if !spellFilters.selectedClasses.isEmpty {
+            if !selectedClasses.isEmpty {
                 let spellClasses = Set(spell.classes)
-                let selectedClasses = spellFilters.selectedClasses
                 if spellClasses.intersection(selectedClasses).isEmpty {
                     return false
                 }
             }
-            
+
             // Фильтр концентрации
-            if spellFilters.concentrationOnly && !spell.concentration {
+            if concentrationOnly && !spell.concentration {
                 return false
             }
-            
+
             // Фильтр ритуала
-            if spellFilters.ritualOnly && !spell.ritual {
+            if ritualOnly && !spell.ritual {
                 return false
             }
-            
+
             return true
         }
-        
+
         // Кэшируем фильтры заклинаний
         cacheManager.cacheSpellFilters(spellFilters)
     }
@@ -269,26 +275,28 @@ final class CompendiumStore: ObservableObject {
         featFilters.clear()
         applyFeatFilters()
     }
-    
+
     func applyFeatFilters() {
+        let searchText = featFilters.searchText.lowercased()
+        let selectedCategories = featFilters.selectedCategories
+
         filteredFeats = feats.filter { feat in
             // Поиск по тексту
-            if !featFilters.searchText.isEmpty {
-                let searchText = featFilters.searchText.lowercased()
-                if !feat.name.lowercased().contains(searchText) && 
+            if !searchText.isEmpty {
+                if !feat.name.lowercased().contains(searchText) &&
                    !feat.description.lowercased().contains(searchText) {
                     return false
                 }
             }
-            
+
             // Фильтр по категории
-            if !featFilters.selectedCategories.isEmpty && !featFilters.selectedCategories.contains(feat.category) {
+            if !selectedCategories.isEmpty && !selectedCategories.contains(feat.category) {
                 return false
             }
-            
+
             return true
         }
-        
+
         // Кэшируем фильтры черт
         cacheManager.cacheFeatFilters(featFilters)
     }
