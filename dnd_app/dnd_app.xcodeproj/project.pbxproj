@@ -30,6 +30,7 @@
 		27D1A0172E4700000042C0AB /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0162E4700000042C0AB /* ThemeManager.swift */; };
 		27D304A32E4DBD9100CEDEF1 /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A22E4DBD9000CEDEF1 /* CacheManager.swift */; };
 		27D304A52E4DBD9800CEDEF1 /* CharacterSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */; };
+                27D304AD2E4DF93000CEDEF1 /* CharacterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304AC2E4DF93000CEDEF1 /* CharacterModels.swift */; };
 		27D304A72E4DF91300CEDEF1 /* JSONQuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A62E4DF91200CEDEF1 /* JSONQuoteView.swift */; };
 		27D304A92E4DF91900CEDEF1 /* QuoteModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304A82E4DF91900CEDEF1 /* QuoteModels.swift */; };
 		27D304AB2E4DF92000CEDEF1 /* CommonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D304AA2E4DF92000CEDEF1 /* CommonStyles.swift */; };
@@ -82,6 +83,7 @@
 		27D304A62E4DF91200CEDEF1 /* JSONQuoteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONQuoteView.swift; sourceTree = "<group>"; };
 		27D304A82E4DF91900CEDEF1 /* QuoteModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuoteModels.swift; sourceTree = "<group>"; };
 		27D304AA2E4DF92000CEDEF1 /* CommonStyles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonStyles.swift; sourceTree = "<group>"; };
+                27D304AC2E4DF93000CEDEF1 /* CharacterModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,6 +169,7 @@
 				27D304AA2E4DF92000CEDEF1 /* CommonStyles.swift */,
 				27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */,
 				27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */,
+                                27D304AC2E4DF93000CEDEF1 /* CharacterModels.swift */,
 				27D1A00E2E4700000042C0AB /* QuoteManager.swift */,
 				27D1A0102E4700000042C0AB /* NotesView.swift */,
 				27D1A0122E4700000042C0AB /* RelationshipView.swift */,
@@ -322,6 +325,7 @@
 				27D1A00F2E4700000042C0AB /* QuoteManager.swift in Sources */,
 				27D1A0112E4700000042C0AB /* NotesView.swift in Sources */,
 				27D304A52E4DBD9800CEDEF1 /* CharacterSheetView.swift in Sources */,
+                                27D304AD2E4DF93000CEDEF1 /* CharacterModels.swift in Sources */,
 				27D1A0132E4700000042C0AB /* RelationshipView.swift in Sources */,
 				27D1A0152E4700000042C0AB /* SettingsView.swift in Sources */,
 				27D1A0172E4700000042C0AB /* ThemeManager.swift in Sources */,
