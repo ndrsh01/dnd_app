@@ -182,42 +182,47 @@ final class FavoriteSpellsManager: ObservableObject {
     private func saveSpells() {
         UserDefaults.standard.set(Array(favoriteSpells), forKey: spellsStorageKey)
         // Кэшируем избранные заклинания
-        cacheManager.cacheFavorites(Array(favoriteSpells))
+        cacheManager.cacheFavoriteSpells(Array(favoriteSpells))
     }
     
     private func saveFeats() {
         UserDefaults.standard.set(Array(favoriteFeats), forKey: featsStorageKey)
         // Кэшируем избранные умения
-        cacheManager.cacheFavorites(Array(favoriteFeats))
+        cacheManager.cacheFavoriteFeats(Array(favoriteFeats))
     }
     
     private func saveBackgrounds() {
         UserDefaults.standard.set(Array(favoriteBackgrounds), forKey: backgroundsStorageKey)
         // Кэшируем избранные предыстории
-        cacheManager.cacheFavorites(Array(favoriteBackgrounds))
+        cacheManager.cacheFavoriteBackgrounds(Array(favoriteBackgrounds))
     }
     
     private func load() {
-        // Сначала пытаемся загрузить из кэша
-        if let cachedSpells = cacheManager.getCachedFavorites() {
+        // Сначала пытаемся загрузить заклинания из кэша
+        if let cachedSpells = cacheManager.getCachedFavoriteSpells() {
             favoriteSpells = Set(cachedSpells)
             print("✅ [FAVORITES] Загружено \(cachedSpells.count) избранных заклинаний из кэша")
-        } else {
-            // Если кэша нет, загружаем из UserDefaults
-            if let spellsArray = UserDefaults.standard.array(forKey: spellsStorageKey) as? [String] {
-                favoriteSpells = Set(spellsArray)
-                // Кэшируем избранные заклинания
-                cacheManager.cacheFavorites(Array(favoriteSpells))
-                print("✅ [FAVORITES] Загружено \(favoriteSpells.count) избранных заклинаний из UserDefaults и закэшировано")
-            }
+        } else if let spellsArray = UserDefaults.standard.array(forKey: spellsStorageKey) as? [String] {
+            // Если кэша нет, загружаем из UserDefaults и кэшируем
+            favoriteSpells = Set(spellsArray)
+            cacheManager.cacheFavoriteSpells(Array(favoriteSpells))
+            print("✅ [FAVORITES] Загружено \(favoriteSpells.count) избранных заклинаний из UserDefaults и закэшировано")
         }
-        
-        if let featsArray = UserDefaults.standard.array(forKey: featsStorageKey) as? [String] {
+
+        // Загружаем умения из кэша или UserDefaults
+        if let cachedFeats = cacheManager.getCachedFavoriteFeats() {
+            favoriteFeats = Set(cachedFeats)
+        } else if let featsArray = UserDefaults.standard.array(forKey: featsStorageKey) as? [String] {
             favoriteFeats = Set(featsArray)
+            cacheManager.cacheFavoriteFeats(Array(favoriteFeats))
         }
-        
-        if let backgroundsArray = UserDefaults.standard.array(forKey: backgroundsStorageKey) as? [String] {
+
+        // Загружаем предыстории из кэша или UserDefaults
+        if let cachedBackgrounds = cacheManager.getCachedFavoriteBackgrounds() {
+            favoriteBackgrounds = Set(cachedBackgrounds)
+        } else if let backgroundsArray = UserDefaults.standard.array(forKey: backgroundsStorageKey) as? [String] {
             favoriteBackgrounds = Set(backgroundsArray)
+            cacheManager.cacheFavoriteBackgrounds(Array(favoriteBackgrounds))
         }
     }
 }
