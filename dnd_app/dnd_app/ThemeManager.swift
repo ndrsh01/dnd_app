@@ -34,11 +34,12 @@ final class ThemeManager: ObservableObject {
     )
     
     // Адаптивные цвета
-    static func adaptiveBackground(for colorScheme: ColorScheme?) -> AnyView {
+    @ViewBuilder
+    static func adaptiveBackground(for colorScheme: ColorScheme?) -> some View {
         if colorScheme == .dark {
-            return AnyView(darkBackgroundGradient)
+            darkBackgroundGradient
         } else {
-            return AnyView(backgroundColor)
+            backgroundColor
         }
     }
 
