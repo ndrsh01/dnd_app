@@ -81,7 +81,7 @@ final class CacheManager: ObservableObject {
     // MARK: - Data Caching
     func cacheData(_ data: Data, for key: String) {
         let nsKey = NSString(string: key)
-        let nsData = NSData(data: data)
+        let nsData = data as NSData
         dataCache.setObject(nsData, forKey: nsKey)
         updateStats()
     }
