@@ -383,7 +383,8 @@ struct JSONCategoryQuotesView: View {
                     // Пустое состояние
                     VStack(spacing: 20) {
                         Image(systemName: "quote.bubble")
-                            .font(.system(size: 60))
+                            .font(.title2)
+                            .dynamicTypeSize(.medium ... .xxLarge)
                             .foregroundColor(.orange)
                         
                         Text("Нет цитат в категории")
@@ -546,7 +547,8 @@ struct JSONCategoryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 14, weight: .medium))
+                .font(.headline)
+                .dynamicTypeSize(.small ... .xLarge)
                 .foregroundColor(isSelected ? .white : .primary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)

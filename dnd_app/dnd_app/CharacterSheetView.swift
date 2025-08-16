@@ -774,7 +774,8 @@ struct CharacterSheetView: View {
                     if filteredCharacters.isEmpty {
                         VStack(spacing: 20) {
                             Image(systemName: "person.text.rectangle")
-                                .font(.system(size: 60))
+                                .font(.title2)
+                                .dynamicTypeSize(.medium ... .xxLarge)
                                 .foregroundColor(.orange)
                             
                             Text("Нет персонажей")
@@ -887,7 +888,8 @@ struct ModernStatBadge: View {
                     .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
                 
                 Image(systemName: icon)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.headline)
+                    .dynamicTypeSize(.small ... .xLarge)
                     .foregroundColor(.white)
             }
             
@@ -936,7 +938,8 @@ struct CharacterImportView: View {
                 // Заголовок
                 VStack(spacing: 8) {
                     Image(systemName: "doc.badge.plus")
-                        .font(.system(size: 50))
+                        .font(.title2)
+                        .dynamicTypeSize(.medium ... .xxLarge)
                         .foregroundColor(.orange)
                     
                     Text("Импорт персонажа")
@@ -1150,7 +1153,8 @@ struct CharacterCard: View {
                     .frame(width: 50, height: 50)
                     .overlay(
                         Image(systemName: "person.fill")
-                            .font(.system(size: 24))
+                            .font(.headline)
+                            .dynamicTypeSize(.small ... .xLarge)
                             .foregroundColor(.white)
                     )
                 

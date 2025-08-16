@@ -421,7 +421,8 @@ struct AllSpellsTab: View {
                     Spacer()
                     
                     Image(systemName: "heart.slash")
-                        .font(.system(size: 60))
+                        .font(.title2)
+                        .dynamicTypeSize(.medium ... .xxLarge)
                         .foregroundColor(.orange)
                     
                     Text("Нет избранного")

@@ -311,7 +311,8 @@ struct BestiaryTabView: View {
             Spacer()
             
             Image(systemName: "pawprint.circle.fill")
-                .font(.system(size: 80))
+                .font(.title2)
+                .dynamicTypeSize(.medium ... .xxLarge)
                 .foregroundColor(.orange)
             
             Text("Бестиарий")
@@ -590,7 +591,8 @@ struct FavoritesTabView: View {
                         Spacer()
                         
                         Image(systemName: "heart.slash")
-                            .font(.system(size: 60))
+                            .font(.title2)
+                            .dynamicTypeSize(.medium ... .xxLarge)
                             .foregroundColor(.orange)
                         
                         Text("Нет избранного")

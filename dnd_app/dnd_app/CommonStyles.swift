@@ -127,7 +127,8 @@ struct CommonButton: View {
             HStack(spacing: 8) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.headline)
+                        .dynamicTypeSize(.small ... .xLarge)
                 }
                 Text(title)
             }
@@ -152,7 +153,8 @@ struct CommonSecondaryButton: View {
             HStack(spacing: 8) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.headline)
+                        .dynamicTypeSize(.small ... .xLarge)
                 }
                 Text(title)
             }
@@ -187,7 +189,8 @@ struct CommonSectionHeader: View {
         HStack(spacing: 8) {
             if let icon = icon {
                 Image(systemName: icon)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.headline)
+                    .dynamicTypeSize(.small ... .xLarge)
                     .foregroundColor(.orange)
             }
             Text(title)
