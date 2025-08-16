@@ -267,7 +267,8 @@ struct NotesView: View {
                     if filteredNotes.isEmpty {
                         VStack(spacing: 20) {
                             Image(systemName: "note.text")
-                                .font(.system(size: 60))
+                                .font(.title2)
+                                .dynamicTypeSize(.medium ... .xxLarge)
                                 .foregroundColor(.orange)
                             
                             Text("Нет заметок")

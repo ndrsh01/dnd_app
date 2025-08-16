@@ -37,7 +37,8 @@ struct SettingsView: View {
                                 .blur(radius: 20)
                             
                             Image(systemName: "gearshape.fill")
-                                .font(.system(size: 50))
+                                .font(.title2)
+                                .dynamicTypeSize(.medium ... .xxLarge)
                                 .foregroundColor(.orange)
                                 .shadow(color: .orange.opacity(0.4), radius: 8, x: 0, y: 4)
                         }
@@ -383,7 +384,8 @@ struct QuoteManagerView: View {
                                 .blur(radius: 15)
                             
                             Image(systemName: "quote.bubble.fill")
-                                .font(.system(size: 35))
+                                .font(.title2)
+                                .dynamicTypeSize(.medium ... .xxLarge)
                                 .foregroundColor(.orange)
                                 .shadow(color: .orange.opacity(0.4), radius: 6, x: 0, y: 3)
                         }

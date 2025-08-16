@@ -110,11 +110,12 @@ struct RelationshipView: View {
                     if store.people.isEmpty {
                         VStack(spacing: 30) {
                             Spacer()
-                            
+
                             Image(systemName: "person.3.fill")
-                                .font(.system(size: 80))
+                                .font(.title2)
+                                .dynamicTypeSize(.medium ... .xxLarge)
                                 .foregroundColor(.gray)
-                            
+
                                 Text("Нет персонажей")
                                 .font(.title2)
                                 .fontWeight(.semibold)
