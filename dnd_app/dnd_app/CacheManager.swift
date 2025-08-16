@@ -12,14 +12,12 @@ final class CacheManager: ObservableObject {
     private var imageCache: NSCache<NSString, UIImage> = {
         let cache = NSCache<NSString, UIImage>()
         cache.countLimit = 100 // Максимум 100 изображений
-        cache.totalCostLimit = 50 * 1024 * 1024 // 50 MB
         return cache
     }()
     
     private var dataCache: NSCache<NSString, NSData> = {
         let cache = NSCache<NSString, NSData>()
         cache.countLimit = 200 // Максимум 200 объектов данных
-        cache.totalCostLimit = 100 * 1024 * 1024 // 100 MB
         return cache
     }()
     
