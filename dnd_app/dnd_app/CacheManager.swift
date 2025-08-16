@@ -46,15 +46,31 @@ final class CacheManager: ObservableObject {
     
     // MARK: - Cache Statistics
     @Published var cacheStats = CacheStats()
-    
+
     struct CacheStats {
         var imageCacheCount: Int = 0
         var dataCacheCount: Int = 0
         var objectCacheCount: Int = 0
+        var imageMemoryUsage: Int64 = 0
+        var dataMemoryUsage: Int64 = 0
+        var objectMemoryUsage: Int64 = 0
         var totalMemoryUsage: Int64 = 0
         var cacheHits: Int = 0
         var cacheMisses: Int = 0
     }
+
+    // Separate counters to track cache usage
+    private var imageCacheItemCount: Int = 0
+    private var dataCacheItemCount: Int = 0
+    private var objectCacheItemCount: Int = 0
+
+    // Track memory usage manually using cost dictionaries
+    private var imageCacheCosts: [String: Int] = [:]
+    private var dataCacheCosts: [String: Int] = [:]
+    private var objectCacheCosts: [String: Int] = [:]
+    private var imageCacheTotalCost: Int = 0
+    private var dataCacheTotalCost: Int = 0
+    private var objectCacheTotalCost: Int = 0
     
     private init() {
         setupCacheNotifications()
@@ -64,7 +80,15 @@ final class CacheManager: ObservableObject {
     // MARK: - Image Caching
     func cacheImage(_ image: UIImage, for key: String) {
         let nsKey = NSString(string: key)
-        imageCache.setObject(image, forKey: nsKey)
+        let cost = image.pngData()?.count ?? 0
+        if let existing = imageCacheCosts[key] {
+            imageCacheTotalCost -= existing
+        } else {
+            imageCacheItemCount += 1
+        }
+        imageCacheCosts[key] = cost
+        imageCacheTotalCost += cost
+        imageCache.setObject(image, forKey: nsKey, cost: cost)
         updateStats()
     }
     
@@ -82,7 +106,15 @@ final class CacheManager: ObservableObject {
     func cacheData(_ data: Data, for key: String) {
         let nsKey = NSString(string: key)
         let nsData = NSData(data: data)
-        dataCache.setObject(nsData, forKey: nsKey)
+        let cost = data.count
+        if let existing = dataCacheCosts[key] {
+            dataCacheTotalCost -= existing
+        } else {
+            dataCacheItemCount += 1
+        }
+        dataCacheCosts[key] = cost
+        dataCacheTotalCost += cost
+        dataCache.setObject(nsData, forKey: nsKey, cost: cost)
         updateStats()
     }
     
@@ -99,6 +131,10 @@ final class CacheManager: ObservableObject {
     // MARK: - Object Caching
     func cacheObject<T: AnyObject>(_ object: T, for key: String) {
         let nsKey = NSString(string: key)
+        if objectCache.object(forKey: nsKey) == nil {
+            objectCacheItemCount += 1
+            objectCacheCosts[key] = 0
+        }
         objectCache.setObject(object, forKey: nsKey)
         updateStats()
     }
@@ -140,47 +176,77 @@ final class CacheManager: ObservableObject {
         imageCache.removeAllObjects()
         dataCache.removeAllObjects()
         objectCache.removeAllObjects()
+        imageCacheItemCount = 0
+        dataCacheItemCount = 0
+        objectCacheItemCount = 0
+        imageCacheTotalCost = 0
+        dataCacheTotalCost = 0
+        objectCacheTotalCost = 0
+        imageCacheCosts.removeAll()
+        dataCacheCosts.removeAll()
+        objectCacheCosts.removeAll()
         updateStats()
         print("✅ [CACHE] All caches cleared")
     }
     
     func clearCache(for key: String) {
         let nsKey = NSString(string: key)
-        imageCache.removeObject(forKey: nsKey)
-        dataCache.removeObject(forKey: nsKey)
-        objectCache.removeObject(forKey: nsKey)
+        if let cost = imageCacheCosts.removeValue(forKey: key) {
+            imageCacheItemCount -= 1
+            imageCacheTotalCost -= cost
+            imageCache.removeObject(forKey: nsKey)
+        }
+        if let cost = dataCacheCosts.removeValue(forKey: key) {
+            dataCacheItemCount -= 1
+            dataCacheTotalCost -= cost
+            dataCache.removeObject(forKey: nsKey)
+        }
+        if let cost = objectCacheCosts.removeValue(forKey: key) {
+            objectCacheItemCount -= 1
+            objectCacheTotalCost -= cost
+            objectCache.removeObject(forKey: nsKey)
+        }
         updateStats()
     }
     
     func clearImageCache() {
         imageCache.removeAllObjects()
+        imageCacheItemCount = 0
+        imageCacheTotalCost = 0
+        imageCacheCosts.removeAll()
         updateStats()
         print("✅ [CACHE] Image cache cleared")
     }
     
     func clearDataCache() {
         dataCache.removeAllObjects()
+        dataCacheItemCount = 0
+        dataCacheTotalCost = 0
+        dataCacheCosts.removeAll()
         updateStats()
         print("✅ [CACHE] Data cache cleared")
     }
     
     func clearObjectCache() {
         objectCache.removeAllObjects()
+        objectCacheItemCount = 0
+        objectCacheTotalCost = 0
+        objectCacheCosts.removeAll()
         updateStats()
         print("✅ [CACHE] Object cache cleared")
     }
     
     // MARK: - Cache Statistics
     private func updateStats() {
-        cacheStats.imageCacheCount = imageCache.totalCostLimit > 0 ? imageCache.totalCostLimit : 0
-        cacheStats.dataCacheCount = dataCache.totalCostLimit > 0 ? dataCache.totalCostLimit : 0
-        cacheStats.objectCacheCount = objectCache.totalCostLimit > 0 ? objectCache.totalCostLimit : 0
-        
+        cacheStats.imageCacheCount = imageCacheItemCount
+        cacheStats.dataCacheCount = dataCacheItemCount
+        cacheStats.objectCacheCount = objectCacheItemCount
+
         // Примерный расчет использования памяти
-        let imageMemory = Int64(imageCache.totalCostLimit)
-        let dataMemory = Int64(dataCache.totalCostLimit)
-        let objectMemory = Int64(objectCache.totalCostLimit)
-        cacheStats.totalMemoryUsage = imageMemory + dataMemory + objectMemory
+        cacheStats.imageMemoryUsage = Int64(imageCacheTotalCost)
+        cacheStats.dataMemoryUsage = Int64(dataCacheTotalCost)
+        cacheStats.objectMemoryUsage = Int64(objectCacheTotalCost)
+        cacheStats.totalMemoryUsage = cacheStats.imageMemoryUsage + cacheStats.dataMemoryUsage + cacheStats.objectMemoryUsage
     }
     
     // MARK: - Cache Notifications
@@ -208,11 +274,14 @@ final class CacheManager: ObservableObject {
     
     func getCacheStats() -> String {
         let hitRate = getCacheHitRate()
+        let imageSize = Double(cacheStats.imageMemoryUsage) / 1024 / 1024
+        let dataSize = Double(cacheStats.dataMemoryUsage) / 1024 / 1024
+        let objectSize = Double(cacheStats.objectMemoryUsage) / 1024 / 1024
         return """
         Cache Statistics:
-        - Image Cache: \(imageCache.totalCostLimit / 1024 / 1024) MB
-        - Data Cache: \(dataCache.totalCostLimit / 1024 / 1024) MB
-        - Object Cache: \(objectCache.totalCostLimit / 1024 / 1024) MB
+        - Image Cache: \(cacheStats.imageCacheCount) items (\(String(format: "%.2f", imageSize)) MB)
+        - Data Cache: \(cacheStats.dataCacheCount) items (\(String(format: "%.2f", dataSize)) MB)
+        - Object Cache: \(cacheStats.objectCacheCount) items (\(String(format: "%.2f", objectSize)) MB)
         - Hit Rate: \(String(format: "%.1f", hitRate * 100))%
         - Total Hits: \(cacheStats.cacheHits)
         - Total Misses: \(cacheStats.cacheMisses)

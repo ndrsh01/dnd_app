@@ -271,6 +271,9 @@ struct SettingsView: View {
                             }
                             
                             VStack(alignment: .leading, spacing: 8) {
+                                InfoRow(title: "Изображений", value: "\(cacheManager.cacheStats.imageCacheCount)")
+                                InfoRow(title: "Данных", value: "\(cacheManager.cacheStats.dataCacheCount)")
+                                InfoRow(title: "Объектов", value: "\(cacheManager.cacheStats.objectCacheCount)")
                                 InfoRow(title: "Использование памяти", value: "\(cacheManager.cacheStats.totalMemoryUsage / 1024 / 1024) MB")
                                 InfoRow(title: "Процент попаданий", value: "\(String(format: "%.1f", cacheManager.getCacheHitRate() * 100))%")
                                 InfoRow(title: "Всего обращений", value: "\(cacheManager.cacheStats.cacheHits + cacheManager.cacheStats.cacheMisses)")
