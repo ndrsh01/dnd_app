@@ -30,7 +30,7 @@ extension Color {
 
 struct ContentView: View {
     @StateObject private var manager = QuoteManager()
-    @StateObject private var spells = SpellsStore()
+    @StateObject private var spells = CompendiumStore()
     @StateObject private var favorites = FavoriteSpellsManager()
     @StateObject private var themeManager = ThemeManager()
 
@@ -46,9 +46,9 @@ struct ContentView: View {
                     Label("Отношения", systemImage: "heart.circle")
                 }
 
-            SpellsView(store: spells, favorites: favorites, themeManager: themeManager)
+            CompendiumView()
                 .tabItem {
-                    Label("Заклинания", systemImage: "wand.and.stars")
+                    Label("Компендиум", systemImage: "book.fill")
                 }
 
             NotesView()

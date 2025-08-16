@@ -7,27 +7,67 @@ struct Spell: Identifiable, Codable, Equatable {
     let level: Int
     let school: String
     let classes: [String]
-    let actionType: String?
+    let subclasses: [String]
     let concentration: Bool
     let ritual: Bool
-    let castingTime: String?
-    let range: String?
-    let components: [String]?
-    let duration: String?
+    let castingTime: String
+    let range: String
+    let components: String
+    let duration: String
     let description: String
-    let material: String?
-    let cantripUpgrade: String?
+    let improvements: String
     
     enum CodingKeys: String, CodingKey {
-        case name, level, school, classes, actionType, concentration, ritual, castingTime, range, components, duration, description, material, cantripUpgrade
+        case name = "Название"
+        case level = "Уровень"
+        case school = "Школа"
+        case classes = "Классы"
+        case subclasses = "Подклассы"
+        case concentration = "Концентрация"
+        case ritual = "Ритуал"
+        case castingTime = "Время сотворения"
+        case range = "Дистанция"
+        case components = "Компоненты"
+        case duration = "Длительность"
+        case description = "Описание"
+        case improvements = "Улучшения"
     }
     
-    init(name: String, level: Int, school: String, classes: [String], actionType: String? = nil, concentration: Bool, ritual: Bool, castingTime: String? = nil, range: String? = nil, components: [String]? = nil, duration: String? = nil, description: String, material: String? = nil, cantripUpgrade: String? = nil) {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        name = try container.decode(String.self, forKey: .name)
+        
+        // Парсим уровень
+        let levelString = try container.decode(String.self, forKey: .level)
+        level = Int(levelString) ?? 0
+        
+        school = try container.decode(String.self, forKey: .school)
+        
+        // Парсим классы
+        let classesString = try container.decode(String.self, forKey: .classes)
+        classes = classesString.isEmpty ? [] : classesString.components(separatedBy: ", ")
+        
+        // Парсим подклассы
+        let subclassesString = try container.decode(String.self, forKey: .subclasses)
+        subclasses = subclassesString.isEmpty ? [] : subclassesString.components(separatedBy: ", ")
+        
+        concentration = try container.decode(Bool.self, forKey: .concentration)
+        ritual = try container.decode(Bool.self, forKey: .ritual)
+        castingTime = try container.decode(String.self, forKey: .castingTime)
+        range = try container.decode(String.self, forKey: .range)
+        components = try container.decode(String.self, forKey: .components)
+        duration = try container.decode(String.self, forKey: .duration)
+        description = try container.decode(String.self, forKey: .description)
+        improvements = try container.decode(String.self, forKey: .improvements)
+    }
+    
+    init(name: String, level: Int, school: String, classes: [String], subclasses: [String] = [], concentration: Bool, ritual: Bool, castingTime: String, range: String, components: String, duration: String, description: String, improvements: String = "") {
         self.name = name
         self.level = level
         self.school = school
         self.classes = classes
-        self.actionType = actionType
+        self.subclasses = subclasses
         self.concentration = concentration
         self.ritual = ritual
         self.castingTime = castingTime
@@ -35,17 +75,48 @@ struct Spell: Identifiable, Codable, Equatable {
         self.components = components
         self.duration = duration
         self.description = description
-        self.material = material
-        self.cantripUpgrade = cantripUpgrade
+        self.improvements = improvements
+    }
+}
+
+// MARK: - Background Models
+struct Background: Identifiable, Codable, Equatable {
+    let id = UUID()
+    let name: String
+    let characteristics: String
+    let trait: String
+    let skills: String
+    let tools: String
+    let equipment: String
+    let description: String
+    
+    enum CodingKeys: String, CodingKey {
+        case name = "Название"
+        case characteristics = "Характеристики"
+        case trait = "Черта"
+        case skills = "Навыки"
+        case tools = "Инструменты"
+        case equipment = "Снаряжение"
+        case description = "Описание"
     }
 }
 
 // MARK: - Feat Models
 struct Feat: Identifiable, Codable, Equatable {
-    var id = UUID()
+    let id = UUID()
     let name: String
-    let description: String
     let category: String
+    let requirements: String
+    let abilityIncrease: String
+    let description: String
+    
+    enum CodingKeys: String, CodingKey {
+        case name = "Название"
+        case category = "Категория"
+        case requirements = "Требования"
+        case abilityIncrease = "Повышение характеристики"
+        case description = "Описание"
+    }
 }
 
 // MARK: - Filter Models
@@ -93,6 +164,18 @@ struct SpellFilters: Codable {
         } else {
             selectedClasses.insert(className)
         }
+    }
+}
+
+struct BackgroundFilters: Codable {
+    var searchText: String = ""
+    
+    var isActive: Bool {
+        !searchText.isEmpty
+    }
+    
+    mutating func clear() {
+        searchText = ""
     }
 }
 

@@ -3,10 +3,14 @@ import Foundation
 
 // MARK: - Store
 @MainActor
-final class SpellsStore: ObservableObject {
+final class CompendiumStore: ObservableObject {
     @Published var spells: [Spell] = []
     @Published var filteredSpells: [Spell] = []
     @Published var spellFilters = SpellFilters()
+    
+    @Published var backgrounds: [Background] = []
+    @Published var filteredBackgrounds: [Background] = []
+    @Published var backgroundFilters = BackgroundFilters()
     
     @Published var feats: [Feat] = []
     @Published var filteredFeats: [Feat] = []
@@ -24,6 +28,7 @@ final class SpellsStore: ObservableObject {
     
     private func loadData() {
         loadSpells()
+        loadBackgrounds()
         loadFeats()
         loadCachedFilters()
     }
@@ -62,6 +67,38 @@ final class SpellsStore: ObservableObject {
         }
     }
     
+    // MARK: - Backgrounds Loading
+    private func loadBackgrounds() {
+        // Сначала пытаемся загрузить из кэша
+        if let cachedBackgrounds = cacheManager.getCachedBackgrounds() {
+            self.backgrounds = cachedBackgrounds
+            self.applyBackgroundFilters()
+            print("✅ [BACKGROUNDS] Загружено \(cachedBackgrounds.count) предысторий из кэша")
+            return
+        }
+        
+        // Если кэша нет, загружаем из файла
+        guard let url = Bundle.main.url(forResource: "backgrounds", withExtension: "json") else {
+            print("❌ [BACKGROUNDS] Не найден файл backgrounds.json")
+            return
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let backgrounds = try JSONDecoder().decode([Background].self, from: data)
+            
+            self.backgrounds = backgrounds
+            self.applyBackgroundFilters()
+            
+            // Кэшируем предыстории
+            cacheManager.cacheBackgrounds(backgrounds)
+            
+            print("✅ [BACKGROUNDS] Загружено \(backgrounds.count) предысторий из файла и закэшировано")
+        } catch {
+            print("❌ [BACKGROUNDS] Ошибка загрузки предысторий: \(error)")
+        }
+    }
+    
     // MARK: - Feats Loading
     private func loadFeats() {
         // Сначала пытаемся загрузить из кэша
@@ -70,7 +107,7 @@ final class SpellsStore: ObservableObject {
             let categories = Set(cachedFeats.map { $0.category })
             self.availableFeatCategories = Array(categories).sorted()
             self.applyFeatFilters()
-            print("✅ [FEATS] Загружено \(cachedFeats.count) умений из кэша")
+            print("✅ [FEATS] Загружено \(cachedFeats.count) черт из кэша")
             return
         }
         
@@ -82,31 +119,19 @@ final class SpellsStore: ObservableObject {
         
         do {
             let data = try Data(contentsOf: url)
-            let featsDict = try JSONDecoder().decode([String: [[String: String]]].self, from: data)
+            let feats = try JSONDecoder().decode([Feat].self, from: data)
             
-            var allFeats: [Feat] = []
-            var categories: Set<String> = []
-            
-            for (category, featsArray) in featsDict {
-                categories.insert(category)
-                for featDict in featsArray {
-                    if let name = featDict["название"], let description = featDict["описание"] {
-                        let feat = Feat(name: name, description: description, category: category)
-                        allFeats.append(feat)
-                    }
-                }
-            }
-            
-            self.feats = allFeats
+            self.feats = feats
+            let categories = Set(feats.map { $0.category })
             self.availableFeatCategories = Array(categories).sorted()
             self.applyFeatFilters()
             
-            // Кэшируем умения
-            cacheManager.cacheFeats(allFeats)
+            // Кэшируем черты
+            cacheManager.cacheFeats(feats)
             
-            print("✅ [FEATS] Загружено \(allFeats.count) умений из \(categories.count) категорий и закэшировано")
+            print("✅ [FEATS] Загружено \(feats.count) черт из \(categories.count) категорий и закэшировано")
         } catch {
-            print("❌ [FEATS] Ошибка загрузки умений: \(error)")
+            print("❌ [FEATS] Ошибка загрузки черт: \(error)")
         }
     }
     
@@ -117,6 +142,33 @@ final class SpellsStore: ObservableObject {
         
         let classes = Set(spells.flatMap { $0.classes })
         availableClasses = Array(classes).sorted()
+    }
+    
+    // MARK: - Background Filters
+    func updateBackgroundSearchText(_ text: String) {
+        backgroundFilters.searchText = text
+        applyBackgroundFilters()
+    }
+    
+    func clearBackgroundFilters() {
+        backgroundFilters.clear()
+        applyBackgroundFilters()
+    }
+    
+    func applyBackgroundFilters() {
+        filteredBackgrounds = backgrounds.filter { background in
+            // Поиск по тексту
+            if !backgroundFilters.searchText.isEmpty {
+                let searchText = backgroundFilters.searchText.lowercased()
+                if !background.name.lowercased().contains(searchText) && 
+                   !background.description.lowercased().contains(searchText) &&
+                   !background.trait.lowercased().contains(searchText) {
+                    return false
+                }
+            }
+            
+            return true
+        }
     }
     
     // MARK: - Spell Filters
@@ -237,7 +289,7 @@ final class SpellsStore: ObservableObject {
             return true
         }
         
-        // Кэшируем фильтры умений
+        // Кэшируем фильтры черт
         cacheManager.cacheFeatFilters(featFilters)
     }
     
@@ -249,10 +301,10 @@ final class SpellsStore: ObservableObject {
             print("✅ [CACHE] Загружены кэшированные фильтры заклинаний")
         }
         
-        // Загружаем кэшированные фильтры умений
+        // Загружаем кэшированные фильтры черт
         if let cachedFeatFilters = cacheManager.getCachedFeatFilters() {
             featFilters = cachedFeatFilters
-            print("✅ [CACHE] Загружены кэшированные фильтры умений")
+            print("✅ [CACHE] Загружены кэшированные фильтры черт")
         }
     }
     

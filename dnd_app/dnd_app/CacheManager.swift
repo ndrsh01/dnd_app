@@ -32,6 +32,7 @@ final class CacheManager: ObservableObject {
     // MARK: - Cache Keys
     enum CacheKey: String {
         case spells = "spells_cache"
+        case backgrounds = "backgrounds_cache"
         case feats = "feats_cache"
         case quotes = "quotes_cache"
         case relationships = "relationships_cache"
@@ -235,6 +236,16 @@ extension CacheManager {
     
     func getCachedSpells() -> [Spell]? {
         return getCodable(for: CacheKey.spells.rawValue)
+    }
+    
+    // MARK: - Backgrounds Caching
+    func cacheBackgrounds(_ backgrounds: [Background]) {
+        cacheCodable(backgrounds, for: CacheKey.backgrounds.rawValue)
+        print("✅ [CACHE] Cached \(backgrounds.count) backgrounds")
+    }
+    
+    func getCachedBackgrounds() -> [Background]? {
+        return getCodable(for: CacheKey.backgrounds.rawValue)
     }
     
     // MARK: - Feats Caching

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SpellsView: View {
-    let store: SpellsStore
+    let store: CompendiumStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
 
@@ -35,7 +35,7 @@ struct SpellsView: View {
 
 // MARK: - Search and Filter Section
 struct SearchAndFilterSection: View {
-    @ObservedObject var store: SpellsStore
+    @ObservedObject var store: CompendiumStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
     let currentTab: Int
@@ -104,7 +104,7 @@ struct SearchAndFilterSection: View {
 
 // MARK: - Spell Search View
 struct SpellSearchView: View {
-    @ObservedObject var store: SpellsStore
+    @ObservedObject var store: CompendiumStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
@@ -252,7 +252,7 @@ struct SpellSearchView: View {
 
 // MARK: - Advanced Filters View
 struct AdvancedFiltersView: View {
-    @ObservedObject var store: SpellsStore
+    @ObservedObject var store: CompendiumStore
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -398,7 +398,7 @@ struct AdvancedFiltersView: View {
 
 // MARK: - All Spells Tab (Favorites)
 struct AllSpellsTab: View {
-    let store: SpellsStore
+    let store: CompendiumStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
 
@@ -514,294 +514,5 @@ struct AllSpellsTab: View {
     }
 }
 
-// MARK: - Spell Card
-struct SpellCard: View {
-    let spell: Spell
-    @ObservedObject var favorites: FavoriteSpellsManager
-    @State private var isExpanded = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header with name and expand button
-            HStack {
-                Text(spell.name)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                HStack(spacing: 8) {
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            favorites.toggleSpell(spell.name)
-                        }
-                    }) {
-                        Image(systemName: favorites.isSpellFavorite(spell.name) ? "heart.fill" : "heart")
-                            .foregroundColor(favorites.isSpellFavorite(spell.name) ? .red : .gray)
-                            .font(.title2)
-                            .scaleEffect(favorites.isSpellFavorite(spell.name) ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isSpellFavorite(spell.name))
-                    }
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isExpanded.toggle()
-                        }
-                    }) {
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .foregroundColor(.orange)
-                            .font(.title3)
-                    }
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
-            
-            // Level and School badges
-            HStack(spacing: 8) {
-                Text(spell.level == 0 ? "Заговор" : "\(spell.level) уровень")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.blue.opacity(0.15))
-                    .foregroundColor(.blue)
-                    .cornerRadius(12)
-                
-                Text(getSchoolName(spell.school))
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.purple.opacity(0.15))
-                    .foregroundColor(.purple)
-                    .cornerRadius(12)
-                
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 12)
-            
-            // Classes
-            if !spell.classes.isEmpty {
-                HStack(spacing: 4) {
-                    Image(systemName: "person.2.fill")
-                        .foregroundColor(.green)
-                        .font(.caption)
-                    
-                    Text(spell.classes.joined(separator: ", ").capitalized)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 12)
-            }
-            
-            // Expanded details
-            if isExpanded {
-                VStack(spacing: 12) {
-                    // Casting info
-                    VStack(spacing: 8) {
-                        if let castingTime = spell.castingTime {
-                            HStack(spacing: 8) {
-                                Image(systemName: "clock")
-                                    .foregroundColor(.blue)
-                                    .font(.caption)
-                                Text(castingTime)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                            }
-                        }
-                        
-                        if let range = spell.range {
-                            HStack(spacing: 8) {
-                                Image(systemName: "location")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                                Text(range)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                            }
-                        }
-                        
-                        if let components = spell.components, !components.isEmpty {
-                            HStack(spacing: 8) {
-                                Image(systemName: "hand.raised.fill")
-                                    .foregroundColor(.orange)
-                                    .font(.caption)
-                                Text(getComponentsText(components))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                            }
-                        }
-                        
-                        if let duration = spell.duration {
-                            HStack(spacing: 8) {
-                                Image(systemName: "timer")
-                                    .foregroundColor(.purple)
-                                    .font(.caption)
-                                Text(duration)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    // Description
-                    Text(spell.description)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .padding(.horizontal, 20)
-                    
-                    // Material component if present
-                    if let material = spell.material {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Материальный компонент:")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.orange)
-                            Text(material)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .italic()
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    
-                    // Cantrip upgrade if present
-                    if let cantripUpgrade = spell.cantripUpgrade {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Улучшение заговора:")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.blue)
-                            Text(cantripUpgrade)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                }
-                .padding(.bottom, 16)
-            }
-        }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-        .padding(.horizontal)
-    }
-    
-    private func getSchoolName(_ school: String) -> String {
-        switch school.lowercased() {
-        case "evocation": return "Воплощение"
-        case "necromancy": return "Некромантия"
-        case "illusion": return "Иллюзия"
-        case "transmutation": return "Преобразование"
-        case "conjuration": return "Вызов"
-        case "enchantment": return "Очарование"
-        case "abjuration": return "Ограждение"
-        case "divination": return "Прорицание"
-        default: return school.capitalized
-        }
-    }
-    
-    private func getComponentsText(_ components: [String]) -> String {
-        var result: [String] = []
-        if components.contains("v") { result.append("Вербальный") }
-        if components.contains("s") { result.append("Соматический") }
-        if components.contains("m") { result.append("Материальный") }
-        return result.joined(separator: ", ")
-    }
-}
 
-// MARK: - Feat Card
-struct FeatCard: View {
-    let feat: Feat
-    @ObservedObject var favorites: FavoriteSpellsManager
-    @State private var isExpanded = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(feat.name)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    
-                    Text(feat.category)
-                        .font(.caption)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.orange.opacity(0.2))
-                        .cornerRadius(8)
-                }
-                
-                Spacer()
-                
-                HStack(spacing: 8) {
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            favorites.toggleFeat(feat.name)
-                        }
-                    }) {
-                        Image(systemName: favorites.isFeatFavorite(feat.name) ? "heart.fill" : "heart")
-                            .foregroundColor(favorites.isFeatFavorite(feat.name) ? .red : .gray)
-                            .font(.title2)
-                            .scaleEffect(favorites.isFeatFavorite(feat.name) ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isFeatFavorite(feat.name))
-                    }
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isExpanded.toggle()
-                        }
-                    }) {
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .foregroundColor(.orange)
-                            .font(.title3)
-                    }
-                }
-            }
-            
-            Text(feat.description)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .lineLimit(isExpanded ? nil : 3)
-                .animation(.easeInOut(duration: 0.2), value: isExpanded)
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-        .padding(.horizontal)
-    }
-}
 
-// MARK: - Filter Button
-struct FilterButton: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.caption)
-                .fontWeight(.medium)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(isSelected ? Color.orange : Color(.systemGray5))
-                .foregroundColor(isSelected ? .white : .primary)
-                .cornerRadius(8)
-        }
-    }
-}
