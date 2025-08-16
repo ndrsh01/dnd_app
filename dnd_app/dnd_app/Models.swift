@@ -79,6 +79,14 @@ struct Spell: Identifiable, Codable, Equatable {
     }
 }
 
+// MARK: - Cacheable Conformance
+/// Example usage of the `Cacheable` protocol. Spells will live in the
+/// cache for one hour before being invalidated.
+extension Spell: Cacheable {
+    var cacheKey: String { CacheManager.CacheKey.spells.rawValue }
+    var cacheExpiration: TimeInterval { 60 * 60 } // 1 hour
+}
+
 // MARK: - Background Models
 struct Background: Identifiable, Codable, Equatable {
     let id = UUID()

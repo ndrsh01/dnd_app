@@ -28,6 +28,10 @@ final class CacheManager: ObservableObject {
         cache.countLimit = 50 // Максимум 50 объектов
         return cache
     }()
+
+    // MARK: - Expiration Tracking
+    /// Maps cache keys to their expiration date. Keys without an entry never expire.
+    private var expirationDates: [String: Date] = [:]
     
     // MARK: - Cache Keys
     enum CacheKey: String {
@@ -60,15 +64,38 @@ final class CacheManager: ObservableObject {
         setupCacheNotifications()
         updateStats()
     }
-    
-    // MARK: - Image Caching
-    func cacheImage(_ image: UIImage, for key: String) {
-        let nsKey = NSString(string: key)
-        imageCache.setObject(image, forKey: nsKey)
-        updateStats()
+
+    // MARK: - Expiration Helpers
+    private func setExpiration(for key: String, duration: TimeInterval) {
+        if duration > 0 {
+            expirationDates[key] = Date().addingTimeInterval(duration)
+        } else {
+            expirationDates.removeValue(forKey: key)
+        }
+    }
+
+    private func isExpired(_ key: String) -> Bool {
+        if let expiry = expirationDates[key], Date() >= expiry {
+            clearCache(for: key)
+            return true
+        }
+        return false
     }
     
+    // MARK: - Image Caching
+    func cacheImage(_ image: UIImage, for key: String, expiration: TimeInterval = 0) {
+        let nsKey = NSString(string: key)
+        imageCache.setObject(image, forKey: nsKey)
+        setExpiration(for: key, duration: expiration)
+        updateStats()
+    }
+
     func getImage(for key: String) -> UIImage? {
+        guard !isExpired(key) else {
+            cacheStats.cacheMisses += 1
+            return nil
+        }
+
         let nsKey = NSString(string: key)
         if let image = imageCache.object(forKey: nsKey) {
             cacheStats.cacheHits += 1
@@ -77,16 +104,22 @@ final class CacheManager: ObservableObject {
         cacheStats.cacheMisses += 1
         return nil
     }
-    
+
     // MARK: - Data Caching
-    func cacheData(_ data: Data, for key: String) {
+    func cacheData(_ data: Data, for key: String, expiration: TimeInterval = 0) {
         let nsKey = NSString(string: key)
         let nsData = NSData(data: data)
         dataCache.setObject(nsData, forKey: nsKey)
+        setExpiration(for: key, duration: expiration)
         updateStats()
     }
-    
+
     func getData(for key: String) -> Data? {
+        guard !isExpired(key) else {
+            cacheStats.cacheMisses += 1
+            return nil
+        }
+
         let nsKey = NSString(string: key)
         if let nsData = dataCache.object(forKey: nsKey) {
             cacheStats.cacheHits += 1
@@ -95,15 +128,21 @@ final class CacheManager: ObservableObject {
         cacheStats.cacheMisses += 1
         return nil
     }
-    
+
     // MARK: - Object Caching
-    func cacheObject<T: AnyObject>(_ object: T, for key: String) {
+    func cacheObject<T: AnyObject>(_ object: T, for key: String, expiration: TimeInterval = 0) {
         let nsKey = NSString(string: key)
         objectCache.setObject(object, forKey: nsKey)
+        setExpiration(for: key, duration: expiration)
         updateStats()
     }
-    
+
     func getObject<T: AnyObject>(for key: String) -> T? {
+        guard !isExpired(key) else {
+            cacheStats.cacheMisses += 1
+            return nil
+        }
+
         let nsKey = NSString(string: key)
         if let object = objectCache.object(forKey: nsKey) as? T {
             cacheStats.cacheHits += 1
@@ -112,27 +151,35 @@ final class CacheManager: ObservableObject {
         cacheStats.cacheMisses += 1
         return nil
     }
-    
+
     // MARK: - Codable Object Caching
-    func cacheCodable<T: Codable>(_ object: T, for key: String) {
+    func cacheCodable<T: Codable>(_ object: T, for key: String, expiration: TimeInterval = 0) {
         do {
             let data = try JSONEncoder().encode(object)
-            cacheData(data, for: key)
+            cacheData(data, for: key, expiration: expiration)
         } catch {
             print("❌ [CACHE] Failed to encode object for key \(key): \(error)")
         }
     }
-    
+
     func getCodable<T: Codable>(for key: String) -> T? {
-        guard let data = getData(for: key) else { return nil }
-        
-        do {
-            let object = try JSONDecoder().decode(T.self, from: data)
-            return object
-        } catch {
-            print("❌ [CACHE] Failed to decode object for key \(key): \(error)")
+        guard !isExpired(key) else {
+            cacheStats.cacheMisses += 1
             return nil
         }
+
+        let nsKey = NSString(string: key)
+        if let nsData = dataCache.object(forKey: nsKey) {
+            do {
+                let object = try JSONDecoder().decode(T.self, from: Data(referencing: nsData))
+                cacheStats.cacheHits += 1
+                return object
+            } catch {
+                print("❌ [CACHE] Failed to decode object for key \(key): \(error)")
+            }
+        }
+        cacheStats.cacheMisses += 1
+        return nil
     }
     
     // MARK: - Cache Management
@@ -140,32 +187,37 @@ final class CacheManager: ObservableObject {
         imageCache.removeAllObjects()
         dataCache.removeAllObjects()
         objectCache.removeAllObjects()
+        expirationDates.removeAll()
         updateStats()
         print("✅ [CACHE] All caches cleared")
     }
-    
+
     func clearCache(for key: String) {
         let nsKey = NSString(string: key)
         imageCache.removeObject(forKey: nsKey)
         dataCache.removeObject(forKey: nsKey)
         objectCache.removeObject(forKey: nsKey)
+        expirationDates.removeValue(forKey: key)
         updateStats()
     }
     
     func clearImageCache() {
         imageCache.removeAllObjects()
+        expirationDates.removeAll()
         updateStats()
         print("✅ [CACHE] Image cache cleared")
     }
     
     func clearDataCache() {
         dataCache.removeAllObjects()
+        expirationDates.removeAll()
         updateStats()
         print("✅ [CACHE] Data cache cleared")
     }
     
     func clearObjectCache() {
         objectCache.removeAllObjects()
+        expirationDates.removeAll()
         updateStats()
         print("✅ [CACHE] Object cache cleared")
     }
@@ -221,8 +273,14 @@ final class CacheManager: ObservableObject {
 }
 
 // MARK: - Cacheable Protocol
+/// Types that conform to `Cacheable` can be stored in `CacheManager`
+/// with an associated expiration time. Values with a nonzero
+/// `cacheExpiration` are automatically invalidated once the interval
+/// has passed.
 protocol Cacheable {
+    /// Key used to store the value in the cache.
     var cacheKey: String { get }
+    /// Lifetime of the cached value in seconds. `0` means the value never expires.
     var cacheExpiration: TimeInterval { get }
 }
 
@@ -230,7 +288,9 @@ protocol Cacheable {
 extension CacheManager {
     // MARK: - Spells Caching
     func cacheSpells(_ spells: [Spell]) {
-        cacheCodable(spells, for: CacheKey.spells.rawValue)
+        let cacheKey = spells.first?.cacheKey ?? CacheKey.spells.rawValue
+        let expiration = spells.first?.cacheExpiration ?? 0
+        cacheCodable(spells, for: cacheKey, expiration: expiration)
         print("✅ [CACHE] Cached \(spells.count) spells")
     }
     
