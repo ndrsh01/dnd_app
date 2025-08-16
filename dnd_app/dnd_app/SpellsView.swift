@@ -14,17 +14,9 @@ struct SpellsView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [
-                    Color("BackgroundColor"),
-                    Color("BackgroundColor").opacity(0.9),
-                    Color("BackgroundColor")
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
+            ThemeManager.adaptiveBackground(for: themeManager.preferredColorScheme)
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
                 SearchAndFilterSection(store: store, favorites: favorites, themeManager: themeManager, currentTab: 0)
                 AllSpellsTab(store: store, favorites: favorites, themeManager: themeManager)
@@ -117,16 +109,8 @@ struct SpellSearchView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(
-                    colors: [
-                        Color("BackgroundColor"),
-                        Color("BackgroundColor").opacity(0.9),
-                        Color("BackgroundColor")
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                ThemeManager.adaptiveBackground(for: themeManager.preferredColorScheme)
+                    .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                 // Search bar
