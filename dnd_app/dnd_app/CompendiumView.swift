@@ -349,7 +349,7 @@ struct SpellFiltersView: View {
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
                                 ForEach(0...9, id: \.self) { level in
                                     FilterButton(
                                         title: level == 0 ? "Заговоры" : "\(level) уровень",
@@ -367,7 +367,7 @@ struct SpellFiltersView: View {
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                                 let schoolNames = [
                                     ("evocation", "Воплощение"),
                                     ("conjuration", "Вызов"),
@@ -396,7 +396,7 @@ struct SpellFiltersView: View {
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                                 let classNames = [
                                     ("bard", "Бард"),
                                     ("sorcerer", "Волшебник"),
@@ -494,7 +494,7 @@ struct FeatFiltersView: View {
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                                 ForEach(store.availableFeatCategories, id: \.self) { category in
                                     FilterButton(
                                         title: category,

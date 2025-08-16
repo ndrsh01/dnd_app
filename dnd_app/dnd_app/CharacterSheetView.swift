@@ -1420,13 +1420,13 @@ struct MainStatsView: View {
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 12)], spacing: 12) {
                 StatCard(title: "КЗ", value: "\(character.armorClass)", color: .blue)
                 StatCard(title: "Инициатива", value: "\(character.initiative >= 0 ? "+" : "")\(character.initiative)", color: .green)
                 StatCard(title: "Скорость", value: "\(character.speed) фт", color: .purple)
             }
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
                 // Редактируемые хиты
                 Button(action: {
                     tempCurrentHP = character.currentHitPoints
@@ -1507,7 +1507,7 @@ struct AbilityScoresViewerView: View {
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
                 ForEach(abilities, id: \.0) { ability in
                     AbilityScoreViewerCard(
                         name: ability.0,
@@ -1720,7 +1720,7 @@ struct SkillsViewerView: View {
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                 ForEach(skills, id: \.0) { skill in
                     SkillViewerCard(
                         name: skill.0,
@@ -2035,7 +2035,7 @@ struct BasicInfoSection: View {
                 .font(.headline)
                 .fontWeight(.semibold)
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Имя персонажа")
                         .font(.caption)
@@ -2120,7 +2120,7 @@ struct CombatStatsSection: View {
                 .font(.headline)
                 .fontWeight(.semibold)
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Класс брони (КЗ)")
                         .font(.caption)
@@ -2275,7 +2275,7 @@ struct AbilityScoresSection: View {
                 .font(.headline)
                 .fontWeight(.semibold)
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 12)], spacing: 12) {
                 ForEach(abilities, id: \.0) { ability in
                     AbilityScoreCard(
                         name: ability.0,
@@ -2402,7 +2402,7 @@ struct SkillsSection: View {
                 .font(.headline)
                 .fontWeight(.semibold)
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                 ForEach(skills, id: \.0) { skill in
                     HStack {
                         Toggle("", isOn: binding(for: skill.1, in: \.skills))
