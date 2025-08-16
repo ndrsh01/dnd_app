@@ -11,9 +11,9 @@ struct SettingsView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -65,11 +65,11 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Тема приложения")
                                     .font(.headline)
-                                    .foregroundColor(ThemeManager.adaptiveTextColor(for: themeManager.isDarkMode))
+                                    .foregroundColor(ThemeManager.adaptiveTextColor(for: themeManager.preferredColorScheme))
                                 
                                 Text(themeManager.isDarkMode ? "Темная тема" : "Светлая тема")
                                     .font(.caption)
-                                    .foregroundColor(ThemeManager.adaptiveSecondaryTextColor(for: themeManager.isDarkMode))
+                                    .foregroundColor(ThemeManager.adaptiveSecondaryTextColor(for: themeManager.preferredColorScheme))
                             }
                             
                             Spacer()
@@ -358,9 +358,9 @@ struct QuoteManagerView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -951,9 +951,9 @@ struct ModernAddQuoteView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -1053,9 +1053,9 @@ struct ModernEditCategoryView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -1192,7 +1192,7 @@ struct QuoteEditorAddView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                Color("BackgroundColor")
                     .ignoresSafeArea()
                 
                 VStack(spacing: 24) {

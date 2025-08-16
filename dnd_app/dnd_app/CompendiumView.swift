@@ -10,9 +10,9 @@ struct CompendiumView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -338,7 +338,7 @@ struct SpellFiltersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                Color("BackgroundColor")
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -483,7 +483,7 @@ struct FeatFiltersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                Color("BackgroundColor")
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -575,9 +575,9 @@ struct FavoritesTabView: View {
         ZStack {
             LinearGradient(
                 colors: [
-                    Color(hex: "#fceeda"),
-                    Color(hex: "#fceeda").opacity(0.9),
-                    Color(hex: "#fceeda")
+                    Color("BackgroundColor"),
+                    Color("BackgroundColor").opacity(0.9),
+                    Color("BackgroundColor")
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing

@@ -735,9 +735,9 @@ struct CharacterSheetView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -1028,7 +1028,7 @@ struct CharacterImportView: View {
                 Spacer()
             }
             .padding()
-            .background(Color(hex: "#fceeda"))
+            .background(Color("BackgroundColor"))
             .navigationTitle("Импорт")
             .navigationBarTitleDisplayMode(.inline)
             .alert(isSuccess ? "Успех!" : "Ошибка", isPresented: $showingAlert) {
@@ -1352,8 +1352,8 @@ struct CharacterViewerView: View {
             .background(
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9)
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
@@ -1986,7 +1986,7 @@ struct CharacterEditorView: View {
                 }
                 .padding()
             }
-            .background(Color(hex: "#fceeda"))
+            .background(Color("BackgroundColor"))
             .navigationTitle(character == nil ? "Новый персонаж" : "Редактирование")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

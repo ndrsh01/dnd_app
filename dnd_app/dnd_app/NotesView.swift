@@ -144,9 +144,9 @@ struct NotesView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -618,9 +618,9 @@ struct AddNoteView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color("BackgroundColor"),
+                        Color("BackgroundColor").opacity(0.9),
+                        Color("BackgroundColor")
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
