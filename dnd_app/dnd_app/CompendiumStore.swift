@@ -70,7 +70,7 @@ final class CompendiumStore: ObservableObject {
                 fileName: "spells",
                 cacheGetter: cacheManager.getCachedSpells,
                 cacheSetter: cacheManager.cacheSpells
-            ) {
+            ) as ([Spell], Bool)? {
                 await MainActor.run {
                     self.spells = spells
                     self.updateAvailableFilters()

@@ -236,6 +236,9 @@ struct Character: Identifiable, Codable, Equatable {
     var deathSaveSuccesses: Int = 0
     var deathSaveFailures: Int = 0
     
+    // Exhaustion
+    var exhaustionLevel: Int = 0
+    
     // Ability Scores
     var strength: Int = 10
     var dexterity: Int = 10
@@ -313,8 +316,168 @@ struct Character: Identifiable, Codable, Equatable {
     var attacks: [Attack] = []
     var spellSlots: [Int: Int] = [1: 0, 2: 0, 3: 0, 4: 0, 5: 0]
     
+    // Spells
+    var spells: [CharacterSpell] = []
+    
+    // Treasure and Resources
+    var treasure: String = ""
+    var specialResources: String = ""
+    
+    // Languages
+    var languages: String = ""
+    
+    // Hit Dice
+    var hitDiceUsed: Int = 0
+    
     var dateCreated: Date = Date()
     var dateModified: Date = Date()
+    
+    // MARK: - Initializer
+    init() {
+        // Default initializer - all properties already have default values
+    }
+    
+    // MARK: - Codable Implementation
+    enum CodingKeys: String, CodingKey {
+        case id, name, playerName, race, characterClass, background, alignment, experience, level
+        case armorClass, initiative, speed, maxHitPoints, currentHitPoints, temporaryHitPoints
+        case hitDiceTotal, hitDiceType, proficiencyBonus, inspiration
+        case deathSaveSuccesses, deathSaveFailures, exhaustionLevel
+        case strength, dexterity, constitution, intelligence, wisdom, charisma
+        case savingThrows, skills, skillAbilities
+        case personalityTraits, ideals, bonds, flaws
+        case equipment, featuresAndTraits, otherProficiencies
+        case attacks, spellSlots, spells
+        case treasure, specialResources, languages, hitDiceUsed
+        case dateCreated, dateModified
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        playerName = try container.decode(String.self, forKey: .playerName)
+        race = try container.decode(String.self, forKey: .race)
+        characterClass = try container.decode(String.self, forKey: .characterClass)
+        background = try container.decode(String.self, forKey: .background)
+        alignment = try container.decode(String.self, forKey: .alignment)
+        experience = try container.decode(Int.self, forKey: .experience)
+        level = try container.decode(Int.self, forKey: .level)
+        
+        armorClass = try container.decode(Int.self, forKey: .armorClass)
+        initiative = try container.decode(Int.self, forKey: .initiative)
+        speed = try container.decode(Int.self, forKey: .speed)
+        maxHitPoints = try container.decode(Int.self, forKey: .maxHitPoints)
+        currentHitPoints = try container.decode(Int.self, forKey: .currentHitPoints)
+        temporaryHitPoints = try container.decode(Int.self, forKey: .temporaryHitPoints)
+        hitDiceTotal = try container.decode(Int.self, forKey: .hitDiceTotal)
+        hitDiceType = try container.decode(String.self, forKey: .hitDiceType)
+        proficiencyBonus = try container.decode(Int.self, forKey: .proficiencyBonus)
+        inspiration = try container.decode(Bool.self, forKey: .inspiration)
+        
+        deathSaveSuccesses = try container.decode(Int.self, forKey: .deathSaveSuccesses)
+        deathSaveFailures = try container.decode(Int.self, forKey: .deathSaveFailures)
+        exhaustionLevel = try container.decode(Int.self, forKey: .exhaustionLevel)
+        
+        strength = try container.decode(Int.self, forKey: .strength)
+        dexterity = try container.decode(Int.self, forKey: .dexterity)
+        constitution = try container.decode(Int.self, forKey: .constitution)
+        intelligence = try container.decode(Int.self, forKey: .intelligence)
+        wisdom = try container.decode(Int.self, forKey: .wisdom)
+        charisma = try container.decode(Int.self, forKey: .charisma)
+        
+        savingThrows = try container.decode([String: Bool].self, forKey: .savingThrows)
+        skills = try container.decode([String: Bool].self, forKey: .skills)
+        skillAbilities = try container.decode([String: String].self, forKey: .skillAbilities)
+        
+        personalityTraits = try container.decode(String.self, forKey: .personalityTraits)
+        ideals = try container.decode(String.self, forKey: .ideals)
+        bonds = try container.decode(String.self, forKey: .bonds)
+        flaws = try container.decode(String.self, forKey: .flaws)
+        
+        equipment = try container.decode(String.self, forKey: .equipment)
+        featuresAndTraits = try container.decode(String.self, forKey: .featuresAndTraits)
+        otherProficiencies = try container.decode(String.self, forKey: .otherProficiencies)
+        
+        attacks = try container.decode([Attack].self, forKey: .attacks)
+        spellSlots = try container.decode([Int: Int].self, forKey: .spellSlots)
+        spells = try container.decode([CharacterSpell].self, forKey: .spells)
+        
+        treasure = try container.decode(String.self, forKey: .treasure)
+        specialResources = try container.decode(String.self, forKey: .specialResources)
+        languages = try container.decode(String.self, forKey: .languages)
+        hitDiceUsed = try container.decode(Int.self, forKey: .hitDiceUsed)
+        
+        dateCreated = try container.decode(Date.self, forKey: .dateCreated)
+        dateModified = try container.decode(Date.self, forKey: .dateModified)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(playerName, forKey: .playerName)
+        try container.encode(race, forKey: .race)
+        try container.encode(characterClass, forKey: .characterClass)
+        try container.encode(background, forKey: .background)
+        try container.encode(alignment, forKey: .alignment)
+        try container.encode(experience, forKey: .experience)
+        try container.encode(level, forKey: .level)
+        
+        try container.encode(armorClass, forKey: .armorClass)
+        try container.encode(initiative, forKey: .initiative)
+        try container.encode(speed, forKey: .speed)
+        try container.encode(maxHitPoints, forKey: .maxHitPoints)
+        try container.encode(currentHitPoints, forKey: .currentHitPoints)
+        try container.encode(temporaryHitPoints, forKey: .temporaryHitPoints)
+        try container.encode(hitDiceTotal, forKey: .hitDiceTotal)
+        try container.encode(hitDiceType, forKey: .hitDiceType)
+        try container.encode(proficiencyBonus, forKey: .proficiencyBonus)
+        try container.encode(inspiration, forKey: .inspiration)
+        
+        try container.encode(deathSaveSuccesses, forKey: .deathSaveSuccesses)
+        try container.encode(deathSaveFailures, forKey: .deathSaveFailures)
+        try container.encode(exhaustionLevel, forKey: .exhaustionLevel)
+        
+        try container.encode(strength, forKey: .strength)
+        try container.encode(dexterity, forKey: .dexterity)
+        try container.encode(constitution, forKey: .constitution)
+        try container.encode(intelligence, forKey: .intelligence)
+        try container.encode(wisdom, forKey: .wisdom)
+        try container.encode(charisma, forKey: .charisma)
+        
+        try container.encode(savingThrows, forKey: .savingThrows)
+        try container.encode(skills, forKey: .skills)
+        try container.encode(skillAbilities, forKey: .skillAbilities)
+        
+        try container.encode(personalityTraits, forKey: .personalityTraits)
+        try container.encode(ideals, forKey: .ideals)
+        try container.encode(bonds, forKey: .bonds)
+        try container.encode(flaws, forKey: .flaws)
+        
+        try container.encode(equipment, forKey: .equipment)
+        try container.encode(featuresAndTraits, forKey: .featuresAndTraits)
+        try container.encode(otherProficiencies, forKey: .otherProficiencies)
+        
+        try container.encode(attacks, forKey: .attacks)
+        try container.encode(spellSlots, forKey: .spellSlots)
+        try container.encode(spells, forKey: .spells)
+        
+        try container.encode(treasure, forKey: .treasure)
+        try container.encode(specialResources, forKey: .specialResources)
+        try container.encode(languages, forKey: .languages)
+        try container.encode(hitDiceUsed, forKey: .hitDiceUsed)
+        
+        try container.encode(dateCreated, forKey: .dateCreated)
+        try container.encode(dateModified, forKey: .dateModified)
+    }
+    
+    // MARK: - Equatable Implementation
+    static func == (lhs: Character, rhs: Character) -> Bool {
+        return lhs.id == rhs.id
+    }
     
     // Computed Properties
     var strengthModifier: Int { (strength - 10) / 2 }
@@ -325,6 +488,9 @@ struct Character: Identifiable, Codable, Equatable {
     var charismaModifier: Int { (charisma - 10) / 2 }
     
     var passivePerception: Int { 10 + wisdomModifier + (skills["perception"] == true ? proficiencyBonus : 0) }
+    
+    // Скорость с учетом истощения
+    var effectiveSpeed: Int { max(0, speed - (exhaustionLevel * 5)) }
     
     // Skill modifiers
     func skillModifier(for skill: String) -> Int {
@@ -368,6 +534,19 @@ struct Attack: Identifiable, Codable, Equatable {
     var damageType: String = ""
 }
 
+struct CharacterSpell: Identifiable, Codable, Equatable {
+    var id = UUID()
+    var name: String = ""
+    var level: Int = 0
+    var school: String = ""
+    var castingTime: String = ""
+    var range: String = ""
+    var components: String = ""
+    var duration: String = ""
+    var description: String = ""
+    var isPrepared: Bool = false
+}
+
 // MARK: - Character Store
 
 final class CharacterStore: ObservableObject {
@@ -375,7 +554,12 @@ final class CharacterStore: ObservableObject {
         didSet { save() }
     }
     
+    @Published var selectedCharacter: Character? {
+        didSet { saveSelectedCharacter() }
+    }
+    
     private let key = "characters_v1"
+    private let selectedCharacterKey = "selectedCharacter_v1"
     private let cacheManager = CacheManager.shared
     
     init() {
@@ -469,11 +653,6 @@ final class CharacterStore: ObservableObject {
         
         // Прочие владения и языки
         testCharacter.otherProficiencies = """
-        • Язык из родного мира
-        • Общий
-        • Эльфийский
-        • Дварфский
-        • Воровской жаргон
         • Лёгкие доспехи
         • Простое оружие
         • Воровские инструменты
@@ -481,6 +660,28 @@ final class CharacterStore: ObservableObject {
         • Средние доспехи
         • Щиты
         • Воинское оружие
+        """
+        
+        // Языки
+        testCharacter.languages = """
+        • Язык из родного мира
+        • Общий
+        • Эльфийский
+        • Дварфский
+        • Воровской жаргон
+        """
+        
+        // Сокровища и ресурсы
+        testCharacter.treasure = """
+        • 15 золотых монет
+        • 3 серебряных монеты
+        • 8 медных монет
+        • Драгоценный камень (50 золотых)
+        """
+        
+        testCharacter.specialResources = """
+        • Вдохновение: 1
+        • Второе дыхание: 1/день
         """
         
         // Атаки
@@ -516,6 +717,11 @@ final class CharacterStore: ObservableObject {
     func update(_ character: Character) {
         if let idx = characters.firstIndex(where: { $0.id == character.id }) {
             characters[idx] = character
+            
+            // Если это выбранный персонаж, обновляем его
+            if selectedCharacter?.id == character.id {
+                selectedCharacter = character
+            }
         }
     }
     
@@ -643,10 +849,16 @@ final class CharacterStore: ObservableObject {
             
             newCharacter.equipment = equipmentText
             
-            // Прочие владения
-            if let prof = charData.prof {
-                newCharacter.otherProficiencies = prof.value.extractText()
-            }
+                    // Прочие владения
+        if let prof = charData.prof {
+            newCharacter.otherProficiencies = prof.value.extractText()
+        }
+        
+        // Языки (по умолчанию)
+        newCharacter.languages = "Общий"
+        
+        // Кости хитов
+        newCharacter.hitDiceUsed = 0
             
             // Атаки
             for weapon in charData.weaponsList {
@@ -687,23 +899,231 @@ final class CharacterStore: ObservableObject {
         }
     }
     
+    func updateCharacterHitPoints(_ character: Character, newCurrentHP: Int) {
+        if let index = characters.firstIndex(where: { $0.id == character.id }) {
+            characters[index].currentHitPoints = max(0, min(newCurrentHP, character.maxHitPoints))
+            
+            // Обновляем выбранного персонажа, если это он
+            if selectedCharacter?.id == character.id {
+                selectedCharacter = characters[index]
+            }
+            
+            print("✅ [CHARACTERS] Обновлены хиты персонажа \(character.name): \(newCurrentHP)")
+        }
+    }
+    
+    func updateCharacterExhaustion(_ character: Character, newExhaustionLevel: Int) {
+        if let index = characters.firstIndex(where: { $0.id == character.id }) {
+            characters[index].exhaustionLevel = max(0, min(newExhaustionLevel, 6))
+            
+            // Обновляем выбранного персонажа, если это он
+            if selectedCharacter?.id == character.id {
+                selectedCharacter = characters[index]
+            }
+            
+            print("✅ [CHARACTERS] Обновлена степень истощения персонажа \(character.name): \(newExhaustionLevel)")
+        }
+    }
+    
+    func importCharacterFromJSON(_ jsonString: String) -> Character? {
+        do {
+            let data = jsonString.data(using: .utf8)!
+            let importedCharacter = try JSONDecoder().decode(ImportedCharacter.self, from: data)
+            
+            guard importedCharacter.jsonType == "character" else {
+                print("❌ [IMPORT] Неверный тип JSON: \(importedCharacter.jsonType)")
+                return nil
+            }
+            
+            let charData = try JSONDecoder().decode(CharacterData.self, from: importedCharacter.data.data(using: .utf8)!)
+            
+            var newCharacter = Character()
+            
+            // Основная информация
+            newCharacter.name = charData.name.value
+            newCharacter.playerName = charData.info.playerName.value
+            newCharacter.race = charData.info.race.value
+            newCharacter.characterClass = charData.info.charClass.value
+            newCharacter.background = charData.info.background.value
+            newCharacter.alignment = charData.info.alignment.value
+            newCharacter.level = Int(charData.info.level.value) ?? 1
+            newCharacter.experience = Int(charData.info.experience.value) ?? 0
+            
+            // Характеристики
+            newCharacter.strength = charData.stats.str.score
+            newCharacter.dexterity = charData.stats.dex.score
+            newCharacter.constitution = charData.stats.con.score
+            newCharacter.intelligence = charData.stats.int.score
+            newCharacter.wisdom = charData.stats.wis.score
+            newCharacter.charisma = charData.stats.cha.score
+            
+            // Боевые характеристики
+            newCharacter.armorClass = 10 + newCharacter.dexterityModifier
+            newCharacter.initiative = newCharacter.dexterityModifier
+            newCharacter.speed = 30
+            newCharacter.maxHitPoints = 10 + newCharacter.constitutionModifier
+            newCharacter.currentHitPoints = newCharacter.maxHitPoints
+            newCharacter.hitDiceTotal = newCharacter.level
+            newCharacter.hitDiceType = "d8"
+            newCharacter.proficiencyBonus = (newCharacter.level - 1) / 4 + 2
+            
+            // Спасброски
+            newCharacter.savingThrows["strength"] = charData.saves.str.isProf
+            newCharacter.savingThrows["dexterity"] = charData.saves.dex.isProf
+            newCharacter.savingThrows["constitution"] = charData.saves.con.isProf
+            newCharacter.savingThrows["intelligence"] = charData.saves.int.isProf
+            newCharacter.savingThrows["wisdom"] = charData.saves.wis.isProf
+            newCharacter.savingThrows["charisma"] = charData.saves.cha.isProf
+            
+            // Навыки
+            if let acrobatics = charData.skills.acrobatics { newCharacter.skills["acrobatics"] = acrobatics.isProf != nil }
+            if let investigation = charData.skills.investigation { newCharacter.skills["investigation"] = investigation.isProf != nil }
+            if let athletics = charData.skills.athletics { newCharacter.skills["athletics"] = athletics.isProf != nil }
+            if let perception = charData.skills.perception { newCharacter.skills["perception"] = perception.isProf != nil }
+            if let survival = charData.skills.survival { newCharacter.skills["survival"] = survival.isProf != nil }
+            if let performance = charData.skills.performance { newCharacter.skills["performance"] = performance.isProf != nil }
+            if let intimidation = charData.skills.intimidation { newCharacter.skills["intimidation"] = intimidation.isProf != nil }
+            if let history = charData.skills.history { newCharacter.skills["history"] = history.isProf != nil }
+            if let sleightOfHand = charData.skills.sleightOfHand { newCharacter.skills["sleight_of_hand"] = sleightOfHand.isProf != nil }
+            if let arcana = charData.skills.arcana { newCharacter.skills["arcana"] = arcana.isProf != nil }
+            if let medicine = charData.skills.medicine { newCharacter.skills["medicine"] = medicine.isProf != nil }
+            if let deception = charData.skills.deception { newCharacter.skills["deception"] = deception.isProf != nil }
+            if let nature = charData.skills.nature { newCharacter.skills["nature"] = nature.isProf != nil }
+            if let insight = charData.skills.insight { newCharacter.skills["insight"] = insight.isProf != nil }
+            if let religion = charData.skills.religion { newCharacter.skills["religion"] = religion.isProf != nil }
+            if let animalHandling = charData.skills.animalHandling { newCharacter.skills["animal_handling"] = animalHandling.isProf != nil }
+            if let stealth = charData.skills.stealth { newCharacter.skills["stealth"] = stealth.isProf != nil }
+            if let persuasion = charData.skills.persuasion { newCharacter.skills["persuasion"] = persuasion.isProf != nil }
+            
+            // Черты характера
+            if let traits = charData.text.traits {
+                newCharacter.personalityTraits = traits.value.data.extractText()
+            }
+            if let ideals = charData.text.ideals {
+                newCharacter.ideals = ideals.value.data.extractText()
+            }
+            if let bonds = charData.text.bonds {
+                newCharacter.bonds = bonds.value.data.extractText()
+            }
+            if let flaws = charData.text.flaws {
+                newCharacter.flaws = flaws.value.data.extractText()
+            }
+            
+            // Особенности и черты
+            var featuresText = ""
+            if let traits = charData.text.traits {
+                featuresText += traits.value.data.extractText()
+            }
+            if let prof = charData.prof {
+                if !featuresText.isEmpty {
+                    featuresText += "\n\n"
+                }
+                featuresText += prof.value.extractText()
+            }
+            newCharacter.featuresAndTraits = featuresText
+            
+            // Снаряжение и атаки
+            var equipmentText = ""
+            if let attacks = charData.text.attacks {
+                equipmentText += "Атаки:\n" + attacks.value.data.extractText()
+            }
+            
+            // Добавляем оружие из списка
+            if !charData.weaponsList.isEmpty {
+                if !equipmentText.isEmpty {
+                    equipmentText += "\n\n"
+                }
+                equipmentText += "Оружие:\n"
+                for weapon in charData.weaponsList {
+                    equipmentText += "• \(weapon.name.value) (\(weapon.dmg.value))\n"
+                }
+            }
+            
+            newCharacter.equipment = equipmentText
+            
+            // Прочие владения
+            if let prof = charData.prof {
+                newCharacter.otherProficiencies = prof.value.extractText()
+            }
+            
+            // Языки (по умолчанию)
+            newCharacter.languages = "Общий"
+            
+            // Кости хитов
+            newCharacter.hitDiceUsed = 0
+                
+            // Атаки
+            for weapon in charData.weaponsList {
+                let attack = Attack(
+                    name: weapon.name.value,
+                    attackBonus: weapon.mod.value,
+                    damageType: weapon.dmg.value
+                )
+                newCharacter.attacks.append(attack)
+            }
+            
+            print("✅ [IMPORT] Успешно импортирован персонаж: \(newCharacter.name)")
+            return newCharacter
+            
+        } catch {
+            print("❌ Failed to import character: \(error)")
+            return nil
+        }
+    }
+    
     private func load() {
         // Сначала пытаемся загрузить из кэша
         if let cachedCharacters = cacheManager.getCachedCharacters() {
             characters = cachedCharacters
             print("✅ [CHARACTERS] Загружено \(cachedCharacters.count) персонажей из кэша")
+        } else {
+            // Если кэша нет, загружаем из UserDefaults
+            guard let data = UserDefaults.standard.data(forKey: key) else { return }
+            do {
+                characters = try JSONDecoder().decode([Character].self, from: data)
+                // Кэшируем персонажей
+                cacheManager.cacheCharacters(characters)
+                print("✅ [CHARACTERS] Загружено \(characters.count) персонажей из UserDefaults и закэшировано")
+            } catch {
+                print("❌ Failed to decode characters: \(error)")
+            }
+        }
+        
+        // Загружаем выбранного персонажа
+        loadSelectedCharacter()
+    }
+    
+    private func saveSelectedCharacter() {
+        guard let selectedCharacter = selectedCharacter else {
+            UserDefaults.standard.removeObject(forKey: selectedCharacterKey)
             return
         }
         
-        // Если кэша нет, загружаем из UserDefaults
-        guard let data = UserDefaults.standard.data(forKey: key) else { return }
         do {
-            characters = try JSONDecoder().decode([Character].self, from: data)
-            // Кэшируем персонажей
-            cacheManager.cacheCharacters(characters)
-            print("✅ [CHARACTERS] Загружено \(characters.count) персонажей из UserDefaults и закэшировано")
+            let data = try JSONEncoder().encode(selectedCharacter)
+            UserDefaults.standard.set(data, forKey: selectedCharacterKey)
+            print("✅ [CHARACTER] Сохранен выбранный персонаж: \(selectedCharacter.name)")
         } catch {
-            print("❌ Failed to decode characters: \(error)")
+            print("❌ Failed to save selected character: \(error)")
+        }
+    }
+    
+    private func loadSelectedCharacter() {
+        guard let data = UserDefaults.standard.data(forKey: selectedCharacterKey) else { return }
+        
+        do {
+            let savedCharacter = try JSONDecoder().decode(Character.self, from: data)
+            // Находим персонажа в списке по ID
+            if let character = characters.first(where: { $0.id == savedCharacter.id }) {
+                selectedCharacter = character
+                print("✅ [CHARACTER] Загружен выбранный персонаж: \(character.name)")
+            } else {
+                print("⚠️ [CHARACTER] Выбранный персонаж не найден в списке, сбрасываем выбор")
+                selectedCharacter = nil
+            }
+        } catch {
+            print("❌ Failed to load selected character: \(error)")
+            selectedCharacter = nil
         }
     }
 }

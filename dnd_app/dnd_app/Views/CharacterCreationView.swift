@@ -1,0 +1,490 @@
+import SwiftUI
+
+struct CharacterCreationView: View {
+    @ObservedObject var characterStore: CharacterStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var character = Character()
+    @State private var currentStep = 0
+    
+    private let steps = [
+        "Основная информация",
+        "Характеристики",
+        "Боевые характеристики",
+        "Навыки и спасброски",
+        "Личность",
+        "Снаряжение"
+    ]
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                // Прогресс-бар
+                ProgressView(value: Double(currentStep + 1), total: Double(steps.count))
+                    .progressViewStyle(LinearProgressViewStyle(tint: .orange))
+                    .padding()
+                
+                // Заголовок шага
+                HStack {
+                    Text(steps[currentStep])
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Text("\(currentStep + 1) из \(steps.count)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal)
+                
+                // Контент шага
+                ScrollView {
+                    VStack(spacing: 20) {
+                        switch currentStep {
+                        case 0:
+                            BasicInfoStepView(character: $character)
+                        case 1:
+                            AbilitiesStepView(character: $character)
+                        case 2:
+                            CombatStepView(character: $character)
+                        case 3:
+                            SkillsStepView(character: $character)
+                        case 4:
+                            PersonalityStepView(character: $character)
+                        case 5:
+                            EquipmentStepView(character: $character)
+                        default:
+                            EmptyView()
+                        }
+                    }
+                    .padding()
+                }
+                
+                // Кнопки навигации
+                HStack {
+                    if currentStep > 0 {
+                        Button("Назад") {
+                            withAnimation {
+                                currentStep -= 1
+                            }
+                        }
+                        .foregroundColor(.orange)
+                    }
+                    
+                    Spacer()
+                    
+                    if currentStep < steps.count - 1 {
+                        Button("Далее") {
+                            withAnimation {
+                                currentStep += 1
+                            }
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.orange)
+                        .cornerRadius(8)
+                    } else {
+                        Button("Создать персонажа") {
+                            createCharacter()
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.orange)
+                        .cornerRadius(8)
+                    }
+                }
+                .padding()
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Создание персонажа")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Отмена") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func createCharacter() {
+        character.dateCreated = Date()
+        character.dateModified = Date()
+        characterStore.add(character)
+        dismiss()
+    }
+}
+
+// MARK: - Basic Info Step
+struct BasicInfoStepView: View {
+    @Binding var character: Character
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Основная информация")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                VStack(spacing: 12) {
+                    TextField("Имя персонажа", text: $character.name)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    TextField("Имя игрока", text: $character.playerName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    TextField("Раса", text: $character.race)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    TextField("Класс", text: $character.characterClass)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    TextField("Предыстория", text: $character.background)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    TextField("Мировоззрение", text: $character.alignment)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    HStack {
+                        Text("Уровень:")
+                        Spacer()
+                        Stepper(value: $character.level, in: 1...20) {
+                            Text("\(character.level)")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                        }
+                    }
+                }
+            }
+            .padding()
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
+    }
+}
+
+// MARK: - Abilities Step
+struct AbilitiesStepView: View {
+    @Binding var character: Character
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Характеристики")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+                    AbilityInputCard(title: "Сила", score: $character.strength, icon: "figure.strengthtraining.traditional", color: .red)
+                    AbilityInputCard(title: "Ловкость", score: $character.dexterity, icon: "figure.run", color: .green)
+                    AbilityInputCard(title: "Телосложение", score: $character.constitution, icon: "heart.fill", color: .orange)
+                    AbilityInputCard(title: "Интеллект", score: $character.intelligence, icon: "brain.head.profile", color: .blue)
+                    AbilityInputCard(title: "Мудрость", score: $character.wisdom, icon: "eye.fill", color: .purple)
+                    AbilityInputCard(title: "Харизма", score: $character.charisma, icon: "person.2.fill", color: .pink)
+                }
+            }
+            .padding()
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
+    }
+}
+
+struct AbilityInputCard: View {
+    let title: String
+    @Binding var score: Int
+    let icon: String
+    let color: Color
+    
+    var modifier: Int {
+        (score - 10) / 2
+    }
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(color)
+            
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+            
+            HStack {
+                Button("-") {
+                    if score > 1 {
+                        score -= 1
+                    }
+                }
+                .foregroundColor(.red)
+                
+                Text("\(score)")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                    .frame(minWidth: 40)
+                
+                Button("+") {
+                    if score < 20 {
+                        score += 1
+                    }
+                }
+                .foregroundColor(.green)
+            }
+            
+            Text(modifier >= 0 ? "+\(modifier)" : "\(modifier)")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(modifier >= 0 ? .green : .red)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(color.opacity(0.1))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(color.opacity(0.3), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - Combat Step
+struct CombatStepView: View {
+    @Binding var character: Character
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Боевые характеристики")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                VStack(spacing: 12) {
+                    HStack {
+                        Text("Класс брони:")
+                        Spacer()
+                        TextField("10", value: $character.armorClass, format: .number)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .keyboardType(.numberPad)
+                            .frame(width: 60)
+                    }
+                    
+                    HStack {
+                        Text("Максимум хитов:")
+                        Spacer()
+                        TextField("0", value: $character.maxHitPoints, format: .number)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .keyboardType(.numberPad)
+                            .frame(width: 60)
+                    }
+                    
+                    HStack {
+                        Text("Скорость:")
+                        Spacer()
+                        TextField("30", value: $character.speed, format: .number)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .keyboardType(.numberPad)
+                            .frame(width: 60)
+                    }
+                    
+                    HStack {
+                        Text("Инициатива:")
+                        Spacer()
+                        Text("\(character.dexterityModifier)")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(character.dexterityModifier >= 0 ? .green : .red)
+                    }
+                }
+            }
+            .padding()
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
+    }
+}
+
+// MARK: - Skills Step
+struct SkillsStepView: View {
+    @Binding var character: Character
+    
+    private let skillNames = [
+        "acrobatics": "Акробатика",
+        "animal_handling": "Уход за животными",
+        "arcana": "Магия",
+        "athletics": "Атлетика",
+        "deception": "Обман",
+        "history": "История",
+        "insight": "Проницательность",
+        "intimidation": "Запугивание",
+        "investigation": "Расследование",
+        "medicine": "Медицина",
+        "nature": "Природа",
+        "perception": "Восприятие",
+        "performance": "Выступление",
+        "persuasion": "Убеждение",
+        "religion": "Религия",
+        "sleight_of_hand": "Ловкость рук",
+        "stealth": "Скрытность",
+        "survival": "Выживание"
+    ]
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Навыки")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 1), spacing: 8) {
+                    ForEach(Array(skillNames.keys.sorted()), id: \.self) { skillKey in
+                        if let skillName = skillNames[skillKey] {
+                            SkillToggleRow(
+                                name: skillName,
+                                isProficient: Binding(
+                                    get: { character.skills[skillKey] == true },
+                                    set: { character.skills[skillKey] = $0 }
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            .padding()
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
+    }
+}
+
+struct SkillToggleRow: View {
+    let name: String
+    @Binding var isProficient: Bool
+    
+    var body: some View {
+        HStack {
+            Text(name)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            Toggle("", isOn: $isProficient)
+                .toggleStyle(SwitchToggleStyle(tint: .orange))
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+    }
+}
+
+// MARK: - Personality Step
+struct PersonalityStepView: View {
+    @Binding var character: Character
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Личность")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                VStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Черты характера")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        TextField("Опишите черты характера", text: $character.personalityTraits, axis: .vertical)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .lineLimit(3...6)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Идеалы")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        TextField("Опишите идеалы", text: $character.ideals, axis: .vertical)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .lineLimit(3...6)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Привязанности")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        TextField("Опишите привязанности", text: $character.bonds, axis: .vertical)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .lineLimit(3...6)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Слабости")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        TextField("Опишите слабости", text: $character.flaws, axis: .vertical)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .lineLimit(3...6)
+                    }
+                }
+            }
+            .padding()
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
+    }
+}
+
+// MARK: - Equipment Step
+struct EquipmentStepView: View {
+    @Binding var character: Character
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Снаряжение")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                VStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Снаряжение")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        TextField("Опишите снаряжение", text: $character.equipment, axis: .vertical)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .lineLimit(3...6)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Умения и способности")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        TextField("Опишите умения и способности", text: $character.featuresAndTraits, axis: .vertical)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .lineLimit(3...6)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Прочие владения и языки")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        TextField("Опишите прочие владения и языки", text: $character.otherProficiencies, axis: .vertical)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .lineLimit(3...6)
+                    }
+                }
+            }
+            .padding()
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
+    }
+}
+
+#Preview {
+    CharacterCreationView(characterStore: CharacterStore())
+}

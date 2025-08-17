@@ -5,6 +5,7 @@ struct ContentView: View {
     @StateObject private var spells = CompendiumStore()
     @StateObject private var favorites = FavoriteSpellsManager()
     @StateObject private var themeManager = ThemeManager()
+    @StateObject private var characterStore = CharacterStore()
 
     var body: some View {
         TabView {
@@ -28,7 +29,7 @@ struct ContentView: View {
                     Label("Заметки", systemImage: "note.text")
                 }
 
-            CharacterSheetView()
+            CharacterSheetView(characterStore: characterStore)
                 .tabItem {
                     Label("Персонаж", systemImage: "person.text.rectangle")
                 }
@@ -51,5 +52,6 @@ struct ContentView: View {
         )
         .preferredColorScheme(themeManager.preferredColorScheme)
         .accentColor(.orange)
+
     }
 }

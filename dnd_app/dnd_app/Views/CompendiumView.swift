@@ -10,9 +10,9 @@ struct CompendiumView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(hex: "#fceeda"),
-                        Color(hex: "#fceeda").opacity(0.9),
-                        Color(hex: "#fceeda")
+                        Color(red: 0.988, green: 0.933, blue: 0.855),
+                        Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                        Color(red: 0.988, green: 0.933, blue: 0.855)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -28,7 +28,7 @@ struct CompendiumView: View {
                                     .foregroundColor(.purple)
                                     .font(.title2)
                                     .frame(width: 30)
-                                
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Заклинания")
                                         .font(.headline)
@@ -37,9 +37,9 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
@@ -48,14 +48,14 @@ struct CompendiumView: View {
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: BackgroundsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "person.3.sequence")
                                     .foregroundColor(.blue)
                                     .font(.title2)
                                     .frame(width: 30)
-                                
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Предыстории")
                                         .font(.headline)
@@ -64,9 +64,9 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
@@ -75,14 +75,14 @@ struct CompendiumView: View {
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: FeatsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "star.circle")
                                     .foregroundColor(.orange)
                                     .font(.title2)
                                     .frame(width: 30)
-                                
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Черты")
                                         .font(.headline)
@@ -91,9 +91,9 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
@@ -102,14 +102,14 @@ struct CompendiumView: View {
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: BestiaryTabView()) {
                             HStack {
                                 Image(systemName: "pawprint.circle")
                                     .foregroundColor(.green)
                                     .font(.title2)
                                     .frame(width: 30)
-                                
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Бестиарий")
                                         .font(.headline)
@@ -118,9 +118,9 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
@@ -129,14 +129,14 @@ struct CompendiumView: View {
                         }
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
-                        
+
                         NavigationLink(destination: FavoritesTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "heart.circle")
                                     .foregroundColor(.red)
                                     .font(.title2)
                                     .frame(width: 30)
-                                
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Избранное")
                                         .font(.headline)
@@ -145,9 +145,9 @@ struct CompendiumView: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
@@ -196,7 +196,7 @@ struct SpellsTabView: View {
             ScrollView {
                 LazyVStack(spacing: 12) {
                     ForEach(store.filteredSpells) { spell in
-                        SpellCard(spell: spell, favorites: favorites)
+                        CompendiumSpellCard(spell: spell, favorites: favorites)
                             .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
                     }
                 }
@@ -338,7 +338,7 @@ struct SpellFiltersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                Color(red: 0.988, green: 0.933, blue: 0.855)
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -483,7 +483,7 @@ struct FeatFiltersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#fceeda")
+                Color(red: 0.988, green: 0.933, blue: 0.855)
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -531,25 +531,7 @@ struct FeatFiltersView: View {
     }
 }
 
-// MARK: - Filter Button
-struct FilterButton: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.caption)
-                .fontWeight(.medium)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(isSelected ? Color.orange : Color(.systemGray5))
-                .foregroundColor(isSelected ? .white : .primary)
-                .cornerRadius(8)
-        }
-    }
-}
+
 
 // MARK: - Favorites Tab View
 struct FavoritesTabView: View {
@@ -575,9 +557,9 @@ struct FavoritesTabView: View {
         ZStack {
             LinearGradient(
                 colors: [
-                    Color(hex: "#fceeda"),
-                    Color(hex: "#fceeda").opacity(0.9),
-                    Color(hex: "#fceeda")
+                    Color(red: 0.988, green: 0.933, blue: 0.855),
+                    Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                    Color(red: 0.988, green: 0.933, blue: 0.855)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -625,7 +607,7 @@ struct FavoritesTabView: View {
                                     
                                     if !spellsCollapsed {
                                         ForEach(favoriteSpells) { spell in
-                                            SpellCard(spell: spell, favorites: favorites)
+                                            CompendiumSpellCard(spell: spell, favorites: favorites)
                                                 .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
                                         }
                                     }
@@ -700,311 +682,9 @@ struct FavoritesTabView: View {
     }
 }
 
-// MARK: - Spell Card
-struct SpellCard: View {
-    let spell: Spell
-    @ObservedObject var favorites: FavoriteSpellsManager
-    @State private var isExpanded = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header with name and expand button
-            HStack {
-                Text(spell.name)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                HStack(spacing: 8) {
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            favorites.toggleSpell(spell.name)
-                        }
-                    }) {
-                        Image(systemName: favorites.isSpellFavorite(spell.name) ? "heart.fill" : "heart")
-                            .foregroundColor(favorites.isSpellFavorite(spell.name) ? .red : .gray)
-                            .font(.title2)
-                            .scaleEffect(favorites.isSpellFavorite(spell.name) ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isSpellFavorite(spell.name))
-                    }
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isExpanded.toggle()
-                        }
-                    }) {
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .foregroundColor(.orange)
-                            .font(.title3)
-                    }
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
-            
-            // Level and School badges
-            HStack(spacing: 8) {
-                Text(spell.level == 0 ? "Заговор" : "\(spell.level) уровень")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.blue.opacity(0.15))
-                    .foregroundColor(.blue)
-                    .cornerRadius(12)
-                
-                Text(getSchoolName(spell.school))
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 6)
-                    .background(Color.purple.opacity(0.15))
-                    .foregroundColor(.purple)
-                    .cornerRadius(12)
-                
-                // Concentration badge
-                if spell.concentration {
-                    Text("Концентрация")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 6)
-                        .background(Color.red.opacity(0.15))
-                        .foregroundColor(.red)
-                        .cornerRadius(12)
-                }
-                
-                // Ritual badge
-                if spell.ritual {
-                    Text("Ритуал")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.orange.opacity(0.15))
-                        .foregroundColor(.orange)
-                        .cornerRadius(12)
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 12)
-            
-            // Classes (always visible)
-            if !spell.classes.isEmpty {
-                HStack(spacing: 4) {
-                    Image(systemName: "person.2.fill")
-                        .foregroundColor(.green)
-                        .font(.caption)
-                    
-                    Text(spell.classes.joined(separator: ", ").capitalized)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 12)
-            }
-            
-            // Expanded details (additional parameters and description)
-            if isExpanded {
-                VStack(spacing: 12) {
-                    // Additional parameters list
-                    VStack(spacing: 8) {
-                        // Subclasses if present
-                        if !spell.subclasses.isEmpty {
-                            HStack(spacing: 4) {
-                                Image(systemName: "person.3.sequence")
-                                    .foregroundColor(.blue)
-                                    .font(.caption)
-                                
-                                Text(spell.subclasses.joined(separator: ", ").capitalized)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Spacer()
-                            }
-                        }
-                        
-                        // Casting time
-                        HStack(spacing: 4) {
-                            Image(systemName: "clock")
-                                .foregroundColor(.blue)
-                                .font(.caption)
-                            Text(spell.castingTime)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                        }
-                        
-                        // Range
-                        HStack(spacing: 4) {
-                            Image(systemName: "location")
-                                .foregroundColor(.red)
-                                .font(.caption)
-                            Text(spell.range)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                        }
-                        
-                        // Components
-                        HStack(spacing: 4) {
-                            Image(systemName: "hand.raised.fill")
-                                .foregroundColor(.orange)
-                                .font(.caption)
-                            Text(spell.components)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                        }
-                        
-                        // Duration
-                        HStack(spacing: 4) {
-                            Image(systemName: "timer")
-                                .foregroundColor(.purple)
-                                .font(.caption)
-                            Text(spell.duration)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    // Description
-                    Text(spell.description)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 20)
-                    
-                    // Improvements if present
-                    if !spell.improvements.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Улучшения:")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.blue)
-                            Text(spell.improvements)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.leading)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                }
-                .padding(.bottom, 16)
-            }
-        }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-        .padding(.horizontal)
-    }
-    
-    private func getSchoolName(_ school: String) -> String {
-        switch school.lowercased() {
-        case "evocation": return "Воплощение"
-        case "abjuration": return "Ограждение"
-        case "conjuration": return "Вызов"
-        case "divination": return "Прорицание"
-        case "enchantment": return "Очарование"
-        case "illusion": return "Иллюзия"
-        case "necromancy": return "Некромантия"
-        case "transmutation": return "Преобразование"
-        default: return school
-        }
-    }
-}
 
-// MARK: - Feat Card
-struct FeatCard: View {
-    let feat: Feat
-    @ObservedObject var favorites: FavoriteSpellsManager
-    @State private var isExpanded = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header with name and expand button
-            HStack {
-                Text(feat.name)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                HStack(spacing: 8) {
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            favorites.toggleFeat(feat.name)
-                        }
-                    }) {
-                        Image(systemName: favorites.isFeatFavorite(feat.name) ? "heart.fill" : "heart")
-                            .foregroundColor(favorites.isFeatFavorite(feat.name) ? .red : .gray)
-                            .font(.title2)
-                            .scaleEffect(favorites.isFeatFavorite(feat.name) ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isFeatFavorite(feat.name))
-                    }
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isExpanded.toggle()
-                        }
-                    }) {
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .foregroundColor(.orange)
-                            .font(.title3)
-                    }
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
-            
-            // Category badge
-            if !feat.category.isEmpty {
-                HStack(spacing: 8) {
-                    Text(feat.category)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.orange.opacity(0.15))
-                        .foregroundColor(.orange)
-                        .cornerRadius(12)
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 12)
-            }
-            
-            // Expanded details (description)
-            if isExpanded {
-                Text(feat.description)
-                    .font(.body)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
-            }
-        }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-        .padding(.horizontal)
-    }
-}
+
+
 
 // MARK: - Background Card
 struct BackgroundCard: View {
@@ -1068,3 +748,13 @@ struct BackgroundCard: View {
         .padding(.horizontal)
     }
 }
+
+
+
+
+
+
+
+
+
+

@@ -4,92 +4,39 @@ import UniformTypeIdentifiers
 // MARK: - Character Sheet View
 
 struct CharacterSheetView: View {
-    @StateObject private var store = CharacterStore()
+    @ObservedObject var characterStore: CharacterStore
+    @StateObject private var compendiumStore = CompendiumStore()
+    @StateObject private var themeManager = ThemeManager()
     @State private var showingAdd = false
     @State private var showingImport = false
-    @State private var searchText = ""
-    
-    var filteredCharacters: [Character] {
-        if searchText.isEmpty {
-            return store.characters
-        } else {
-            return store.characters.filter { character in
-                character.name.localizedCaseInsensitiveContains(searchText) ||
-                character.playerName.localizedCaseInsensitiveContains(searchText) ||
-                character.characterClass.localizedCaseInsensitiveContains(searchText) ||
-                character.race.localizedCaseInsensitiveContains(searchText)
-            }
-        }
-    }
+    @State private var showCharacterSelection = false
     
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(
-                    colors: [
-                        Color("BackgroundColor"),
-                        Color("BackgroundColor").opacity(0.9),
-                        Color("BackgroundColor")
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                ThemeManager.adaptiveBackground(for: themeManager.preferredColorScheme)
+                    .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // Поиск
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.secondary)
-                        
-                        TextField("Поиск персонажей...", text: $searchText)
-                            .textFieldStyle(PlainTextFieldStyle())
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemGray6))
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                ),
-                                lineWidth: 1
-                            )
-                    )
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                    .padding(.top)
-                    
-                    // Список персонажей
-                    if filteredCharacters.isEmpty {
+                    // Всегда показываем лист выбранного персонажа
+                    if let character = characterStore.selectedCharacter {
+                        CompactCharacterSheetView(character: character, store: characterStore, compendiumStore: compendiumStore)
+                    } else {
+                        // Fallback если по какой-то причине персонаж не выбран
                         VStack(spacing: 20) {
                             Image(systemName: "person.text.rectangle")
                                 .font(.system(size: 60))
                                 .foregroundColor(.orange)
                             
-                            Text("Нет персонажей")
+                            Text("Персонаж не выбран")
                                 .font(.title2)
                                 .fontWeight(.semibold)
                             
-                            Text("Создайте первого персонажа для начала игры")
+                            Text("Выберите персонажа в настройках")
                                 .font(.body)
                                 .foregroundColor(.secondary)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else {
-                        List {
-                            ForEach(filteredCharacters) { character in
-                                CharacterCard(character: character, store: store)
-                                    .listRowSeparator(.hidden)
-                                    .listRowBackground(Color.clear)
-                                    .padding(.vertical, 4)
-                            }
-                            .onDelete(perform: deleteCharacters)
-                        }
-                        .listStyle(PlainListStyle())
-                        .background(Color.clear)
                     }
                 }
             }
@@ -98,35 +45,39 @@ struct CharacterSheetView: View {
             }
             .navigationTitle("Лист персонажа")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showCharacterSelection = true }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "person.2.fill")
+                            Text("Сменить персонажа")
+                                .font(.subheadline)
+                        }
+                        .foregroundColor(.orange)
+                    }
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
+                    if characterStore.selectedCharacter != nil {
                         Button(action: { showingAdd = true }) {
-                            Label("Создать персонажа", systemImage: "person.badge.plus")
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.orange)
                         }
-                        
-                        Button(action: { showingImport = true }) {
-                            Label("Импортировать JSON", systemImage: "doc.badge.plus")
-                        }
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.orange)
                     }
                 }
             }
             .sheet(isPresented: $showingAdd) {
-                CharacterEditorView(store: store)
+                CharacterEditorView(store: characterStore, character: characterStore.selectedCharacter)
             }
             .sheet(isPresented: $showingImport) {
-                CharacterImportView(store: store)
+                CharacterImportView(store: characterStore)
             }
-        }
-    }
-    
-    private func deleteCharacters(at offsets: IndexSet) {
-        for index in offsets {
-            let character = filteredCharacters[index]
-            store.remove(character: character)
+            .sheet(isPresented: $showCharacterSelection) {
+                CharacterSelectionView(
+                    characterStore: characterStore,
+                    isPresented: $showCharacterSelection
+                )
+            }
         }
     }
 }
@@ -213,6 +164,8 @@ struct ModernStatBadge: View {
 
 struct CharacterImportView: View {
     let store: CharacterStore
+    let onImport: ((Character) -> Void)?
+    
     @Environment(\.dismiss) private var dismiss
     @State private var jsonText = ""
     @State private var showingAlert = false
@@ -220,6 +173,11 @@ struct CharacterImportView: View {
     @State private var isSuccess = false
     @State private var showingFilePicker = false
     @State private var showingDocumentPicker = false
+    
+    init(store: CharacterStore, onImport: ((Character) -> Void)? = nil) {
+        self.store = store
+        self.onImport = onImport
+    }
     
     var body: some View {
         NavigationStack {
@@ -351,12 +309,21 @@ struct CharacterImportView: View {
     private func importCharacter() {
         guard !jsonText.isEmpty else { return }
         
-        let success = store.importFromJSON(jsonText)
-        isSuccess = success
-        
-        if success {
+        if let importedCharacter = store.importCharacterFromJSON(jsonText) {
+            isSuccess = true
             alertMessage = "Персонаж успешно импортирован!"
+            
+            // Если есть callback, используем его
+            if let onImport = onImport {
+                onImport(importedCharacter)
+                dismiss()
+            } else {
+                // Иначе добавляем в список
+                store.add(importedCharacter)
+                dismiss()
+            }
         } else {
+            isSuccess = false
             alertMessage = "Ошибка при импорте. Проверьте формат JSON файла."
         }
         
@@ -390,14 +357,21 @@ struct CharacterImportView: View {
                 let fileContent = try String(contentsOf: url, encoding: .utf8)
                 
                 // Сразу импортируем персонажа
-                let success = store.importFromJSON(fileContent)
-                isSuccess = success
-                
-                if success {
+                if let importedCharacter = store.importCharacterFromJSON(fileContent) {
+                    isSuccess = true
                     alertMessage = "Персонаж успешно импортирован из файла!"
-                    // Закрываем окно импорта
-                    dismiss()
+                    
+                    // Если есть callback, используем его
+                    if let onImport = onImport {
+                        onImport(importedCharacter)
+                        dismiss()
+                    } else {
+                        // Иначе добавляем в список
+                        store.add(importedCharacter)
+                        dismiss()
+                    }
                 } else {
+                    isSuccess = false
                     alertMessage = "Ошибка при импорте. Проверьте формат JSON файла."
                 }
                 
@@ -503,104 +477,7 @@ struct CharacterCard: View {
 
 
 
-// MARK: - Character Header View
 
-struct CharacterHeaderView: View {
-    let character: Character
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Text("Информация о персонаже")
-                .font(.headline)
-                .fontWeight(.semibold)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            VStack(spacing: 12) {
-                // Имя персонажа
-                HStack {
-                    Text("Имя")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text(character.name.isEmpty ? "Без имени" : character.name)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                }
-                
-                // Раса
-                if !character.race.isEmpty {
-                    HStack {
-                        Text("Раса")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(character.race)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                    }
-                }
-                
-                // Класс
-                if !character.characterClass.isEmpty {
-                    HStack {
-                        Text("Класс")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(character.characterClass)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                    }
-                }
-                
-                // Игрок
-                if !character.playerName.isEmpty {
-                    HStack {
-                        Text("Игрок")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(character.playerName)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                    }
-                }
-                
-                // Уровень
-                HStack {
-                    Text("Уровень")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("\(character.level)")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                }
-                
-                // Опыт
-                HStack {
-                    Text("Опыт")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("\(character.experience)")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                }
-            }
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-    }
-}
 
 // MARK: - Character Viewer View
 
@@ -615,7 +492,7 @@ struct CharacterViewerView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     // Заголовок персонажа
-                    CharacterHeaderView(character: character)
+                    CharacterDisplayHeaderView(character: character)
                     
                     // Основные характеристики
                     MainStatsView(character: character, store: store)
@@ -1243,6 +1120,7 @@ struct CharacterEditorView: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var editedCharacter: Character
+    @State private var showingImport = false
     
     init(store: CharacterStore, character: Character? = nil) {
         self.store = store
@@ -1289,11 +1167,26 @@ struct CharacterEditorView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Сохранить") {
-                        saveCharacter()
+                    HStack {
+                        if character == nil {
+                            Button(action: { showingImport = true }) {
+                                Image(systemName: "doc.badge.plus")
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                        
+                        Button("Сохранить") {
+                            saveCharacter()
+                        }
+                        .fontWeight(.semibold)
+                        .foregroundColor(.orange)
                     }
-                    .fontWeight(.semibold)
-                    .foregroundColor(.orange)
+                }
+            }
+            .sheet(isPresented: $showingImport) {
+                CharacterImportView(store: store) { importedCharacter in
+                    editedCharacter = importedCharacter
+                    showingImport = false
                 }
             }
         }
@@ -1388,9 +1281,37 @@ struct BasicInfoSection: View {
                     Text("Уровень")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    TextField("Введите уровень", value: $character.level, format: .number)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.numberPad)
+                    HStack(spacing: 8) {
+                        Button(action: {
+                            if character.level > 1 {
+                                character.level -= 1
+                                // Обновляем бонус владения
+                                character.proficiencyBonus = (character.level - 1) / 4 + 2
+                            }
+                        }) {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.red)
+                        }
+                        
+                        Text("\(character.level)")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                            .frame(minWidth: 40)
+                        
+                        Button(action: {
+                            if character.level < 20 {
+                                character.level += 1
+                                // Обновляем бонус владения
+                                character.proficiencyBonus = (character.level - 1) / 4 + 2
+                            }
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.green)
+                        }
+                    }
                 }
             }
         }
@@ -1443,9 +1364,14 @@ struct CombatStatsSection: View {
                     Text("Бонус владения")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    TextField("Бонус", value: $character.proficiencyBonus, format: .number)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.numberPad)
+                    Text("\(character.proficiencyBonus)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 8)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -1552,12 +1478,12 @@ struct AbilityScoresSection: View {
     @Binding var character: Character
     
     let abilities = [
-        ("Сила", "strength", \Character.strength),
-        ("Ловкость", "dexterity", \Character.dexterity),
-        ("Телосложение", "constitution", \Character.constitution),
-        ("Интеллект", "intelligence", \Character.intelligence),
-        ("Мудрость", "wisdom", \Character.wisdom),
-        ("Харизма", "charisma", \Character.charisma)
+        ("Сила", "strength"),
+        ("Ловкость", "dexterity"),
+        ("Телосложение", "constitution"),
+        ("Интеллект", "intelligence"),
+        ("Мудрость", "wisdom"),
+        ("Харизма", "charisma")
     ]
     
     var body: some View {
@@ -1570,8 +1496,8 @@ struct AbilityScoresSection: View {
                 ForEach(abilities, id: \.0) { ability in
                     AbilityScoreCard(
                         name: ability.0,
-                        score: binding(for: ability.2),
-                        modifier: modifier(for: ability.2),
+                        score: binding(for: ability.1),
+                        modifier: modifier(for: ability.1),
                         savingThrow: binding(for: ability.1, in: \.savingThrows),
                         savingThrowModifier: character.savingThrowModifier(for: ability.1)
                     )
@@ -1583,15 +1509,44 @@ struct AbilityScoresSection: View {
         .cornerRadius(12)
     }
     
-    private func binding(for keyPath: WritableKeyPath<Character, Int>) -> Binding<Int> {
+    private func binding(for ability: String) -> Binding<Int> {
         Binding(
-            get: { character[keyPath: keyPath] },
-            set: { character[keyPath: keyPath] = $0 }
+            get: { 
+                switch ability {
+                case "strength": return character.strength
+                case "dexterity": return character.dexterity
+                case "constitution": return character.constitution
+                case "intelligence": return character.intelligence
+                case "wisdom": return character.wisdom
+                case "charisma": return character.charisma
+                default: return 10
+                }
+            },
+            set: { newValue in
+                switch ability {
+                case "strength": character.strength = newValue
+                case "dexterity": character.dexterity = newValue
+                case "constitution": character.constitution = newValue
+                case "intelligence": character.intelligence = newValue
+                case "wisdom": character.wisdom = newValue
+                case "charisma": character.charisma = newValue
+                default: break
+                }
+            }
         )
     }
     
-    private func modifier(for keyPath: KeyPath<Character, Int>) -> Int {
-        let score = character[keyPath: keyPath]
+    private func modifier(for ability: String) -> Int {
+        let score: Int
+        switch ability {
+        case "strength": score = character.strength
+        case "dexterity": score = character.dexterity
+        case "constitution": score = character.constitution
+        case "intelligence": score = character.intelligence
+        case "wisdom": score = character.wisdom
+        case "charisma": score = character.charisma
+        default: score = 10
+        }
         return (score - 10) / 2
     }
     
@@ -1617,10 +1572,33 @@ struct AbilityScoreCard: View {
                 .fontWeight(.medium)
                 .foregroundColor(.secondary)
             
-            TextField("10", value: $score, format: .number)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .keyboardType(.numberPad)
-                .multilineTextAlignment(.center)
+            HStack(spacing: 8) {
+                Button(action: {
+                    if score > 1 {
+                        score -= 1
+                    }
+                }) {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(.red)
+                }
+                
+                Text("\(score)")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                    .frame(minWidth: 40)
+                
+                Button(action: {
+                    if score < 30 {
+                        score += 1
+                    }
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(.green)
+                }
+            }
             
             VStack(spacing: 2) {
                 Text("\(modifier >= 0 ? "+" : "")\(modifier)")
@@ -1914,5 +1892,373 @@ struct AttacksSection: View {
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(12)
+    }
+}
+
+// MARK: - Character Detail Views
+
+struct CharacterDisplayHeaderView: View {
+    let character: Character
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            // Аватар и имя
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(Color.orange.opacity(0.2))
+                        .frame(width: 80, height: 80)
+                    
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.orange)
+                }
+                
+                VStack(spacing: 4) {
+                    Text(character.name)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Text("\(character.race) • \(character.characterClass)")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Уровень \(character.level)")
+                        .font(.subheadline)
+                        .foregroundColor(.orange)
+                        .fontWeight(.semibold)
+                }
+            }
+            
+            // Основная информация
+            HStack(spacing: 20) {
+                InfoItem(title: "Игрок", value: character.playerName)
+                InfoItem(title: "Предыстория", value: character.background)
+                InfoItem(title: "Мировоззрение", value: character.alignment)
+            }
+        }
+    }
+}
+
+struct InfoItem: View {
+    let title: String
+    let value: String
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Text(value.isEmpty ? "—" : value)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+        }
+    }
+}
+
+struct CharacterStatsView: View {
+    let character: Character
+    
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
+            StatItem(name: "СИЛ", score: character.strength, modifier: character.strengthModifier)
+            StatItem(name: "ЛОВ", score: character.dexterity, modifier: character.dexterityModifier)
+            StatItem(name: "ТЕЛ", score: character.constitution, modifier: character.constitutionModifier)
+            StatItem(name: "ИНТ", score: character.intelligence, modifier: character.intelligenceModifier)
+            StatItem(name: "МДР", score: character.wisdom, modifier: character.wisdomModifier)
+            StatItem(name: "ХАР", score: character.charisma, modifier: character.charismaModifier)
+        }
+    }
+}
+
+struct StatItem: View {
+    let name: String
+    let score: Int
+    let modifier: Int
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(name)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.secondary)
+            
+            Text("\(score)")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+            
+            Text(modifier >= 0 ? "+\(modifier)" : "\(modifier)")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(modifier >= 0 ? .green : .red)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+    }
+}
+
+struct CharacterCombatView: View {
+    let character: Character
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+                CombatStatItem(title: "Класс брони", value: "\(character.armorClass)", icon: "shield.fill", color: .blue)
+                CombatStatItem(title: "Инициатива", value: character.initiative >= 0 ? "+\(character.initiative)" : "\(character.initiative)", icon: "bolt.fill", color: .yellow)
+                CombatStatItem(title: "Скорость", value: "\(character.speed) фт.", icon: "figure.walk", color: .green)
+                CombatStatItem(title: "Пассивное восприятие", value: "\(character.passivePerception)", icon: "eye.fill", color: .purple)
+            }
+            
+            // Хиты
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Хиты")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    Spacer()
+                    Text("\(character.currentHitPoints)/\(character.maxHitPoints)")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.red)
+                }
+                
+                ProgressView(value: Double(character.currentHitPoints), total: Double(character.maxHitPoints))
+                    .progressViewStyle(LinearProgressViewStyle(tint: .red))
+            }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
+        }
+    }
+}
+
+struct CombatStatItem: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(color)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(value)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+            }
+            
+            Spacer()
+        }
+    }
+}
+
+struct CharacterSkillsView: View {
+    let character: Character
+    
+    private let skillNames = [
+        "acrobatics": "Акробатика",
+        "animal_handling": "Уход за животными",
+        "arcana": "Магия",
+        "athletics": "Атлетика",
+        "deception": "Обман",
+        "history": "История",
+        "insight": "Проницательность",
+        "intimidation": "Запугивание",
+        "investigation": "Расследование",
+        "medicine": "Медицина",
+        "nature": "Природа",
+        "perception": "Восприятие",
+        "performance": "Выступление",
+        "persuasion": "Убеждение",
+        "religion": "Религия",
+        "sleight_of_hand": "Ловкость рук",
+        "stealth": "Скрытность",
+        "survival": "Выживание"
+    ]
+    
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
+            ForEach(Array(skillNames.keys.sorted()), id: \.self) { skillKey in
+                if let skillName = skillNames[skillKey] {
+                    SkillItem(
+                        name: skillName,
+                        modifier: character.skillModifier(for: skillKey),
+                        isProficient: character.skills[skillKey] == true
+                    )
+                }
+            }
+        }
+    }
+}
+
+struct SkillItem: View {
+    let name: String
+    let modifier: Int
+    let isProficient: Bool
+    
+    var body: some View {
+        HStack {
+            Text(name)
+                .font(.subheadline)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            if isProficient {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.orange)
+                    .font(.caption)
+            }
+            
+            Text(modifier >= 0 ? "+\(modifier)" : "\(modifier)")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(modifier >= 0 ? .green : .red)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct CharacterDetailsView: View {
+    let character: Character
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            DetailSection(title: "Черты характера", text: character.personalityTraits)
+            DetailSection(title: "Идеалы", text: character.ideals)
+            DetailSection(title: "Привязанности", text: character.bonds)
+            DetailSection(title: "Слабости", text: character.flaws)
+            DetailSection(title: "Снаряжение", text: character.equipment)
+            DetailSection(title: "Умения и способности", text: character.featuresAndTraits)
+        }
+    }
+}
+
+struct DetailSection: View {
+    let title: String
+    let text: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+            
+            if text.isEmpty {
+                Text("—")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .italic()
+            } else {
+                Text(text)
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+            }
+        }
+    }
+}
+
+struct CharacterAttacksView: View {
+    let character: Character
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            ForEach(character.attacks) { attack in
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(attack.name)
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        Text("Бонус атаки: \(attack.attackBonus)")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text("Урон")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(attack.damageType)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.orange)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
+    }
+}
+
+struct CharacterSavesView: View {
+    let character: Character
+    
+    private let saveNames = [
+        "strength": "СИЛ",
+        "dexterity": "ЛОВ", 
+        "constitution": "ТЕЛ",
+        "intelligence": "ИНТ",
+        "wisdom": "МДР",
+        "charisma": "ХАР"
+    ]
+    
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
+            ForEach(Array(saveNames.keys.sorted()), id: \.self) { saveKey in
+                if let saveName = saveNames[saveKey] {
+                    SaveItem(
+                        name: saveName,
+                        modifier: character.savingThrowModifier(for: saveKey),
+                        isProficient: character.savingThrows[saveKey] == true
+                    )
+                }
+            }
+        }
+    }
+}
+
+struct SaveItem: View {
+    let name: String
+    let modifier: Int
+    let isProficient: Bool
+    
+    var body: some View {
+        HStack {
+            Text(name)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            if isProficient {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.orange)
+                    .font(.caption)
+            }
+            
+            Text(modifier >= 0 ? "+\(modifier)" : "\(modifier)")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(modifier >= 0 ? .green : .red)
+        }
+        .padding(.vertical, 4)
     }
 }

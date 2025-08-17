@@ -1,5 +1,13 @@
 import Foundation
 
+// MARK: - Cacheable Protocol
+protocol Cacheable {
+    /// Key used to store the value in the cache.
+    var cacheKey: String { get }
+    /// Lifetime of the cached value in seconds. `0` means the value never expires.
+    var cacheExpiration: TimeInterval { get }
+}
+
 // MARK: - Spell Models
 struct Spell: Identifiable, Codable, Equatable {
     let id = UUID()
@@ -83,7 +91,7 @@ struct Spell: Identifiable, Codable, Equatable {
 /// Example usage of the `Cacheable` protocol. Spells will live in the
 /// cache for one hour before being invalidated.
 extension Spell: Cacheable {
-    var cacheKey: String { CacheManager.CacheKey.spells.rawValue }
+    var cacheKey: String { "spells" }
     var cacheExpiration: TimeInterval { 60 * 60 } // 1 hour
 }
 

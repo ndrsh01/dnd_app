@@ -88,6 +88,20 @@ final class FavoriteSpellsManager: ObservableObject {
         return favoriteFeats.contains(featName)
     }
     
+    func isFeatFavorite(_ feat: Feat) -> Bool {
+        return favoriteFeats.contains(feat.name)
+    }
+    
+    func addFeatToFavorites(_ feat: Feat) {
+        favoriteFeats.insert(feat.name)
+        saveFeats()
+    }
+    
+    func removeFeatFromFavorites(_ feat: Feat) {
+        favoriteFeats.remove(feat.name)
+        saveFeats()
+    }
+    
     func addMultipleFeats(_ feats: [Feat]) {
         for feat in feats {
             favoriteFeats.insert(feat.name)
@@ -138,6 +152,20 @@ final class FavoriteSpellsManager: ObservableObject {
     
     func isBackgroundFavorite(_ backgroundName: String) -> Bool {
         return favoriteBackgrounds.contains(backgroundName)
+    }
+    
+    func isBackgroundFavorite(_ background: Background) -> Bool {
+        return favoriteBackgrounds.contains(background.name)
+    }
+    
+    func addBackgroundToFavorites(_ background: Background) {
+        favoriteBackgrounds.insert(background.name)
+        saveBackgrounds()
+    }
+    
+    func removeBackgroundFromFavorites(_ background: Background) {
+        favoriteBackgrounds.remove(background.name)
+        saveBackgrounds()
     }
     
     func addMultipleBackgrounds(_ backgrounds: [Background]) {

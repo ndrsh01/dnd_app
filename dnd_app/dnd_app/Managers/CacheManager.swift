@@ -277,15 +277,7 @@ final class CacheManager: ObservableObject {
 
 // MARK: - Cacheable Protocol
 /// Types that conform to `Cacheable` can be stored in `CacheManager`
-/// with an associated expiration time. Values with a nonzero
-/// `cacheExpiration` are automatically invalidated once the interval
-/// has passed.
-protocol Cacheable {
-    /// Key used to store the value in the cache.
-    var cacheKey: String { get }
-    /// Lifetime of the cached value in seconds. `0` means the value never expires.
-    var cacheExpiration: TimeInterval { get }
-}
+
 
 // MARK: - Cache Extensions
 extension CacheManager {
