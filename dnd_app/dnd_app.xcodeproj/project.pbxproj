@@ -27,7 +27,7 @@
 		27D1A0032E4700000042C0AB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0022E4700000042C0AB /* ContentView.swift */; };
 		27D1A0052E4700000042C0AB /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0042E4700000042C0AB /* Models.swift */; };
 		27D1A0072E4700000042C0AB /* SpellsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0062E4700000042C0AB /* SpellsView.swift */; };
-		27D1A00B2E4700000042C0AB /* FavoriteSpellsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */; };
+            27D1A00B2E4700000042C0AB /* FavoritesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A00A2E4700000042C0AB /* FavoritesManager.swift */; };
 		27D1A00F2E4700000042C0AB /* QuoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A00E2E4700000042C0AB /* QuoteManager.swift */; };
 		27D1A0112E4700000042C0AB /* NotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0102E4700000042C0AB /* NotesView.swift */; };
 		27D1A0132E4700000042C0AB /* RelationshipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D1A0122E4700000042C0AB /* RelationshipView.swift */; };
@@ -82,7 +82,7 @@
 		27D1A0022E4700000042C0AB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		27D1A0042E4700000042C0AB /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		27D1A0062E4700000042C0AB /* SpellsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpellsView.swift; sourceTree = "<group>"; };
-		27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteSpellsManager.swift; sourceTree = "<group>"; };
+            27D1A00A2E4700000042C0AB /* FavoritesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesManager.swift; sourceTree = "<group>"; };
 		27D1A00E2E4700000042C0AB /* QuoteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteManager.swift; sourceTree = "<group>"; };
 		27D1A0102E4700000042C0AB /* NotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesView.swift; sourceTree = "<group>"; };
 		27D1A0122E4700000042C0AB /* RelationshipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationshipView.swift; sourceTree = "<group>"; };
@@ -165,7 +165,7 @@
 			isa = PBXGroup;
 			children = (
 				27D304A22E4DBD9000CEDEF1 /* CacheManager.swift */,
-				27D1A00A2E4700000042C0AB /* FavoriteSpellsManager.swift */,
+                            27D1A00A2E4700000042C0AB /* FavoritesManager.swift */,
 				27D1A00E2E4700000042C0AB /* QuoteManager.swift */,
 				27D1A0162E4700000042C0AB /* ThemeManager.swift */,
 			);
@@ -369,7 +369,7 @@
 				27D1A0072E4700000042C0AB /* SpellsView.swift in Sources */,
 				272ADF582E51E207007AF452 /* DetailSection.swift in Sources */,
 				275B2C202E4F68EF008AA77B /* CompendiumStore.swift in Sources */,
-				27D1A00B2E4700000042C0AB /* FavoriteSpellsManager.swift in Sources */,
+                            27D1A00B2E4700000042C0AB /* FavoritesManager.swift in Sources */,
 				272ADF532E51D346007AF452 /* CharacterCreationView.swift in Sources */,
 				27D304AB2E4DF92000CEDEF1 /* CommonStyles.swift in Sources */,
 				27D1A00F2E4700000042C0AB /* QuoteManager.swift in Sources */,

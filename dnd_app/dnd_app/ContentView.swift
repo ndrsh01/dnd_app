@@ -3,7 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var manager = QuoteManager()
     @StateObject private var spells = CompendiumStore()
-    @StateObject private var favorites = FavoriteSpellsManager()
+    @StateObject private var favorites = Favorites()
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var characterStore = CharacterStore()
 
