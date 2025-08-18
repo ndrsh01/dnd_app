@@ -12,81 +12,13 @@ struct SpellsView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                SearchAndFilterSection(store: store, favorites: favorites, themeManager: themeManager, currentTab: 0)
+                SpellSearchSection(store: store, favorites: favorites, themeManager: themeManager, currentTab: 0)
                 AllSpellsTab(store: store, favorites: favorites, themeManager: themeManager)
             }
         }
     }
 }
 
-// MARK: - Search and Filter Section
-struct SearchAndFilterSection: View {
-    @ObservedObject var store: CompendiumStore
-    let favorites: FavoriteSpellsManager
-    let themeManager: ThemeManager
-    let currentTab: Int
-    @State private var showingFilters = false
-
-    private func getActiveFiltersCount() -> Int {
-        return store.spellFilters.selectedLevels.count + 
-               store.spellFilters.selectedSchools.count + 
-               store.spellFilters.selectedClasses.count +
-               (store.spellFilters.concentrationOnly ? 1 : 0) +
-               (store.spellFilters.ritualOnly ? 1 : 0)
-    }
-
-    var body: some View {
-        Group {
-            VStack(spacing: 12) {
-                Button(action: { showingFilters = true }) {
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.secondary)
-                        Text("Поиск заклинаний...")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        if getActiveFiltersCount() > 0 {
-                            Text("\(getActiveFiltersCount())")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(
-                                    LinearGradient(
-                                        colors: [.orange, .orange.opacity(0.8)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                                .shadow(color: .orange.opacity(0.3), radius: 4, x: 0, y: 2)
-                        }
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemGray6))
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                ),
-                                lineWidth: 1
-                            )
-                    )
-                    .cornerRadius(12)
-                }
-                .padding(.horizontal)
-                .padding(.top)
-            }
-            .sheet(isPresented: $showingFilters) {
-                SpellSearchView(store: store, favorites: favorites, themeManager: themeManager)
-            }
-        }
-    }
-}
 
 // MARK: - Spell Search View
 struct SpellSearchView: View {
@@ -142,7 +74,7 @@ struct SpellSearchView: View {
                                 
                                 if !spellsCollapsed {
                                     ForEach(store.filteredSpells) { spell in
-                                            CompendiumSpellCard(spell: spell, favorites: favorites)
+                                            SpellRow(spell: spell, favorites: favorites)
                                             .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
                                     }
                                 }
@@ -433,7 +365,7 @@ struct AllSpellsTab: View {
                                 
                                 if !spellsCollapsed {
                                     ForEach(favoriteSpells) { spell in
-                                        CompendiumSpellCard(spell: spell, favorites: favorites)
+                                        SpellRow(spell: spell, favorites: favorites)
                                             .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
                                     }
                                 }
@@ -622,210 +554,4 @@ struct FeatCard: View {
         .padding(.horizontal, 20)
     }
 }
-
-// MARK: - Compendium Spell Card
-struct CompendiumSpellCard: View {
-    let spell: Spell
-    @ObservedObject var favorites: FavoriteSpellsManager
-    @State private var isExpanded = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header with name and expand button
-            HStack {
-                Text(spell.name)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                HStack(spacing: 8) {
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            favorites.toggleSpell(spell.name)
-                        }
-                    }) {
-                        Image(systemName: favorites.isSpellFavorite(spell.name) ? "heart.fill" : "heart")
-                            .foregroundColor(favorites.isSpellFavorite(spell.name) ? .red : .gray)
-                            .font(.title2)
-                            .scaleEffect(favorites.isSpellFavorite(spell.name) ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isSpellFavorite(spell.name))
-                    }
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isExpanded.toggle()
-                        }
-                    }) {
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .foregroundColor(.orange)
-                            .font(.title3)
-                    }
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
-            
-            // Level and School badges
-            HStack(spacing: 8) {
-                Text(spell.level == 0 ? "Заговор" : "\(spell.level) уровень")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.blue.opacity(0.15))
-                    .foregroundColor(.blue)
-                    .cornerRadius(12)
-                
-                Text(getSchoolName(spell.school))
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 6)
-                    .background(Color.purple.opacity(0.15))
-                    .foregroundColor(.purple)
-                    .cornerRadius(12)
-                
-                // Concentration badge
-                if spell.concentration {
-                    Text("Концентрация")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 6)
-                        .background(Color.red.opacity(0.15))
-                        .foregroundColor(.red)
-                        .cornerRadius(12)
-                }
-                
-                // Ritual badge
-                if spell.ritual {
-                    Text("Ритуал")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.orange.opacity(0.15))
-                        .foregroundColor(.orange)
-                        .cornerRadius(12)
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 12)
-            
-            // Classes (always visible)
-            if !spell.classes.isEmpty {
-                HStack(spacing: 8) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "person.2.fill")
-                            .foregroundColor(.green)
-                            .font(.caption)
-                        Text(spell.classes.map { getClassName($0) }.joined(separator: ", "))
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 12)
-            }
-            
-            // Description (expandable)
-            if isExpanded {
-                VStack(alignment: .leading, spacing: 12) {
-                    // Casting time, range, components, duration
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "clock")
-                                .foregroundColor(.blue)
-                                .font(.caption)
-                            Text(spell.castingTime)
-                                .font(.caption)
-                                .foregroundColor(.primary)
-                        }
-                        
-                        HStack(spacing: 8) {
-                            Image(systemName: "paperplane")
-                                .foregroundColor(.green)
-                                .font(.caption)
-                            Text(spell.range)
-                                .font(.caption)
-                                .foregroundColor(.primary)
-                        }
-                        
-                        HStack(spacing: 8) {
-                            Image(systemName: "hand.raised")
-                                .foregroundColor(.orange)
-                                .font(.caption)
-                            Text(spell.components)
-                                .font(.caption)
-                                .foregroundColor(.primary)
-                        }
-                        
-                        HStack(spacing: 8) {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .foregroundColor(.purple)
-                                .font(.caption)
-                            Text(spell.duration)
-                                .font(.caption)
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    Divider()
-                        .padding(.horizontal, 20)
-                    
-                    // Description
-                    Text(spell.description)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 16)
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-        }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-        .padding(.horizontal, 20)
-    }
-    
-    private func getSchoolName(_ school: String) -> String {
-        let schoolNames = [
-            "evocation": "Воплощение",
-            "conjuration": "Вызов",
-            "illusion": "Иллюзия",
-            "necromancy": "Некромантия",
-            "abjuration": "Ограждение",
-            "enchantment": "Очарование",
-            "transmutation": "Преобразование",
-            "divination": "Прорицание"
-        ]
-        return schoolNames[school] ?? school
-    }
-    
-    private func getClassName(_ className: String) -> String {
-        let classNames = [
-            "bard": "Бард",
-            "sorcerer": "Волшебник",
-            "druid": "Друид",
-            "cleric": "Жрец",
-            "warlock": "Колдун",
-            "paladin": "Паладин",
-            "ranger": "Следопыт",
-            "wizard": "Чародей"
-        ]
-        return classNames[className] ?? className
-    }
-}
-
-
-
 
