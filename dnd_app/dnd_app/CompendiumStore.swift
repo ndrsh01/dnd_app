@@ -15,6 +15,10 @@ final class CompendiumStore: ObservableObject {
     @Published var feats: [Feat] = []
     @Published var filteredFeats: [Feat] = []
     @Published var featFilters = FeatFilters()
+
+    // MARK: - Characters
+    /// Хранит экспортируемый список персонажей
+    @Published var characters: [Character] = []
     
     @Published var availableSchools: [String] = []
     @Published var availableClasses: [String] = []
@@ -310,5 +314,29 @@ final class CompendiumStore: ObservableObject {
     func clearAllCaches() {
         cacheManager.clearAllCaches()
         print("✅ [CACHE] Все кэши очищены")
+    }
+
+    // MARK: - Characters Export/Import
+    /// Экспортирует текущий список персонажей в JSON-формат
+    func exportCharacters() -> Data {
+        let bundle = CharacterBundle(characters: characters)
+        do {
+            let data = try JSONEncoder().encode(bundle)
+            return data
+        } catch {
+            print("❌ [CHARACTERS] Ошибка экспорта: \(error)")
+            return Data()
+        }
+    }
+
+    /// Импортирует персонажей из JSON-данных
+    func importCharacters(from data: Data) {
+        do {
+            let bundle = try JSONDecoder().decode(CharacterBundle.self, from: data)
+            characters = bundle.characters
+            print("✅ [CHARACTERS] Импортировано персонажей: \(characters.count)")
+        } catch {
+            print("❌ [CHARACTERS] Ошибка импорта: \(error)")
+        }
     }
 }

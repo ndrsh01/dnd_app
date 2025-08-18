@@ -8,8 +8,17 @@ struct CharacterSheetView: View {
     @StateObject private var compendiumStore = CompendiumStore()
     @StateObject private var themeManager = ThemeManager()
     @State private var showingAdd = false
-    @State private var showingImport = false
     @State private var showCharacterSelection = false
+    @State private var isImporting = false
+
+    // URL временного файла для экспорта персонажей
+    private var exportURL: URL {
+        compendiumStore.characters = characterStore.characters
+        let data = compendiumStore.exportCharacters()
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("characters.json")
+        try? data.write(to: url)
+        return url
+    }
     
     var body: some View {
         NavigationStack {
@@ -55,9 +64,19 @@ struct CharacterSheetView: View {
                         .foregroundColor(.orange)
                     }
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
+
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     if characterStore.selectedCharacter != nil {
+                        ShareLink(item: exportURL) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.title2)
+                        }
+
+                        Button(action: { isImporting = true }) {
+                            Image(systemName: "square.and.arrow.down")
+                                .font(.title2)
+                        }
+
                         Button(action: { showingAdd = true }) {
                             Image(systemName: "pencil.circle.fill")
                                 .font(.title2)
@@ -69,8 +88,15 @@ struct CharacterSheetView: View {
             .sheet(isPresented: $showingAdd) {
                 CharacterEditorView(store: characterStore, character: characterStore.selectedCharacter)
             }
-            .sheet(isPresented: $showingImport) {
-                CharacterImportView(store: characterStore)
+            .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
+                do {
+                    let url = try result.get()
+                    let data = try Data(contentsOf: url)
+                    compendiumStore.importCharacters(from: data)
+                    characterStore.characters = compendiumStore.characters
+                } catch {
+                    print("Ошибка импорта: \(error)")
+                }
             }
             .sheet(isPresented: $showCharacterSelection) {
                 CharacterSelectionView(
