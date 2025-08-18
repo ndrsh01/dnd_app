@@ -5,7 +5,9 @@ import UniformTypeIdentifiers
 
 struct CharacterSheetView: View {
     @ObservedObject var characterStore: CharacterStore
-    @StateObject private var compendiumStore = CompendiumStore()
+    @StateObject private var spellStore = SpellStore()
+    @StateObject private var featStore = FeatStore()
+    @StateObject private var backgroundStore = BackgroundStore()
     @StateObject private var themeManager = ThemeManager()
     @State private var showingAdd = false
     @State private var showingImport = false
@@ -20,7 +22,7 @@ struct CharacterSheetView: View {
                 VStack(spacing: 0) {
                     // Всегда показываем лист выбранного персонажа
                     if let character = characterStore.selectedCharacter {
-                        CompactCharacterSheetView(character: character, store: characterStore, compendiumStore: compendiumStore)
+                        CompactCharacterSheetView(character: character, store: characterStore, spellStore: spellStore, featStore: featStore, backgroundStore: backgroundStore)
                     } else {
                         // Fallback если по какой-то причине персонаж не выбран
                         VStack(spacing: 20) {
