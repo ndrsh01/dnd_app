@@ -2,7 +2,9 @@ import SwiftUI
 
 // MARK: - Spells View
 struct SpellsView: View {
-    @StateObject private var store = CompendiumStore()
+    @StateObject private var spellStore = SpellStore()
+    @StateObject private var featStore = FeatStore()
+    @StateObject private var backgroundStore = BackgroundStore()
     @StateObject private var favorites = FavoriteSpellsManager()
     @StateObject private var themeManager = ThemeManager()
 
@@ -12,8 +14,8 @@ struct SpellsView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                SearchAndFilterSection(store: store, favorites: favorites, themeManager: themeManager, currentTab: 0)
-                AllSpellsTab(store: store, favorites: favorites, themeManager: themeManager)
+                SearchAndFilterSection(spellStore: spellStore, featStore: featStore, favorites: favorites, themeManager: themeManager, currentTab: 0)
+                AllSpellsTab(spellStore: spellStore, featStore: featStore, backgroundStore: backgroundStore, favorites: favorites, themeManager: themeManager)
             }
         }
     }
@@ -21,18 +23,19 @@ struct SpellsView: View {
 
 // MARK: - Search and Filter Section
 struct SearchAndFilterSection: View {
-    @ObservedObject var store: CompendiumStore
+    @ObservedObject var spellStore: SpellStore
+    @ObservedObject var featStore: FeatStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
     let currentTab: Int
     @State private var showingFilters = false
 
     private func getActiveFiltersCount() -> Int {
-        return store.spellFilters.selectedLevels.count + 
-               store.spellFilters.selectedSchools.count + 
-               store.spellFilters.selectedClasses.count +
-               (store.spellFilters.concentrationOnly ? 1 : 0) +
-               (store.spellFilters.ritualOnly ? 1 : 0)
+        return spellStore.spellFilters.selectedLevels.count +
+               spellStore.spellFilters.selectedSchools.count +
+               spellStore.spellFilters.selectedClasses.count +
+               (spellStore.spellFilters.concentrationOnly ? 1 : 0) +
+               (spellStore.spellFilters.ritualOnly ? 1 : 0)
     }
 
     var body: some View {
@@ -82,7 +85,7 @@ struct SearchAndFilterSection: View {
                 .padding(.top)
             }
             .sheet(isPresented: $showingFilters) {
-                SpellSearchView(store: store, favorites: favorites, themeManager: themeManager)
+                SpellSearchView(spellStore: spellStore, featStore: featStore, favorites: favorites, themeManager: themeManager)
             }
         }
     }
@@ -90,7 +93,8 @@ struct SearchAndFilterSection: View {
 
 // MARK: - Spell Search View
 struct SpellSearchView: View {
-    @ObservedObject var store: CompendiumStore
+    @ObservedObject var spellStore: SpellStore
+    @ObservedObject var featStore: FeatStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
@@ -113,8 +117,8 @@ struct SpellSearchView: View {
                         .foregroundColor(.secondary)
                     TextField("Поиск заклинаний и умений...", text: $searchText)
                         .onChange(of: searchText) { 
-                            store.updateSpellSearchText(searchText)
-                            store.updateFeatSearchText(searchText)
+                            spellStore.updateSpellSearchText(searchText)
+                            featStore.updateFeatSearchText(searchText)
                         }
                 }
                 .padding()
@@ -125,11 +129,11 @@ struct SpellSearchView: View {
                 // Results
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        if !store.filteredSpells.isEmpty {
+                        if !spellStore.filteredSpells.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
                                 Button(action: { spellsCollapsed.toggle() }) {
                                     HStack {
-                                        Text("Заклинания (\(store.filteredSpells.count))")
+                                        Text("Заклинания (\(spellStore.filteredSpells.count))")
                                             .font(.headline)
                                             .foregroundColor(.primary)
                                         Spacer()
@@ -140,20 +144,20 @@ struct SpellSearchView: View {
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 
-                                if !spellsCollapsed {
-                                    ForEach(store.filteredSpells) { spell in
+                                    if !spellsCollapsed {
+                                        ForEach(spellStore.filteredSpells) { spell in
                                             CompendiumSpellCard(spell: spell, favorites: favorites)
-                                            .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
+                                                .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
                                     }
                                 }
                             }
                         }
-                        
-                        if !store.filteredFeats.isEmpty {
+
+                        if !featStore.filteredFeats.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
                                 Button(action: { featsCollapsed.toggle() }) {
                                     HStack {
-                                        Text("Умения (\(store.filteredFeats.count))")
+                                        Text("Умения (\(featStore.filteredFeats.count))")
                                             .font(.headline)
                                             .foregroundColor(.primary)
                                         Spacer()
@@ -164,10 +168,10 @@ struct SpellSearchView: View {
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 
-                                if !featsCollapsed {
-                                    ForEach(store.filteredFeats) { feat in
-                                        FeatCard(feat: feat, favorites: favorites)
-                                            .id("\(feat.id)-\(favorites.isFeatFavorite(feat.name))")
+                                    if !featsCollapsed {
+                                        ForEach(featStore.filteredFeats) { feat in
+                                            FeatCard(feat: feat, favorites: favorites)
+                                                .id("\(feat.id)-\(favorites.isFeatFavorite(feat.name))")
                                     }
                                 }
                             }
@@ -189,17 +193,17 @@ struct SpellSearchView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
-                        if !store.filteredSpells.isEmpty || !store.filteredFeats.isEmpty {
+                        if !spellStore.filteredSpells.isEmpty || !featStore.filteredFeats.isEmpty {
                             Button(action: {
-                                if !store.filteredSpells.isEmpty {
-                                    favorites.toggleMultipleSpells(store.filteredSpells)
+                                if !spellStore.filteredSpells.isEmpty {
+                                    favorites.toggleMultipleSpells(spellStore.filteredSpells)
                                 }
-                                if !store.filteredFeats.isEmpty {
-                                    favorites.toggleMultipleFeats(store.filteredFeats)
+                                if !featStore.filteredFeats.isEmpty {
+                                    favorites.toggleMultipleFeats(featStore.filteredFeats)
                                 }
                             }) {
-                                let allSpellsFavorite = store.filteredSpells.isEmpty || favorites.areAllSpellsFavorite(store.filteredSpells)
-                                let allFeatsFavorite = store.filteredFeats.isEmpty || favorites.areAllFeatsFavorite(store.filteredFeats)
+                                let allSpellsFavorite = spellStore.filteredSpells.isEmpty || favorites.areAllSpellsFavorite(spellStore.filteredSpells)
+                                let allFeatsFavorite = featStore.filteredFeats.isEmpty || favorites.areAllFeatsFavorite(featStore.filteredFeats)
                                 let allFavorite = allSpellsFavorite && allFeatsFavorite
                                 
                                 Image(systemName: allFavorite ? "heart.fill" : "heart")
@@ -220,7 +224,7 @@ struct SpellSearchView: View {
                 }
             }
             .sheet(isPresented: $showingFilters) {
-                AdvancedFiltersView(store: store)
+                AdvancedFiltersView(store: spellStore)
             }
         }
     }
@@ -228,7 +232,7 @@ struct SpellSearchView: View {
 
 // MARK: - Advanced Filters View
 struct AdvancedFiltersView: View {
-    @ObservedObject var store: CompendiumStore
+    @ObservedObject var store: SpellStore
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -373,7 +377,9 @@ struct AdvancedFiltersView: View {
 
 // MARK: - All Spells Tab (Favorites)
 struct AllSpellsTab: View {
-    let store: CompendiumStore
+    let spellStore: SpellStore
+    let featStore: FeatStore
+    let backgroundStore: BackgroundStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
 
@@ -386,9 +392,9 @@ struct AllSpellsTab: View {
     
     @MainActor
     private func updateFavorites() {
-        favoriteSpells = favorites.getFavoriteSpells(from: store.spells)
-        favoriteFeats = favorites.getFavoriteFeats(from: store.feats)
-        favoriteBackgrounds = favorites.getFavoriteBackgrounds(from: store.backgrounds)
+        favoriteSpells = favorites.getFavoriteSpells(from: spellStore.spells)
+        favoriteFeats = favorites.getFavoriteFeats(from: featStore.feats)
+        favoriteBackgrounds = favorites.getFavoriteBackgrounds(from: backgroundStore.backgrounds)
     }
 
     var body: some View {

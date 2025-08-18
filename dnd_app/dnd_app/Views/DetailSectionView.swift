@@ -4,7 +4,9 @@ struct DetailSectionView: View {
     let character: Character
     let section: CharacterDetailSection
     @ObservedObject var store: CharacterStore
-    @ObservedObject var compendiumStore: CompendiumStore
+    @ObservedObject var spellStore: SpellStore
+    @ObservedObject var featStore: FeatStore
+    @ObservedObject var backgroundStore: BackgroundStore
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -19,15 +21,15 @@ struct DetailSectionView: View {
                     case .skills:
                         SkillsDetailView(character: character)
                     case .spells:
-                        SpellsDetailView(character: character, compendiumStore: compendiumStore)
+                        SpellsDetailView(character: character, spellStore: spellStore)
                     case .equipment:
                         EquipmentDetailView(character: character)
                     case .treasure:
                         TreasureDetailView(character: character)
                     case .personality:
-                        PersonalityDetailView(character: character)
+                        PersonalityDetailView(character: character, backgroundStore: backgroundStore)
                     case .features:
-                        FeaturesDetailView(character: character)
+                        FeaturesDetailView(character: character, featStore: featStore)
                     }
                 }
                 .padding()
@@ -582,7 +584,7 @@ struct SkillDetailRow: View {
 // MARK: - Spells Detail View
 struct SpellsDetailView: View {
     let character: Character
-    @ObservedObject var compendiumStore: CompendiumStore
+    @ObservedObject var spellStore: SpellStore
     @StateObject private var favorites = FavoriteSpellsManager()
     @State private var favoriteSpells: [Spell] = []
     
@@ -674,7 +676,7 @@ struct SpellsDetailView: View {
     
     @MainActor
     private func updateFavorites() {
-        favoriteSpells = favorites.getFavoriteSpells(from: compendiumStore.spells)
+        favoriteSpells = favorites.getFavoriteSpells(from: spellStore.spells)
     }
 }
 
@@ -881,8 +883,8 @@ struct TreasureDetailView: View {
 // MARK: - Personality Detail View
 struct PersonalityDetailView: View {
     let character: Character
+    @ObservedObject var backgroundStore: BackgroundStore
     @StateObject private var favorites = FavoriteSpellsManager()
-    @StateObject private var store = CompendiumStore()
     @State private var favoriteBackgrounds: [Background] = []
     
     var body: some View {
@@ -995,15 +997,15 @@ struct PersonalityDetailView: View {
     
     @MainActor
     private func updateFavorites() {
-        favoriteBackgrounds = favorites.getFavoriteBackgrounds(from: store.backgrounds)
+        favoriteBackgrounds = favorites.getFavoriteBackgrounds(from: backgroundStore.backgrounds)
     }
 }
 
 // MARK: - Features Detail View
 struct FeaturesDetailView: View {
     let character: Character
+    @ObservedObject var featStore: FeatStore
     @StateObject private var favorites = FavoriteSpellsManager()
-    @StateObject private var store = CompendiumStore()
     @State private var favoriteFeats: [Feat] = []
     
     var body: some View {
@@ -1096,7 +1098,7 @@ struct FeaturesDetailView: View {
     
     @MainActor
     private func updateFavorites() {
-        favoriteFeats = favorites.getFavoriteFeats(from: store.feats)
+        favoriteFeats = favorites.getFavoriteFeats(from: featStore.feats)
     }
 }
 

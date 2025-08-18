@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct CompendiumView: View {
-    @StateObject private var store = CompendiumStore()
+    @StateObject private var spellStore = SpellStore()
+    @StateObject private var backgroundStore = BackgroundStore()
+    @StateObject private var featStore = FeatStore()
     @StateObject private var favorites = FavoriteSpellsManager()
     @StateObject private var themeManager = ThemeManager()
     
@@ -22,7 +24,7 @@ struct CompendiumView: View {
                 VStack(spacing: 0) {
                     // Main list
                     List {
-                        NavigationLink(destination: SpellsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
+                        NavigationLink(destination: SpellsTabView(store: spellStore, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "wand.and.stars")
                                     .foregroundColor(.purple)
@@ -49,7 +51,7 @@ struct CompendiumView: View {
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
 
-                        NavigationLink(destination: BackgroundsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
+                        NavigationLink(destination: BackgroundsTabView(store: backgroundStore, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "person.3.sequence")
                                     .foregroundColor(.blue)
@@ -76,7 +78,7 @@ struct CompendiumView: View {
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
 
-                        NavigationLink(destination: FeatsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
+                        NavigationLink(destination: FeatsTabView(store: featStore, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "star.circle")
                                     .foregroundColor(.orange)
@@ -130,7 +132,7 @@ struct CompendiumView: View {
                         .listRowBackground(Color(.systemBackground))
                         .listRowSeparator(.hidden)
 
-                        NavigationLink(destination: FavoritesTabView(store: store, favorites: favorites, themeManager: themeManager)) {
+                        NavigationLink(destination: FavoritesTabView(spellStore: spellStore, featStore: featStore, backgroundStore: backgroundStore, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "heart.circle")
                                     .foregroundColor(.red)
@@ -169,7 +171,7 @@ struct CompendiumView: View {
 
 // MARK: - Spells Tab View
 struct SpellsTabView: View {
-    @ObservedObject var store: CompendiumStore
+    @ObservedObject var store: SpellStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
     @State private var showingFilters = false
@@ -212,14 +214,14 @@ struct SpellsTabView: View {
             }
         }
         .sheet(isPresented: $showingFilters) {
-            SpellFiltersView(store: store)
+            SpellFiltersView(store: spellStore)
         }
     }
 }
 
 // MARK: - Backgrounds Tab View
 struct BackgroundsTabView: View {
-    @ObservedObject var store: CompendiumStore
+    @ObservedObject var store: BackgroundStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
     @State private var searchText = ""
@@ -256,7 +258,7 @@ struct BackgroundsTabView: View {
 
 // MARK: - Feats Tab View
 struct FeatsTabView: View {
-    @ObservedObject var store: CompendiumStore
+    @ObservedObject var store: FeatStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
     @State private var showingFilters = false
@@ -299,7 +301,7 @@ struct FeatsTabView: View {
             }
         }
         .sheet(isPresented: $showingFilters) {
-            FeatFiltersView(store: store)
+            FeatFiltersView(store: featStore)
         }
     }
 }
@@ -332,7 +334,7 @@ struct BestiaryTabView: View {
 
 // MARK: - Spell Filters View
 struct SpellFiltersView: View {
-    @ObservedObject var store: CompendiumStore
+    @ObservedObject var store: SpellStore
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -477,7 +479,7 @@ struct SpellFiltersView: View {
 
 // MARK: - Feat Filters View
 struct FeatFiltersView: View {
-    @ObservedObject var store: CompendiumStore
+    @ObservedObject var store: FeatStore
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -535,7 +537,9 @@ struct FeatFiltersView: View {
 
 // MARK: - Favorites Tab View
 struct FavoritesTabView: View {
-    @ObservedObject var store: CompendiumStore
+    @ObservedObject var spellStore: SpellStore
+    @ObservedObject var featStore: FeatStore
+    @ObservedObject var backgroundStore: BackgroundStore
     let favorites: FavoriteSpellsManager
     let themeManager: ThemeManager
     @State private var spellsCollapsed = false
@@ -548,9 +552,9 @@ struct FavoritesTabView: View {
     
     @MainActor
     private func updateFavorites() {
-        favoriteSpells = favorites.getFavoriteSpells(from: store.spells)
-        favoriteFeats = favorites.getFavoriteFeats(from: store.feats)
-        favoriteBackgrounds = favorites.getFavoriteBackgrounds(from: store.backgrounds)
+        favoriteSpells = favorites.getFavoriteSpells(from: spellStore.spells)
+        favoriteFeats = favorites.getFavoriteFeats(from: featStore.feats)
+        favoriteBackgrounds = favorites.getFavoriteBackgrounds(from: backgroundStore.backgrounds)
     }
     
     var body: some View {

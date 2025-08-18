@@ -15,7 +15,10 @@
 		275B2C182E4E2F89008AA77B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 275B2C172E4E2F89008AA77B /* Assets.xcassets */; };
 		275B2C1C2E4F666F008AA77B /* backgrounds.json in Resources */ = {isa = PBXBuildFile; fileRef = 275B2C1B2E4F666E008AA77B /* backgrounds.json */; };
 		275B2C1E2E4F68E9008AA77B /* CompendiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */; };
-		275B2C202E4F68EF008AA77B /* CompendiumStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 275B2C1F2E4F68EF008AA77B /* CompendiumStore.swift */; };
+               0C8C480C640E4E448E78B522 /* FilterStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A06A7654764B1F9F6330AC /* FilterStore.swift */; };
+               42D486B1CA534E409BB88740 /* SpellStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414C8EC17BAA4AB2851DAFD1 /* SpellStore.swift */; };
+               34E0618A9C03428291732F36 /* BackgroundStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977CA90FD6714D7F9C65F054 /* BackgroundStore.swift */; };
+               21AFEBC0C58E422CAF02F24F /* FeatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774A1B549C7F462D97CA0300 /* FeatStore.swift */; };
 		2792B75E2E4CC2EF0064FC97 /* quotes.json in Resources */ = {isa = PBXBuildFile; fileRef = 2792B75D2E4CC2EF0064FC97 /* quotes.json */; };
 		2792B7602E4CC3540064FC97 /* spells.json in Resources */ = {isa = PBXBuildFile; fileRef = 2792B75F2E4CC3540064FC97 /* spells.json */; };
 		2792B7622E4CC35C0064FC97 /* feats.json in Resources */ = {isa = PBXBuildFile; fileRef = 2792B7612E4CC35B0064FC97 /* feats.json */; };
@@ -67,7 +70,10 @@
 		275B2C172E4E2F89008AA77B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		275B2C1B2E4F666E008AA77B /* backgrounds.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = backgrounds.json; sourceTree = "<group>"; };
 		275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompendiumView.swift; sourceTree = "<group>"; };
-		275B2C1F2E4F68EF008AA77B /* CompendiumStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompendiumStore.swift; sourceTree = "<group>"; };
+               11A06A7654764B1F9F6330AC /* FilterStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterStore.swift; sourceTree = "<group>"; };
+               414C8EC17BAA4AB2851DAFD1 /* SpellStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpellStore.swift; sourceTree = "<group>"; };
+               977CA90FD6714D7F9C65F054 /* BackgroundStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundStore.swift; sourceTree = "<group>"; };
+               774A1B549C7F462D97CA0300 /* FeatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatStore.swift; sourceTree = "<group>"; };
 		2792B75D2E4CC2EF0064FC97 /* quotes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = quotes.json; sourceTree = "<group>"; };
 		2792B75F2E4CC3540064FC97 /* spells.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = spells.json; sourceTree = "<group>"; };
 		2792B7612E4CC35B0064FC97 /* feats.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = feats.json; sourceTree = "<group>"; };
@@ -220,7 +226,10 @@
 				27D1A0002E4700000042C0AB /* tabaxiApp.swift */,
 				27D1A0022E4700000042C0AB /* ContentView.swift */,
 				275B2C172E4E2F89008AA77B /* Assets.xcassets */,
-				275B2C1F2E4F68EF008AA77B /* CompendiumStore.swift */,
+                               11A06A7654764B1F9F6330AC /* FilterStore.swift */,
+                               414C8EC17BAA4AB2851DAFD1 /* SpellStore.swift */,
+                               977CA90FD6714D7F9C65F054 /* BackgroundStore.swift */,
+                               774A1B549C7F462D97CA0300 /* FeatStore.swift */,
 				27D304AA2E4DF92000CEDEF1 /* CommonStyles.swift */,
 			);
 			path = dnd_app;
@@ -368,7 +377,10 @@
 				27D1A0052E4700000042C0AB /* Models.swift in Sources */,
 				27D1A0072E4700000042C0AB /* SpellsView.swift in Sources */,
 				272ADF582E51E207007AF452 /* DetailSection.swift in Sources */,
-				275B2C202E4F68EF008AA77B /* CompendiumStore.swift in Sources */,
+                               0C8C480C640E4E448E78B522 /* FilterStore.swift in Sources */,
+                               42D486B1CA534E409BB88740 /* SpellStore.swift in Sources */,
+                               34E0618A9C03428291732F36 /* BackgroundStore.swift in Sources */,
+                               21AFEBC0C58E422CAF02F24F /* FeatStore.swift in Sources */,
 				27D1A00B2E4700000042C0AB /* FavoriteSpellsManager.swift in Sources */,
 				272ADF532E51D346007AF452 /* CharacterCreationView.swift in Sources */,
 				27D304AB2E4DF92000CEDEF1 /* CommonStyles.swift in Sources */,

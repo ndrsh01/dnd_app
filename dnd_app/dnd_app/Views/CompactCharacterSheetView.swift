@@ -3,7 +3,9 @@ import SwiftUI
 struct CompactCharacterSheetView: View {
     let character: Character
     @ObservedObject var store: CharacterStore
-    @ObservedObject var compendiumStore: CompendiumStore
+    @ObservedObject var spellStore: SpellStore
+    @ObservedObject var featStore: FeatStore
+    @ObservedObject var backgroundStore: BackgroundStore
     @State private var showingDetailSection: CharacterDetailSection?
     
     var body: some View {
@@ -25,7 +27,7 @@ struct CompactCharacterSheetView: View {
         }
         .background(ThemeManager.adaptiveCardBackground(for: nil))
         .sheet(item: $showingDetailSection) { section in
-            DetailSectionView(character: character, section: section, store: store, compendiumStore: compendiumStore)
+            DetailSectionView(character: character, section: section, store: store, spellStore: spellStore, featStore: featStore, backgroundStore: backgroundStore)
         }
     }
 }
