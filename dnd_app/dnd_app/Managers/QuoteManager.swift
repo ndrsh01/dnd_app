@@ -60,8 +60,8 @@ final class QuoteManager: ObservableObject {
     private var isInitialized = false
     private let cacheManager = CacheManager.shared
     
-    // Lazy initialization for better performance
-    func ensureInitialized() async {
+    // Lazy initialization for better performance  
+    func ensureInitialized() {
         guard !isInitialized else { return }
         isInitialized = true
 
@@ -71,18 +71,16 @@ final class QuoteManager: ObservableObject {
             return
         }
 
-        await Task.detached { [weak self] in
-            guard let self else { return }
-            await self.loadBundledQuotes()
-            await self.loadFavorites()
-            await self.mergeCustomQuotesFromStorage()
-            await self.rebuildCategories()
-
-            let quotesSnapshot = await self.quotesSnapshot()
-            let favoritesSnapshot = await self.favoritesSnapshot()
-            self.cacheManager.cacheQuotes(quotesSnapshot)
-            self.cacheManager.cacheFavorites(favoritesSnapshot)
-        }.value
+        loadBundledQuotes()
+        mergeCustomQuotesFromStorage()
+        loadFavorites()
+        rebuildCategories()
+        
+        // Сохраняем в кэш
+        let currentQuotes = self.quotesSnapshot()
+        let currentFavorites = self.favoritesSnapshot()
+        cacheManager.cacheQuotes(currentQuotes)
+        cacheManager.cacheFavorites(currentFavorites)
     }
 
     // Init
@@ -91,11 +89,11 @@ final class QuoteManager: ObservableObject {
     }
 
     // Thread-safe snapshots
-    @Sendable func quotesSnapshot() -> [String: [Quote]] {
+    func quotesSnapshot() -> [String: [Quote]] {
         quotes
     }
 
-    @Sendable func favoritesSnapshot() -> [String] {
+    func favoritesSnapshot() -> [String] {
         favorites
     }
 
@@ -136,8 +134,8 @@ final class QuoteManager: ObservableObject {
     }
 
     // MARK: - Random
-    func randomQuote(in category: String?) async {
-        await ensureInitialized()
+    func randomQuote(in category: String?) {
+        ensureInitialized()
 
         let pool: [Quote]
         if let category = category, let arr = quotes[category], !arr.isEmpty {

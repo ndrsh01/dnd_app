@@ -10,15 +10,7 @@ struct CharacterSheetView: View {
     @State private var showingAdd = false
     @State private var showCharacterSelection = false
     @State private var isImporting = false
-
-    // URL временного файла для экспорта персонажей
-    private var exportURL: URL {
-        compendiumStore.characters = characterStore.characters
-        let data = compendiumStore.exportCharacters()
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("characters.json")
-        try? data.write(to: url)
-        return url
-    }
+    @State private var isExporting = false
     
     var body: some View {
         NavigationStack {
@@ -67,14 +59,16 @@ struct CharacterSheetView: View {
 
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     if characterStore.selectedCharacter != nil {
-                        ShareLink(item: exportURL) {
+                        Button(action: { isExporting = true }) {
                             Image(systemName: "square.and.arrow.up")
                                 .font(.title2)
+                                .foregroundColor(.orange)
                         }
 
                         Button(action: { isImporting = true }) {
                             Image(systemName: "square.and.arrow.down")
                                 .font(.title2)
+                                .foregroundColor(.orange)
                         }
 
                         Button(action: { showingAdd = true }) {
@@ -88,12 +82,31 @@ struct CharacterSheetView: View {
             .sheet(isPresented: $showingAdd) {
                 CharacterEditorView(store: characterStore, character: characterStore.selectedCharacter)
             }
+            .fileExporter(
+                isPresented: $isExporting,
+                document: CharacterExportDocument(characters: characterStore.characters),
+                contentType: .json,
+                defaultFilename: "characters"
+            ) { result in
+                switch result {
+                case .success(let url):
+                    print("Персонажи экспортированы в: \(url)")
+                case .failure(let error):
+                    print("Ошибка экспорта: \(error)")
+                }
+            }
             .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
                 do {
                     let url = try result.get()
                     let data = try Data(contentsOf: url)
-                    compendiumStore.importCharacters(from: data)
-                    characterStore.characters = compendiumStore.characters
+                    let jsonString = String(data: data, encoding: .utf8) ?? ""
+                    
+                    // Попробуем импортировать как персонажей
+                    if let importedCharacters = try? JSONDecoder().decode([Character].self, from: data) {
+                        for character in importedCharacters {
+                            characterStore.add(character)
+                        }
+                    }
                 } catch {
                     print("Ошибка импорта: \(error)")
                 }
@@ -105,6 +118,31 @@ struct CharacterSheetView: View {
                 )
             }
         }
+    }
+}
+
+// MARK: - Character Export Document
+
+struct CharacterExportDocument: FileDocument {
+    static var readableContentTypes: [UTType] = [.json]
+    
+    let characters: [Character]
+    
+    init(characters: [Character]) {
+        self.characters = characters
+    }
+    
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        
+        characters = try JSONDecoder().decode([Character].self, from: data)
+    }
+    
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        let data = try JSONEncoder().encode(characters)
+        return FileWrapper(regularFileWithContents: data)
     }
 }
 

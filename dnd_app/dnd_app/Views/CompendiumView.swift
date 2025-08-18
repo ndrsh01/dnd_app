@@ -670,13 +670,13 @@ struct FavoritesTabView: View {
         .onAppear {
             updateFavorites()
         }
-        .onChange(of: favorites.spells.favorites) { _ in
+        .onChange(of: favorites.spells.favorites) {
             updateFavorites()
         }
-        .onChange(of: favorites.feats.favorites) { _ in
+        .onChange(of: favorites.feats.favorites) {
             updateFavorites()
         }
-        .onChange(of: favorites.backgrounds.favorites) { _ in
+        .onChange(of: favorites.backgrounds.favorites) {
             updateFavorites()
         }
     }

@@ -661,7 +661,7 @@ struct SpellsDetailView: View {
         .onAppear {
             updateFavorites()
         }
-        .onChange(of: favorites.spells.favorites) { _ in
+        .onChange(of: favorites.spells.favorites) {
             updateFavorites()
         }
     }
@@ -982,7 +982,7 @@ struct PersonalityDetailView: View {
         .onAppear {
             updateFavorites()
         }
-        .onChange(of: favorites.backgrounds.favorites) { _ in
+        .onChange(of: favorites.backgrounds.favorites) {
             updateFavorites()
         }
     }
@@ -1083,7 +1083,7 @@ struct FeaturesDetailView: View {
         .onAppear {
             updateFavorites()
         }
-        .onChange(of: favorites.feats.favorites) { _ in
+        .onChange(of: favorites.feats.favorites) {
             updateFavorites()
         }
     }

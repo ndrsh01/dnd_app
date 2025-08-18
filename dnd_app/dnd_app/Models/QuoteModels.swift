@@ -7,7 +7,7 @@ struct JSONQuotes: Codable {
 }
 
 struct QuoteCategory: Identifiable, Codable, Equatable {
-    let id = UUID()
+    var id: UUID { UUID() }
     let name: String
     var quotes: [String]
     
