@@ -1,8 +1,5 @@
-
 import Foundation
 
-// MARK: - Store
-@MainActor
 final class CompendiumStore: ObservableObject {
     @Published var spells: [Spell] = []
     @Published var filteredSpells: [Spell] = []
@@ -15,176 +12,153 @@ final class CompendiumStore: ObservableObject {
     @Published var feats: [Feat] = []
     @Published var filteredFeats: [Feat] = []
     @Published var featFilters = FeatFilters()
-
-    // MARK: - Characters
-    /// Хранит экспортируемый список персонажей
-    @Published var characters: [Character] = []
     
-    @Published var availableSchools: [String] = []
-    @Published var availableClasses: [String] = []
-    @Published var availableFeatCategories: [String] = []
+    @Published var isLoading = false
     
     private let cacheManager = CacheManager.shared
-
+    
     init() {
-        loadData()
+        loadAllData()
     }
-
-    private func loadData() {
+    
+    private func loadAllData() {
+        isLoading = true
+        
         loadSpells()
         loadBackgrounds()
         loadFeats()
-        loadCachedFilters()
-    }
-
-    // MARK: - Generic Loader
-    /// Asynchronously loads a decodable array either from cache or from a JSON file in the bundle.
-    /// - Returns: Tuple containing the loaded array and a flag indicating whether the data came from cache.
-    private func loadDecodableArray<T: Decodable>(
-        fileName: String,
-        cacheGetter: () -> [T]?,
-        cacheSetter: @escaping ([T]) -> Void
-    ) async -> ([T], Bool)? {
-        if let cached = cacheGetter() {
-            return (cached, true)
-        }
-
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "json") else {
-            print("❌ [\(fileName.uppercased())] Не найден файл \(fileName).json")
-            return nil
-        }
-
-        do {
-            let data = try await Task.detached(priority: .background) {
-                try Data(contentsOf: url)
-            }.value
-            let items = try JSONDecoder().decode([T].self, from: data)
-            cacheSetter(items)
-            return (items, false)
-        } catch {
-            print("❌ [\(fileName.uppercased())] Ошибка загрузки: \(error)")
-            return nil
-        }
-    }
-
-    // MARK: - Spells Loading
-    private func loadSpells() {
-        Task {
-            if let (spells, fromCache) = await loadDecodableArray(
-                fileName: "spells",
-                cacheGetter: cacheManager.getCachedSpells,
-                cacheSetter: cacheManager.cacheSpells
-            ) as ([Spell], Bool)? {
-                await MainActor.run {
-                    self.spells = spells
-                    self.updateAvailableFilters()
-                    self.applySpellFilters()
-                    let message = fromCache
-                        ? "✅ [SPELLS] Загружено \(spells.count) заклинаний из кэша"
-                        : "✅ [SPELLS] Загружено \(spells.count) заклинаний из файла и закэшировано"
-                    print(message)
-                }
-            }
-        }
-    }
-
-    // MARK: - Backgrounds Loading
-    private func loadBackgrounds() {
-        Task {
-            if let (backgrounds, fromCache) = await loadDecodableArray(
-                fileName: "backgrounds",
-                cacheGetter: cacheManager.getCachedBackgrounds,
-                cacheSetter: cacheManager.cacheBackgrounds
-            ) {
-                await MainActor.run {
-                    self.backgrounds = backgrounds
-                    self.applyBackgroundFilters()
-                    let message = fromCache
-                        ? "✅ [BACKGROUNDS] Загружено \(backgrounds.count) предысторий из кэша"
-                        : "✅ [BACKGROUNDS] Загружено \(backgrounds.count) предысторий из файла и закэшировано"
-                    print(message)
-                }
-            }
-        }
-    }
-
-    // MARK: - Feats Loading
-    private func loadFeats() {
-        Task {
-            if let (feats, fromCache) = await loadDecodableArray(
-                fileName: "feats",
-                cacheGetter: cacheManager.getCachedFeats,
-                cacheSetter: cacheManager.cacheFeats
-            ) {
-                let categories = Set(feats.map { $0.category })
-                await MainActor.run {
-                    self.feats = feats
-                    self.availableFeatCategories = Array(categories).sorted()
-                    self.applyFeatFilters()
-                    let message = fromCache
-                        ? "✅ [FEATS] Загружено \(feats.count) черт из кэша"
-                        : "✅ [FEATS] Загружено \(feats.count) черт из \(categories.count) категорий и закэшировано"
-                    print(message)
-                }
-            }
-        }
-    }
-    
-    // MARK: - Filter Updates
-    private func updateAvailableFilters() {
-        let schools = Set(spells.map { $0.school })
-        availableSchools = Array(schools).sorted()
         
-        let classes = Set(spells.flatMap { $0.classes })
-        availableClasses = Array(classes).sorted()
+        isLoading = false
     }
     
-    // MARK: - Background Filters
-    func updateBackgroundSearchText(_ text: String) {
-        backgroundFilters.searchText = text
-        applyBackgroundFilters()
-    }
-    
-    func clearBackgroundFilters() {
-        backgroundFilters.clear()
-        applyBackgroundFilters()
-    }
-
-    func applyBackgroundFilters() {
-        let searchText = backgroundFilters.searchText.lowercased()
-
-        filteredBackgrounds = backgrounds.filter { background in
-            // Поиск по тексту
-            if !searchText.isEmpty {
-                if !background.name.lowercased().contains(searchText) &&
-                   !background.description.lowercased().contains(searchText) &&
-                   !background.trait.lowercased().contains(searchText) {
-                    return false
-                }
-            }
-
-            return true
+    private func loadSpells() {
+        // Пытаемся загрузить из кэша
+        if let cachedSpells = cacheManager.getCachedSpells() {
+            self.spells = cachedSpells
+            self.filteredSpells = cachedSpells
+            return
+        }
+        
+        // Загружаем из файла
+        guard let url = Bundle.main.url(forResource: "spells", withExtension: "json") else {
+            print("❌ [SPELLS] Не найден файл spells.json")
+            return
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let loadedSpells = try JSONDecoder().decode([Spell].self, from: data)
+            
+            self.spells = loadedSpells
+            self.filteredSpells = loadedSpells
+            
+            // Кэшируем
+            cacheManager.cacheSpells(loadedSpells)
+            print("✅ [SPELLS] Загружено \(loadedSpells.count) заклинаний")
+        } catch {
+            print("❌ [SPELLS] Ошибка загрузки: \(error)")
         }
     }
     
-    // MARK: - Spell Filters
+    private func loadBackgrounds() {
+        // Пытаемся загрузить из кэша
+        if let cachedBackgrounds = cacheManager.getCachedBackgrounds() {
+            self.backgrounds = cachedBackgrounds
+            self.filteredBackgrounds = cachedBackgrounds
+            return
+        }
+        
+        // Загружаем из файла
+        guard let url = Bundle.main.url(forResource: "backgrounds", withExtension: "json") else {
+            print("❌ [BACKGROUNDS] Не найден файл backgrounds.json")
+            return
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let loadedBackgrounds = try JSONDecoder().decode([Background].self, from: data)
+            
+            self.backgrounds = loadedBackgrounds
+            self.filteredBackgrounds = loadedBackgrounds
+            
+            // Кэшируем
+            cacheManager.cacheBackgrounds(loadedBackgrounds)
+            print("✅ [BACKGROUNDS] Загружено \(loadedBackgrounds.count) предысторий")
+        } catch {
+            print("❌ [BACKGROUNDS] Ошибка загрузки: \(error)")
+        }
+    }
+    
+    private func loadFeats() {
+        // Пытаемся загрузить из кэша
+        if let cachedFeats = cacheManager.getCachedFeats() {
+            self.feats = cachedFeats
+            self.filteredFeats = cachedFeats
+            return
+        }
+        
+        // Загружаем из файла
+        guard let url = Bundle.main.url(forResource: "feats", withExtension: "json") else {
+            print("❌ [FEATS] Не найден файл feats.json")
+            return
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let loadedFeats = try JSONDecoder().decode([Feat].self, from: data)
+            
+            self.feats = loadedFeats
+            self.filteredFeats = loadedFeats
+            
+            // Кэшируем
+            cacheManager.cacheFeats(loadedFeats)
+            print("✅ [FEATS] Загружено \(loadedFeats.count) черт")
+        } catch {
+            print("❌ [FEATS] Ошибка загрузки: \(error)")
+        }
+    }
+    
+    // MARK: - Update Methods
+    
     func updateSpellSearchText(_ text: String) {
         spellFilters.searchText = text
         applySpellFilters()
     }
     
+    func updateBackgroundSearchText(_ text: String) {
+        backgroundFilters.searchText = text
+        applyBackgroundFilters()
+    }
+    
+    func updateFeatSearchText(_ text: String) {
+        featFilters.searchText = text
+        applyFeatFilters()
+    }
+    
     func toggleSpellLevelFilter(_ level: Int) {
-        spellFilters.toggleLevelFilter(level)
+        if spellFilters.selectedLevels.contains(level) {
+            spellFilters.selectedLevels.remove(level)
+        } else {
+            spellFilters.selectedLevels.insert(level)
+        }
         applySpellFilters()
     }
     
     func toggleSpellSchoolFilter(_ school: String) {
-        spellFilters.toggleSchoolFilter(school)
+        if spellFilters.selectedSchools.contains(school) {
+            spellFilters.selectedSchools.remove(school)
+        } else {
+            spellFilters.selectedSchools.insert(school)
+        }
         applySpellFilters()
     }
     
     func toggleSpellClassFilter(_ className: String) {
-        spellFilters.toggleClassFilter(className)
+        if spellFilters.selectedClasses.contains(className) {
+            spellFilters.selectedClasses.remove(className)
+        } else {
+            spellFilters.selectedClasses.insert(className)
+        }
         applySpellFilters()
     }
     
@@ -198,145 +172,102 @@ final class CompendiumStore: ObservableObject {
         applySpellFilters()
     }
     
+    func toggleFeatCategoryFilter(_ category: String) {
+        // Для простоты пока не реализуем категории черт
+        applyFeatFilters()
+    }
+    
+    var availableFeatCategories: [String] {
+        // Возвращаем пустой массив, так как категории черт не определены
+        return []
+    }
+    
+    var availableSpellSchools: [String] {
+        let schools = Set(spells.map { $0.school })
+        return Array(schools).sorted()
+    }
+    
+    var availableSpellClasses: [String] {
+        let allClasses = spells.flatMap { $0.classes }
+        let uniqueClasses = Set(allClasses)
+        return Array(uniqueClasses).sorted()
+    }
+    
     func clearSpellFilters() {
-        spellFilters.clear()
+        spellFilters = SpellFilters()
         applySpellFilters()
     }
-
-    func applySpellFilters() {
-        let searchText = spellFilters.searchText.lowercased()
-        let selectedLevels = spellFilters.selectedLevels
-        let selectedSchools = spellFilters.selectedSchools
-        let selectedClasses = spellFilters.selectedClasses
-        let concentrationOnly = spellFilters.concentrationOnly
-        let ritualOnly = spellFilters.ritualOnly
-
-        filteredSpells = spells.filter { spell in
-            // Поиск по тексту
-            if !searchText.isEmpty {
-                if !spell.name.lowercased().contains(searchText) &&
-                   !spell.description.lowercased().contains(searchText) {
-                    return false
-                }
-            }
-
-            // Фильтр по уровню
-            if !selectedLevels.isEmpty && !selectedLevels.contains(spell.level) {
-                return false
-            }
-
-            // Фильтр по школе
-            if !selectedSchools.isEmpty && !selectedSchools.contains(spell.school) {
-                return false
-            }
-
-            // Фильтр по классу
-            if !selectedClasses.isEmpty {
-                let spellClasses = Set(spell.classes)
-                if spellClasses.intersection(selectedClasses).isEmpty {
-                    return false
-                }
-            }
-
-            // Фильтр концентрации
-            if concentrationOnly && !spell.concentration {
-                return false
-            }
-
-            // Фильтр ритуала
-            if ritualOnly && !spell.ritual {
-                return false
-            }
-
-            return true
-        }
-
-        // Кэшируем фильтры заклинаний
-        cacheManager.cacheSpellFilters(spellFilters)
-    }
     
-    // MARK: - Feat Filters
-    func updateFeatSearchText(_ text: String) {
-        featFilters.searchText = text
-        applyFeatFilters()
-    }
-    
-    func toggleFeatCategoryFilter(_ category: String) {
-        featFilters.toggleCategoryFilter(category)
-        applyFeatFilters()
+    func clearBackgroundFilters() {
+        backgroundFilters = BackgroundFilters()
+        applyBackgroundFilters()
     }
     
     func clearFeatFilters() {
-        featFilters.clear()
+        featFilters = FeatFilters()
         applyFeatFilters()
     }
-
-    func applyFeatFilters() {
-        let searchText = featFilters.searchText.lowercased()
-        let selectedCategories = featFilters.selectedCategories
-
-        filteredFeats = feats.filter { feat in
-            // Поиск по тексту
-            if !searchText.isEmpty {
-                if !feat.name.lowercased().contains(searchText) &&
-                   !feat.description.lowercased().contains(searchText) {
+    
+    // MARK: - Filtering
+    
+    func applySpellFilters() {
+        filteredSpells = spells.filter { spell in
+            // Фильтр по уровню
+            if !spellFilters.selectedLevels.isEmpty && !spellFilters.selectedLevels.contains(spell.level) {
+                return false
+            }
+            
+            // Фильтр по школе
+            if !spellFilters.selectedSchools.isEmpty && !spellFilters.selectedSchools.contains(spell.school) {
+                return false
+            }
+            
+            // Фильтр по классам
+            if !spellFilters.selectedClasses.isEmpty {
+                let hasMatchingClass = spellFilters.selectedClasses.contains { filterClass in
+                    spell.classes.contains { spellClass in
+                        spellClass.lowercased().contains(filterClass.lowercased())
+                    }
+                }
+                if !hasMatchingClass {
                     return false
                 }
             }
-
-            // Фильтр по категории
-            if !selectedCategories.isEmpty && !selectedCategories.contains(feat.category) {
-                return false
+            
+            // Поиск по тексту
+            if !spellFilters.searchText.isEmpty {
+                let searchText = spellFilters.searchText.lowercased()
+                return spell.name.lowercased().contains(searchText) ||
+                       spell.description.lowercased().contains(searchText)
             }
-
+            
             return true
         }
-
-        // Кэшируем фильтры черт
-        cacheManager.cacheFeatFilters(featFilters)
     }
     
-    // MARK: - Cache Management
-    private func loadCachedFilters() {
-        // Загружаем кэшированные фильтры заклинаний
-        if let cachedSpellFilters = cacheManager.getCachedSpellFilters() {
-            spellFilters = cachedSpellFilters
-            print("✅ [CACHE] Загружены кэшированные фильтры заклинаний")
-        }
-        
-        // Загружаем кэшированные фильтры черт
-        if let cachedFeatFilters = cacheManager.getCachedFeatFilters() {
-            featFilters = cachedFeatFilters
-            print("✅ [CACHE] Загружены кэшированные фильтры черт")
+    func applyBackgroundFilters() {
+        filteredBackgrounds = backgrounds.filter { background in
+            // Поиск по тексту
+            if !backgroundFilters.searchText.isEmpty {
+                let searchText = backgroundFilters.searchText.lowercased()
+                return background.name.lowercased().contains(searchText) ||
+                       background.description.lowercased().contains(searchText)
+            }
+            
+            return true
         }
     }
     
-    func clearAllCaches() {
-        cacheManager.clearAllCaches()
-        print("✅ [CACHE] Все кэши очищены")
-    }
-
-    // MARK: - Characters Export/Import
-    /// Экспортирует текущий список персонажей в JSON-формат
-    func exportCharacters() -> Data {
-        let bundle = CharacterBundle(characters: characters)
-        do {
-            let data = try JSONEncoder().encode(bundle)
-            return data
-        } catch {
-            print("❌ [CHARACTERS] Ошибка экспорта: \(error)")
-            return Data()
-        }
-    }
-
-    /// Импортирует персонажей из JSON-данных
-    func importCharacters(from data: Data) {
-        do {
-            let bundle = try JSONDecoder().decode(CharacterBundle.self, from: data)
-            characters = bundle.characters
-            print("✅ [CHARACTERS] Импортировано персонажей: \(characters.count)")
-        } catch {
-            print("❌ [CHARACTERS] Ошибка импорта: \(error)")
+    func applyFeatFilters() {
+        filteredFeats = feats.filter { feat in
+            // Поиск по тексту
+            if !featFilters.searchText.isEmpty {
+                let searchText = featFilters.searchText.lowercased()
+                return feat.name.lowercased().contains(searchText) ||
+                       feat.description.lowercased().contains(searchText)
+            }
+            
+            return true
         }
     }
 }

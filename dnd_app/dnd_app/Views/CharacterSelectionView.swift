@@ -1,9 +1,15 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct CharacterSelectionView: View {
     @ObservedObject var characterStore: CharacterStore
     @Binding var isPresented: Bool
     @State private var showCharacterCreation = false
+    @State private var isImporting = false
+    @State private var isExporting = false
+    @State private var showImportSuccess = false
+    @State private var showImportError = false
+    @State private var importMessage = ""
     
     var body: some View {
         NavigationView {
@@ -23,7 +29,7 @@ struct CharacterSelectionView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-                .padding(.top, 20)
+                .padding(.top, 60)
                 
                 // Список персонажей
                 if characterStore.characters.isEmpty {
@@ -112,9 +118,99 @@ struct CharacterSelectionView: View {
                 endPoint: .bottomTrailing
             )
         )
-        .navigationBarHidden(true)
+        .navigationTitle("Персонажи")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Закрыть") {
+                    isPresented = false
+                }
+                .foregroundColor(.orange)
+            }
+            
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Button(action: { isImporting = true }) {
+                    Image(systemName: "square.and.arrow.down")
+                        .font(.title2)
+                        .foregroundColor(.orange)
+                }
+                
+                Button(action: { isExporting = true }) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.title2)
+                        .foregroundColor(.orange)
+                }
+            }
+        }
         .sheet(isPresented: $showCharacterCreation) {
             CharacterCreationView(characterStore: characterStore)
+        }
+        .fileExporter(
+            isPresented: $isExporting,
+            document: CharacterExportDocument(characters: characterStore.characters),
+            contentType: .json,
+            defaultFilename: "characters"
+        ) { result in
+            switch result {
+            case .success(let url):
+                print("Персонажи экспортированы в: \(url)")
+            case .failure(let error):
+                print("Ошибка экспорта: \(error)")
+            }
+        }
+        .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
+            do {
+                let url = try result.get()
+                let data = try Data(contentsOf: url)
+                let jsonString = String(data: data, encoding: .utf8) ?? ""
+                
+                var importedCount = 0
+                
+                // Попробуем импортировать как массив персонажей
+                if let importedCharacters = try? JSONDecoder().decode([Character].self, from: data) {
+                    for character in importedCharacters {
+                        characterStore.add(character)
+                        importedCount += 1
+                    }
+                    print("✅ Импортировано персонажей из массива: \(importedCount)")
+                }
+                // Попробуем импортировать как одного персонажа
+                else if let importedCharacter = try? JSONDecoder().decode(Character.self, from: data) {
+                    characterStore.add(importedCharacter)
+                    importedCount = 1
+                    print("✅ Импортирован персонаж: \(importedCharacter.name)")
+                }
+                // Попробуем импортировать как JSON из внешнего источника
+                else if let externalCharacter = characterStore.importCharacterFromJSON(jsonString) {
+                    characterStore.add(externalCharacter)
+                    importedCount = 1
+                    print("✅ Импортирован персонаж из внешнего JSON: \(externalCharacter.name)")
+                }
+                else {
+                    print("❌ Ошибка: Неверный формат файла. Файл должен содержать персонажа или массив персонажей в JSON формате.")
+                    showImportError = true
+                }
+                
+                if importedCount > 0 {
+                    showImportSuccess = true
+                    importMessage = "Успешно импортировано персонажей: \(importedCount)"
+                }
+                
+            } catch {
+                print("❌ Ошибка импорта: \(error)")
+                showImportError = true
+                importMessage = "Ошибка чтения файла: \(error.localizedDescription)"
+            }
+        }
+        .alert("Импорт успешен", isPresented: $showImportSuccess) {
+            Button("OK") { }
+        } message: {
+            Text(importMessage)
+        }
+        .alert("Ошибка импорта", isPresented: $showImportError) {
+            Button("OK") { }
+        } message: {
+            Text(importMessage)
         }
         }
     }
@@ -187,6 +283,31 @@ struct CharacterCardView: View {
             )
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// MARK: - Character Export Document
+
+struct CharacterExportDocument: FileDocument {
+    static var readableContentTypes: [UTType] = [.json]
+    
+    let characters: [Character]
+    
+    init(characters: [Character]) {
+        self.characters = characters
+    }
+    
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        
+        characters = try JSONDecoder().decode([Character].self, from: data)
+    }
+    
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        let data = try JSONEncoder().encode(characters)
+        return FileWrapper(regularFileWithContents: data)
     }
 }
 

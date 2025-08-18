@@ -24,14 +24,20 @@ struct CompendiumView: View {
                     List {
                         NavigationLink(destination: SpellsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
-                                Image(systemName: "wand.and.stars")
-                                    .foregroundColor(.purple)
-                                    .font(.title2)
-                                    .frame(width: 30)
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.purple.opacity(0.2))
+                                        .frame(width: 40, height: 40)
+                                    
+                                    Image(systemName: "wand.and.stars")
+                                        .foregroundColor(.purple)
+                                        .font(.title3)
+                                }
 
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Заклинания")
                                         .font(.headline)
+                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Магические заклинания и их описания")
                                         .font(.caption)
@@ -39,26 +45,35 @@ struct CompendiumView: View {
                                 }
 
                                 Spacer()
-
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
                             }
-                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemBackground))
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
+                        .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
 
                         NavigationLink(destination: BackgroundsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
-                                Image(systemName: "person.3.sequence")
-                                    .foregroundColor(.blue)
-                                    .font(.title2)
-                                    .frame(width: 30)
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.blue.opacity(0.2))
+                                        .frame(width: 40, height: 40)
+                                    
+                                    Image(systemName: "person.3.sequence")
+                                        .foregroundColor(.blue)
+                                        .font(.title3)
+                                }
 
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Предыстории")
                                         .font(.headline)
+                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Происхождение и история персонажа")
                                         .font(.caption)
@@ -66,26 +81,35 @@ struct CompendiumView: View {
                                 }
 
                                 Spacer()
-
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
                             }
-                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemBackground))
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
+                        .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
 
                         NavigationLink(destination: FeatsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
-                                Image(systemName: "star.circle")
-                                    .foregroundColor(.orange)
-                                    .font(.title2)
-                                    .frame(width: 30)
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.orange.opacity(0.2))
+                                        .frame(width: 40, height: 40)
+                                    
+                                    Image(systemName: "star.circle")
+                                        .foregroundColor(.orange)
+                                        .font(.title3)
+                                }
 
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Черты")
                                         .font(.headline)
+                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Особые способности и умения")
                                         .font(.caption)
@@ -93,26 +117,35 @@ struct CompendiumView: View {
                                 }
 
                                 Spacer()
-
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
                             }
-                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemBackground))
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
+                        .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
 
                         NavigationLink(destination: BestiaryTabView()) {
                             HStack {
-                                Image(systemName: "pawprint.circle")
-                                    .foregroundColor(.green)
-                                    .font(.title2)
-                                    .frame(width: 30)
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.green.opacity(0.2))
+                                        .frame(width: 40, height: 40)
+                                    
+                                    Image(systemName: "pawprint.circle")
+                                        .foregroundColor(.green)
+                                        .font(.title3)
+                                }
 
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Бестиарий")
                                         .font(.headline)
+                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Монстры и существа")
                                         .font(.caption)
@@ -120,26 +153,35 @@ struct CompendiumView: View {
                                 }
 
                                 Spacer()
-
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
                             }
-                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemBackground))
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
+                        .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
 
                         NavigationLink(destination: FavoritesTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
-                                Image(systemName: "heart.circle")
-                                    .foregroundColor(.red)
-                                    .font(.title2)
-                                    .frame(width: 30)
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.red.opacity(0.2))
+                                        .frame(width: 40, height: 40)
+                                    
+                                    Image(systemName: "heart.circle")
+                                        .foregroundColor(.red)
+                                        .font(.title3)
+                                }
 
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Избранное")
                                         .font(.headline)
+                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Сохраненные элементы")
                                         .font(.caption)
@@ -152,10 +194,17 @@ struct CompendiumView: View {
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
-                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemBackground))
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
+                        .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     }
                     .listStyle(PlainListStyle())
                     .scrollContentBackground(.hidden)

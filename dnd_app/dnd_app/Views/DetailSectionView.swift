@@ -36,7 +36,8 @@ struct DetailSectionView: View {
                 LinearGradient(
                     colors: [
                         Color(red: 0.988, green: 0.933, blue: 0.855),
-                        Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9)
+                        Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                        Color(red: 0.988, green: 0.933, blue: 0.855)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -68,12 +69,22 @@ struct AbilitiesDetailView: View {
             // Характеристики
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Image(systemName: "figure.strengthtraining.traditional")
-                        .foregroundColor(.orange)
-                        .font(.title2)
+                    ZStack {
+                        Circle()
+                            .fill(Color.orange.opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        
+                        Image(systemName: "figure.strengthtraining.traditional")
+                            .foregroundColor(.orange)
+                            .font(.title2)
+                    .fontWeight(.semibold)
+                    }
+                    
                     Text("Характеристики")
                         .font(.title2)
                         .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
                     Spacer()
                 }
                 
@@ -86,22 +97,49 @@ struct AbilitiesDetailView: View {
                     AbilityDetailCard(name: "Харизма", score: character.charisma, modifier: character.charismaModifier, icon: "person.2.fill", color: .pink)
                 }
             }
-            .padding(20)
+            .padding(24)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
             
             // Спасброски
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Image(systemName: "shield.fill")
-                        .foregroundColor(.blue)
-                        .font(.title2)
+                    ZStack {
+                        Circle()
+                            .fill(Color.blue.opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        
+                        Image(systemName: "shield.fill")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                    .fontWeight(.semibold)
+                    }
+                    
                     Text("Спасброски")
                         .font(.title2)
                         .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
                     Spacer()
                 }
                 
@@ -115,11 +153,28 @@ struct AbilitiesDetailView: View {
                     }
                 }
             }
-            .padding(20)
+            .padding(24)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
         }
     }
@@ -139,9 +194,9 @@ struct AbilityDetailCard: View {
                     .fill(color.opacity(0.2))
                     .frame(width: 50, height: 50)
                 
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundColor(color)
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(color)
             }
             
             Text(name)
@@ -206,9 +261,9 @@ struct SaveThrowRow: View {
             
             if isProficient {
                 HStack(spacing: 4) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.orange)
-                        .font(.caption)
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.orange)
+                    .font(.caption)
                     Text("Проф.")
                         .font(.caption)
                         .fontWeight(.medium)
@@ -248,7 +303,7 @@ struct CombatDetailView: View {
                     Image(systemName: "shield.fill")
                         .foregroundColor(.blue)
                         .font(.title2)
-                    Text("Боевые характеристики")
+                Text("Боевые характеристики")
                         .font(.title2)
                         .fontWeight(.bold)
                     Spacer()
@@ -261,11 +316,28 @@ struct CombatDetailView: View {
                     CombatDetailCard(title: "Пассивное восприятие", value: "\(character.passivePerception)", icon: "eye.fill", color: .purple)
                 }
             }
-            .padding(20)
+            .padding(24)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
             
             // Хиты и кости
@@ -274,7 +346,7 @@ struct CombatDetailView: View {
                     Image(systemName: "heart.fill")
                         .foregroundColor(.red)
                         .font(.title2)
-                    Text("Хиты и кости")
+                Text("Хиты и кости")
                         .font(.title2)
                         .fontWeight(.bold)
                     Spacer()
@@ -314,11 +386,28 @@ struct CombatDetailView: View {
                     }
                 }
             }
-            .padding(20)
+            .padding(24)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
             
             // Спасброски от смерти
@@ -341,9 +430,22 @@ struct CombatDetailView: View {
                         
                         HStack(spacing: 4) {
                             ForEach(0..<3) { index in
+                                Button(action: {
+                                    if let selectedCharacter = store.selectedCharacter {
+                                        var updatedCharacter = selectedCharacter
+                                        if index < selectedCharacter.deathSaveSuccesses {
+                                            updatedCharacter.deathSaveSuccesses -= 1
+                                        } else {
+                                            updatedCharacter.deathSaveSuccesses = index + 1
+                                        }
+                                        store.update(updatedCharacter)
+                                    }
+                                }) {
                                 Circle()
-                                    .fill(index < character.deathSaveSuccesses ? Color.green : Color.gray.opacity(0.3))
+                                        .fill(index < (store.selectedCharacter?.deathSaveSuccesses ?? character.deathSaveSuccesses) ? Color.green : Color.gray.opacity(0.3))
                                     .frame(width: 20, height: 20)
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
                     }
@@ -355,19 +457,49 @@ struct CombatDetailView: View {
                         
                         HStack(spacing: 4) {
                             ForEach(0..<3) { index in
+                                Button(action: {
+                                    if let selectedCharacter = store.selectedCharacter {
+                                        var updatedCharacter = selectedCharacter
+                                        if index < selectedCharacter.deathSaveFailures {
+                                            updatedCharacter.deathSaveFailures -= 1
+                                        } else {
+                                            updatedCharacter.deathSaveFailures = index + 1
+                                        }
+                                        store.update(updatedCharacter)
+                                    }
+                                }) {
                                 Circle()
-                                    .fill(index < character.deathSaveFailures ? Color.red : Color.gray.opacity(0.3))
+                                        .fill(index < (store.selectedCharacter?.deathSaveFailures ?? character.deathSaveFailures) ? Color.red : Color.gray.opacity(0.3))
                                     .frame(width: 20, height: 20)
+                            }
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
                     }
                 }
             }
-            .padding(20)
+            .padding(24)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
             
             // Степени истощения
@@ -382,23 +514,43 @@ struct CombatDetailView: View {
                     Spacer()
                 }
                 
-                HStack(spacing: 20) {
+                HStack(spacing: 8) {
                     ForEach(1...6, id: \.self) { level in
                         ExhaustionLevelCard(
                             level: level,
-                            isActive: character.exhaustionLevel >= level,
+                            isActive: (store.selectedCharacter?.exhaustionLevel ?? character.exhaustionLevel) >= level,
                             onTap: {
-                                store.updateCharacterExhaustion(character, newExhaustionLevel: level)
+                                if let selectedCharacter = store.selectedCharacter {
+                                    let newLevel = selectedCharacter.exhaustionLevel >= level ? level - 1 : level
+                                    store.updateCharacterExhaustion(selectedCharacter, newExhaustionLevel: newLevel)
+                                }
                             }
                         )
                     }
                 }
             }
-            .padding(20)
+            .padding(24)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
         }
     }
@@ -444,22 +596,15 @@ struct ExhaustionLevelCard: View {
     
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 4) {
-                Text("\(level)")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(isActive ? .white : .secondary)
-                
-                Circle()
-                    .fill(isActive ? Color.orange : Color.gray.opacity(0.3))
-                    .frame(width: 20, height: 20)
-                    .overlay(
-                        Text("\(level)")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(isActive ? .white : .secondary)
-                    )
-            }
+            Circle()
+                .fill(isActive ? Color.orange : Color.gray.opacity(0.3))
+                .frame(width: 20, height: 20)
+                .overlay(
+                    Text("\(level)")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(isActive ? .white : .secondary)
+                )
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -494,12 +639,22 @@ struct SkillsDetailView: View {
         VStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Image(systemName: "brain.head.profile")
-                        .foregroundColor(.blue)
-                        .font(.title2)
+                    ZStack {
+                        Circle()
+                            .fill(Color.blue.opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        
+                        Image(systemName: "brain.head.profile")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                    .fontWeight(.semibold)
+                    }
+                    
                     Text("Навыки")
                         .font(.title2)
                         .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
                     Spacer()
                 }
                 
@@ -516,11 +671,28 @@ struct SkillsDetailView: View {
                     }
                 }
             }
-            .padding(20)
+            .padding(24)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
         }
     }
@@ -536,9 +708,9 @@ struct SkillDetailRow: View {
         HStack(spacing: 16) {
             HStack(spacing: 8) {
                 Text(skillName)
-                    .font(.subheadline)
+                .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                .foregroundColor(.primary)
                 
                 Text("(\(ability))")
                     .font(.caption)
@@ -550,9 +722,9 @@ struct SkillDetailRow: View {
             
             if isProficient {
                 HStack(spacing: 4) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.orange)
-                        .font(.caption)
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.orange)
+                    .font(.caption)
                     Text("Проф.")
                         .font(.caption)
                         .fontWeight(.medium)
@@ -587,12 +759,27 @@ struct SpellsDetailView: View {
     @State private var favoriteSpells: [Spell] = []
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             // Ячейки заклинаний
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.purple.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.purple)
+                    }
+                    
                 Text("Ячейки заклинаний")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 12) {
                     ForEach(1...5, id: \.self) { level in
@@ -600,62 +787,184 @@ struct SpellsDetailView: View {
                     }
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.purple.opacity(0.3), .purple.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
             
             // Избранные заклинания
             if !favoriteSpells.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Избранные заклинания")
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color.red.opacity(0.2))
+                                .frame(width: 32, height: 32)
+                            
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.red)
+                        }
+                        
+                        Text("Избранные заклинания")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                    }
                     
-                    VStack(spacing: 8) {
+                    LazyVStack(spacing: 12) {
                         ForEach(favoriteSpells) { spell in
                             CompendiumSpellCard(spell: spell, favorites: favorites)
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal, 20)
                         }
                     }
                 }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(.systemBackground),
+                                    Color(.systemBackground).opacity(0.95)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .stroke(
+                            LinearGradient(
+                                colors: [.red.opacity(0.3), .red.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                )
             }
             
             // Список заклинаний персонажа
             if !character.spells.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Заклинания персонажа")
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color.blue.opacity(0.2))
+                                .frame(width: 32, height: 32)
+                            
+                            Image(systemName: "list.bullet")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.blue)
+                        }
+                        
+                        Text("Заклинания персонажа")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                    }
                     
-                    VStack(spacing: 8) {
+                    LazyVStack(spacing: 12) {
                         ForEach(character.spells) { spell in
                             SpellCard(spell: spell)
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal, 20)
                         }
                     }
                 }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(.systemBackground),
+                                    Color(.systemBackground).opacity(0.95)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .stroke(
+                            LinearGradient(
+                                colors: [.blue.opacity(0.3), .blue.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                )
             } else if favoriteSpells.isEmpty {
-                VStack(spacing: 12) {
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 60, height: 60)
+                        
                     Image(systemName: "sparkles")
-                        .font(.system(size: 40))
+                            .font(.system(size: 28))
                         .foregroundColor(.gray)
+                    }
                     
                     Text("Нет заклинаний")
-                        .font(.headline)
+                        .font(.title2)
+                        .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
                     Text("Добавьте заклинания в редакторе персонажа или в избранное")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
+                        .padding(.horizontal)
                 }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(.systemBackground),
+                                    Color(.systemBackground).opacity(0.95)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .stroke(
+                            LinearGradient(
+                                colors: [.gray.opacity(0.3), .gray.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                )
             }
         }
         .onAppear {
@@ -747,43 +1056,114 @@ struct EquipmentDetailView: View {
     let character: Character
     
     var body: some View {
-        VStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 12) {
+        VStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.brown.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "bag.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.brown)
+                    }
+                    
                 Text("Снаряжение")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.equipment.isEmpty {
                     Text(character.equipment)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
                     Text("Снаряжение не указано")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.brown.opacity(0.3), .brown.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
             
             // Атаки
             if !character.attacks.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color.red.opacity(0.2))
+                                .frame(width: 32, height: 32)
+                            
+                            Image(systemName: "sword.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.red)
+                        }
+                        
                     Text("Атаки")
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
                     
-                    VStack(spacing: 8) {
+                        Spacer()
+                    }
+                    
+                    VStack(spacing: 12) {
                         ForEach(character.attacks) { attack in
                             AttackCard(attack: attack)
                         }
                     }
                 }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(.systemBackground),
+                                    Color(.systemBackground).opacity(0.95)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .stroke(
+                            LinearGradient(
+                                colors: [.red.opacity(0.3), .red.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                )
             }
         }
     }
@@ -828,46 +1208,118 @@ struct TreasureDetailView: View {
     let character: Character
     
     var body: some View {
-        VStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 12) {
+        VStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.yellow.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "diamond.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.yellow)
+                    }
+                    
                 Text("Сокровища")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.treasure.isEmpty {
                     Text(character.treasure)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
                     Text("Сокровища не указаны")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.yellow.opacity(0.3), .yellow.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
             
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.cyan.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.cyan)
+                    }
+                    
                 Text("Особые ресурсы")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.specialResources.isEmpty {
                     Text(character.specialResources)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
                     Text("Особые ресурсы не указаны")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.cyan.opacity(0.3), .cyan.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
         }
     }
 }
@@ -880,104 +1332,283 @@ struct PersonalityDetailView: View {
     @State private var favoriteBackgrounds: [Background] = []
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             // Избранные предыстории
             if !favoriteBackgrounds.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Избранные предыстории")
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color.blue.opacity(0.2))
+                                .frame(width: 32, height: 32)
+                            
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.blue)
+                        }
+                        
+                        Text("Избранные предыстории")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                    }
                     
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         ForEach(favoriteBackgrounds) { background in
                             BackgroundCard(background: background, favorites: favorites)
                         }
                     }
                 }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(.systemBackground),
+                                    Color(.systemBackground).opacity(0.95)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .stroke(
+                            LinearGradient(
+                                colors: [.blue.opacity(0.3), .blue.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                )
             }
             
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.pink.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.pink)
+                    }
+                    
                 Text("Черты характера")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.personalityTraits.isEmpty {
                     Text(character.personalityTraits)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
                     Text("Черты характера не указаны")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.pink.opacity(0.3), .pink.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
             
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.purple.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.purple)
+                    }
+                    
                 Text("Идеалы")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.ideals.isEmpty {
                     Text(character.ideals)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
                     Text("Идеалы не указаны")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.purple.opacity(0.3), .purple.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
             
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.orange.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "link")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.orange)
+                    }
+                    
                 Text("Привязанности")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.bonds.isEmpty {
                     Text(character.bonds)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
                     Text("Привязанности не указаны")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
             
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.red.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.red)
+                    }
+                    
                 Text("Слабости")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.flaws.isEmpty {
                     Text(character.flaws)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
                     Text("Слабости не указаны")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.red.opacity(0.3), .red.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
         }
         .onAppear {
             updateFavorites()
@@ -1001,84 +1632,227 @@ struct FeaturesDetailView: View {
     @State private var favoriteFeats: [Feat] = []
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             // Избранные черты
             if !favoriteFeats.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Избранные черты")
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color.orange.opacity(0.2))
+                                .frame(width: 32, height: 32)
+                            
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.orange)
+                        }
+                        
+                        Text("Избранные черты")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                    }
                     
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         ForEach(favoriteFeats) { feat in
                             FeatCard(feat: feat, favorites: favorites)
                         }
                     }
                 }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(.systemBackground),
+                                    Color(.systemBackground).opacity(0.95)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .stroke(
+                            LinearGradient(
+                                colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                )
             }
             
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.green.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "star.circle")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.green)
+                    }
+                    
                 Text("Умения и способности")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.featuresAndTraits.isEmpty {
                     Text(character.featuresAndTraits)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
                     Text("Умения и способности не указаны")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.green.opacity(0.3), .green.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
             
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Прочие владения и языки")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.blue.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "graduationcap.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.blue)
+                    }
+                    
+                    Text("Прочие владения")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.otherProficiencies.isEmpty {
                     Text(character.otherProficiencies)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
-                    Text("Прочие владения и языки не указаны")
-                        .font(.subheadline)
+                    Text("Прочие владения не указаны")
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.blue.opacity(0.3), .blue.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
             
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.purple.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "globe")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.purple)
+                    }
+                    
                 Text("Языки")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
                 
                 if !character.languages.isEmpty {
                     Text(character.languages)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.primary)
+                        .lineSpacing(4)
                 } else {
                     Text("Языки не указаны")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.secondary)
                         .italic()
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.purple.opacity(0.3), .purple.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
         }
         .onAppear {
             updateFavorites()

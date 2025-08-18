@@ -588,8 +588,8 @@ struct QuoteManagerView: View {
                 )
             }
         }
-        .task {
-            await quoteManager.ensureInitialized()
+        .onAppear {
+            quoteManager.ensureInitialized()
         }
     }
     

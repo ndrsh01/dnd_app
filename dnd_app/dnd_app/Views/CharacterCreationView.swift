@@ -5,6 +5,7 @@ struct CharacterCreationView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var character = Character()
     @State private var currentStep = 0
+    @State private var showingImport = false
     
     private let steps = [
         "Основная информация",
@@ -15,85 +16,189 @@ struct CharacterCreationView: View {
         "Снаряжение"
     ]
     
-    var body: some View {
+    private func stepIcon(for step: Int) -> String {
+        switch step {
+        case 0: return "person.circle"
+        case 1: return "sparkles"
+        case 2: return "shield"
+        case 3: return "brain.head.profile"
+        case 4: return "heart"
+        case 5: return "bag"
+        default: return "questionmark.circle"
+        }
+    }
+    
+        var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Прогресс-бар
-                ProgressView(value: Double(currentStep + 1), total: Double(steps.count))
-                    .progressViewStyle(LinearProgressViewStyle(tint: .orange))
-                    .padding()
+            ZStack {
+                // Современный градиентный фон
+                LinearGradient(
+                    colors: [
+                        Color("BackgroundColor").opacity(0.95),
+                        Color("BackgroundColor").opacity(0.8),
+                        Color("BackgroundColor")
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
-                // Заголовок шага
-                HStack {
-                    Text(steps[currentStep])
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    Spacer()
-                    Text("\(currentStep + 1) из \(steps.count)")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal)
-                
-                // Контент шага
-                ScrollView {
-                    VStack(spacing: 20) {
-                        switch currentStep {
-                        case 0:
-                            BasicInfoStepView(character: $character)
-                        case 1:
-                            AbilitiesStepView(character: $character)
-                        case 2:
-                            CombatStepView(character: $character)
-                        case 3:
-                            SkillsStepView(character: $character)
-                        case 4:
-                            PersonalityStepView(character: $character)
-                        case 5:
-                            EquipmentStepView(character: $character)
-                        default:
-                            EmptyView()
+                VStack(spacing: 0) {
+                    // Прогресс-бар с современным стилем
+                    VStack(spacing: 12) {
+                        ProgressView(value: Double(currentStep + 1), total: Double(steps.count))
+                            .progressViewStyle(LinearProgressViewStyle(tint: .orange))
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(4)
+                        
+                        // Заголовок шага с иконкой
+                        HStack {
+                            HStack(spacing: 8) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.orange)
+                                        .frame(width: 32, height: 32)
+                                    
+                                    Image(systemName: stepIcon(for: currentStep))
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.white)
+                                }
+                                
+                                Text(steps[currentStep])
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.primary)
+                            }
+                            
+                            Spacer()
+                            
+                            Text("\(currentStep + 1) из \(steps.count)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(12)
                         }
                     }
                     .padding()
-                }
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color("CardBackground"))
+                            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                    )
+                    .padding(.horizontal)
                 
-                // Кнопки навигации
-                HStack {
-                    if currentStep > 0 {
-                        Button("Назад") {
-                            withAnimation {
-                                currentStep -= 1
+                    // Контент шага
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            switch currentStep {
+                            case 0:
+                                BasicInfoStepView(character: $character)
+                            case 1:
+                                AbilitiesStepView(character: $character)
+                            case 2:
+                                CombatStepView(character: $character)
+                            case 3:
+                                SkillsStepView(character: $character)
+                            case 4:
+                                PersonalityStepView(character: $character)
+                            case 5:
+                                EquipmentStepView(character: $character)
+                            default:
+                                EmptyView()
                             }
                         }
-                        .foregroundColor(.orange)
+                        .padding()
                     }
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color("CardBackground"))
+                            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                    )
+                    .padding(.horizontal)
+                    .padding(.top, 16)
                     
-                    Spacer()
-                    
-                    if currentStep < steps.count - 1 {
-                        Button("Далее") {
-                            withAnimation {
-                                currentStep += 1
+                    // Кнопки навигации
+                    HStack(spacing: 16) {
+                        if currentStep > 0 {
+                            Button(action: {
+                                withAnimation {
+                                    currentStep -= 1
+                                }
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.system(size: 14, weight: .semibold))
+                                    Text("Назад")
+                                        .fontWeight(.semibold)
+                                }
+                                .foregroundColor(.orange)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 12)
+                                .background(Color.orange.opacity(0.1))
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.orange, lineWidth: 1)
+                                )
                             }
                         }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.orange)
-                        .cornerRadius(8)
-                    } else {
-                        Button("Создать персонажа") {
-                            createCharacter()
+                        
+                        Spacer()
+                        
+                        if currentStep < steps.count - 1 {
+                            Button(action: {
+                                withAnimation {
+                                    currentStep += 1
+                                }
+                            }) {
+                                HStack(spacing: 8) {
+                                    Text("Далее")
+                                        .fontWeight(.semibold)
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 14, weight: .semibold))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 12)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.orange, Color.orange.opacity(0.8)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .cornerRadius(12)
+                                .shadow(color: Color.orange.opacity(0.3), radius: 4, x: 0, y: 2)
+                            }
+                        } else {
+                            Button(action: {
+                                createCharacter()
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 16, weight: .semibold))
+                                    Text("Создать персонажа")
+                                        .fontWeight(.semibold)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 12)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.green, Color.green.opacity(0.8)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .cornerRadius(12)
+                                .shadow(color: Color.green.opacity(0.3), radius: 4, x: 0, y: 2)
+                            }
                         }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.orange)
-                        .cornerRadius(8)
                     }
+                    .padding()
                 }
-                .padding()
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Создание персонажа")
@@ -103,6 +208,28 @@ struct CharacterCreationView: View {
                     Button("Отмена") {
                         dismiss()
                     }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showingImport = true
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "square.and.arrow.down")
+                                .font(.system(size: 14, weight: .semibold))
+                            Text("Импорт")
+                                .font(.caption)
+                        }
+                        .foregroundColor(.orange)
+                    }
+                }
+            }
+            .sheet(isPresented: $showingImport) {
+                CharacterImportView(store: characterStore) { importedCharacter in
+                    // Заменяем текущего персонажа импортированным
+                    character = importedCharacter
+                    // Переходим к последнему шагу для проверки
+                    currentStep = steps.count - 1
                 }
             }
         }
@@ -485,6 +612,8 @@ struct EquipmentStepView: View {
     }
 }
 
-#Preview {
-    CharacterCreationView(characterStore: CharacterStore())
+struct CharacterCreationView_Previews: PreviewProvider {
+    static var previews: some View {
+        CharacterCreationView(characterStore: CharacterStore())
+    }
 }

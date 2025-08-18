@@ -492,38 +492,34 @@ struct Character: Identifiable, Codable, Equatable {
     // Скорость с учетом истощения
     var effectiveSpeed: Int { max(0, speed - (exhaustionLevel * 5)) }
     
+    // Ability checks with exhaustion penalty (ability checks include skills)
+    func abilityCheckModifier(for ability: String) -> Int {
+        let base: Int
+        switch ability {
+        case "strength": base = strengthModifier
+        case "dexterity": base = dexterityModifier
+        case "constitution": base = constitutionModifier
+        case "intelligence": base = intelligenceModifier
+        case "wisdom": base = wisdomModifier
+        case "charisma": base = charismaModifier
+        default: base = 0
+        }
+        return base - (exhaustionLevel * 2)
+    }
+    
     // Skill modifiers
     func skillModifier(for skill: String) -> Int {
         guard let ability = skillAbilities[skill] else { return 0 }
         
-        let abilityModifier: Int
-        switch ability {
-        case "strength": abilityModifier = strengthModifier
-        case "dexterity": abilityModifier = dexterityModifier
-        case "constitution": abilityModifier = constitutionModifier
-        case "intelligence": abilityModifier = intelligenceModifier
-        case "wisdom": abilityModifier = wisdomModifier
-        case "charisma": abilityModifier = charismaModifier
-        default: abilityModifier = 0
-        }
+        let abilityModifier = abilityCheckModifier(for: ability)
         
         return abilityModifier + (skills[skill] == true ? proficiencyBonus : 0)
     }
     
     // Saving throw modifiers
     func savingThrowModifier(for ability: String) -> Int {
-        let abilityModifier: Int
-        switch ability {
-        case "strength": abilityModifier = strengthModifier
-        case "dexterity": abilityModifier = dexterityModifier
-        case "constitution": abilityModifier = constitutionModifier
-        case "intelligence": abilityModifier = intelligenceModifier
-        case "wisdom": abilityModifier = wisdomModifier
-        case "charisma": abilityModifier = charismaModifier
-        default: abilityModifier = 0
-        }
-        
-        return abilityModifier + (savingThrows[ability] == true ? proficiencyBonus : 0)
+        let base = abilityCheckModifier(for: ability)
+        return base + (savingThrows[ability] == true ? proficiencyBonus : 0)
     }
 }
 
@@ -908,6 +904,10 @@ final class CharacterStore: ObservableObject {
                 selectedCharacter = characters[index]
             }
             
+            // Сохраняем в кэш
+            cacheManager.cacheCharacters(characters)
+            saveSelectedCharacter()
+            
             print("✅ [CHARACTERS] Обновлены хиты персонажа \(character.name): \(newCurrentHP)")
         }
     }
@@ -921,11 +921,23 @@ final class CharacterStore: ObservableObject {
                 selectedCharacter = characters[index]
             }
             
+            // Сохраняем в кэш
+            cacheManager.cacheCharacters(characters)
+            saveSelectedCharacter()
+            
             print("✅ [CHARACTERS] Обновлена степень истощения персонажа \(character.name): \(newExhaustionLevel)")
         }
     }
     
     func importCharacterFromJSON(_ jsonString: String) -> Character? {
+        // Сначала пытаемся импортировать как наш собственный формат Character
+        if let data = jsonString.data(using: .utf8),
+           let directCharacter = try? JSONDecoder().decode(Character.self, from: data) {
+            print("✅ [IMPORT] Импортирован персонаж в формате Character: \(directCharacter.name)")
+            return directCharacter
+        }
+        
+        // Если не получилось, пытаемся импортировать как внешний формат
         do {
             let data = jsonString.data(using: .utf8)!
             let importedCharacter = try JSONDecoder().decode(ImportedCharacter.self, from: data)

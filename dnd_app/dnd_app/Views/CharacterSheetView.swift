@@ -9,14 +9,20 @@ struct CharacterSheetView: View {
     @StateObject private var themeManager = ThemeManager()
     @State private var showingAdd = false
     @State private var showCharacterSelection = false
-    @State private var isImporting = false
-    @State private var isExporting = false
     
     var body: some View {
         NavigationStack {
             ZStack {
-                ThemeManager.adaptiveBackground(for: themeManager.preferredColorScheme)
-                    .ignoresSafeArea()
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.988, green: 0.933, blue: 0.855),
+                        Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                        Color(red: 0.988, green: 0.933, blue: 0.855)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     // Всегда показываем лист выбранного персонажа
@@ -57,20 +63,8 @@ struct CharacterSheetView: View {
                     }
                 }
 
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     if characterStore.selectedCharacter != nil {
-                        Button(action: { isExporting = true }) {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.title2)
-                                .foregroundColor(.orange)
-                        }
-
-                        Button(action: { isImporting = true }) {
-                            Image(systemName: "square.and.arrow.down")
-                                .font(.title2)
-                                .foregroundColor(.orange)
-                        }
-
                         Button(action: { showingAdd = true }) {
                             Image(systemName: "pencil.circle.fill")
                                 .font(.title2)
@@ -82,35 +76,6 @@ struct CharacterSheetView: View {
             .sheet(isPresented: $showingAdd) {
                 CharacterEditorView(store: characterStore, character: characterStore.selectedCharacter)
             }
-            .fileExporter(
-                isPresented: $isExporting,
-                document: CharacterExportDocument(characters: characterStore.characters),
-                contentType: .json,
-                defaultFilename: "characters"
-            ) { result in
-                switch result {
-                case .success(let url):
-                    print("Персонажи экспортированы в: \(url)")
-                case .failure(let error):
-                    print("Ошибка экспорта: \(error)")
-                }
-            }
-            .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
-                do {
-                    let url = try result.get()
-                    let data = try Data(contentsOf: url)
-                    let jsonString = String(data: data, encoding: .utf8) ?? ""
-                    
-                    // Попробуем импортировать как персонажей
-                    if let importedCharacters = try? JSONDecoder().decode([Character].self, from: data) {
-                        for character in importedCharacters {
-                            characterStore.add(character)
-                        }
-                    }
-                } catch {
-                    print("Ошибка импорта: \(error)")
-                }
-            }
             .sheet(isPresented: $showCharacterSelection) {
                 CharacterSelectionView(
                     characterStore: characterStore,
@@ -121,30 +86,7 @@ struct CharacterSheetView: View {
     }
 }
 
-// MARK: - Character Export Document
 
-struct CharacterExportDocument: FileDocument {
-    static var readableContentTypes: [UTType] = [.json]
-    
-    let characters: [Character]
-    
-    init(characters: [Character]) {
-        self.characters = characters
-    }
-    
-    init(configuration: ReadConfiguration) throws {
-        guard let data = configuration.file.regularFileContents else {
-            throw CocoaError(.fileReadCorruptFile)
-        }
-        
-        characters = try JSONDecoder().decode([Character].self, from: data)
-    }
-    
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let data = try JSONEncoder().encode(characters)
-        return FileWrapper(regularFileWithContents: data)
-    }
-}
 
 // MARK: - Stat Badge
 
@@ -520,7 +462,7 @@ struct CharacterCard: View {
             HStack(spacing: 20) {
                 StatBadge(title: "КЗ", value: "\(character.armorClass)", color: .blue)
                 StatBadge(title: "Инициатива", value: "\(character.initiative >= 0 ? "+" : "")\(character.initiative)", color: .green)
-                StatBadge(title: "Скорость", value: "\(character.speed) фт", color: .purple)
+                StatBadge(title: "Скорость", value: "\(character.effectiveSpeed) фт", color: .purple)
             }
         }
         .padding()
@@ -655,7 +597,7 @@ struct MainStatsView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 12)], spacing: 12) {
                 StatCard(title: "КЗ", value: "\(character.armorClass)", color: .blue)
                 StatCard(title: "Инициатива", value: "\(character.initiative >= 0 ? "+" : "")\(character.initiative)", color: .green)
-                StatCard(title: "Скорость", value: "\(character.speed) фт", color: .purple)
+                StatCard(title: "Скорость", value: "\(character.effectiveSpeed) фт", color: .purple)
             }
             
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
@@ -2074,7 +2016,7 @@ struct CharacterCombatView: View {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
                 CombatStatItem(title: "Класс брони", value: "\(character.armorClass)", icon: "shield.fill", color: .blue)
                 CombatStatItem(title: "Инициатива", value: character.initiative >= 0 ? "+\(character.initiative)" : "\(character.initiative)", icon: "bolt.fill", color: .yellow)
-                CombatStatItem(title: "Скорость", value: "\(character.speed) фт.", icon: "figure.walk", color: .green)
+                CombatStatItem(title: "Скорость", value: "\(character.effectiveSpeed) фт.", icon: "figure.walk", color: .green)
                 CombatStatItem(title: "Пассивное восприятие", value: "\(character.passivePerception)", icon: "eye.fill", color: .purple)
             }
             
