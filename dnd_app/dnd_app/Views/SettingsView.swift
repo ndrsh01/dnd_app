@@ -588,10 +588,8 @@ struct QuoteManagerView: View {
                 )
             }
         }
-        .onAppear {
-            // Принудительная инициализация
-            _ = quoteManager.quotes
-            _ = quoteManager.categories
+        .task {
+            await quoteManager.ensureInitialized()
         }
     }
     

@@ -61,29 +61,42 @@ final class QuoteManager: ObservableObject {
     private let cacheManager = CacheManager.shared
     
     // Lazy initialization for better performance
-    private func ensureInitialized() {
+    func ensureInitialized() async {
         guard !isInitialized else { return }
         isInitialized = true
-        
+
         // Сначала пытаемся загрузить из кэша
         if loadFromCache() {
             print("✅ [QUOTES] Загружено из кэша")
             return
         }
-        
-        loadBundledQuotes()
-        loadFavorites()
-        mergeCustomQuotesFromStorage()
-        rebuildCategories()
-        
-        // Кэшируем данные
-        cacheManager.cacheQuotes(quotes)
-        cacheManager.cacheFavorites(favorites)
+
+        await Task.detached { [weak self] in
+            guard let self else { return }
+            await self.loadBundledQuotes()
+            await self.loadFavorites()
+            await self.mergeCustomQuotesFromStorage()
+            await self.rebuildCategories()
+
+            let quotesSnapshot = await self.quotesSnapshot()
+            let favoritesSnapshot = await self.favoritesSnapshot()
+            self.cacheManager.cacheQuotes(quotesSnapshot)
+            self.cacheManager.cacheFavorites(favoritesSnapshot)
+        }.value
     }
 
     // Init
     init() {
         // Defer heavy loading to first access
+    }
+
+    // Thread-safe snapshots
+    @Sendable func quotesSnapshot() -> [String: [Quote]] {
+        quotes
+    }
+
+    @Sendable func favoritesSnapshot() -> [String] {
+        favorites
     }
 
     // MARK: - Loading bundled quotes
@@ -123,9 +136,9 @@ final class QuoteManager: ObservableObject {
     }
 
     // MARK: - Random
-    func randomQuote(in category: String?) {
-        ensureInitialized()
-        
+    func randomQuote(in category: String?) async {
+        await ensureInitialized()
+
         let pool: [Quote]
         if let category = category, let arr = quotes[category], !arr.isEmpty {
             pool = arr
