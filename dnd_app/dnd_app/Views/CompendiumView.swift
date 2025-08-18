@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CompendiumView: View {
     @StateObject private var store = CompendiumStore()
-    @StateObject private var favorites = FavoriteSpellsManager()
+    @StateObject private var favorites = Favorites()
     @StateObject private var themeManager = ThemeManager()
     
     var body: some View {
@@ -170,7 +170,7 @@ struct CompendiumView: View {
 // MARK: - Spells Tab View
 struct SpellsTabView: View {
     @ObservedObject var store: CompendiumStore
-    let favorites: FavoriteSpellsManager
+    let favorites: Favorites
     let themeManager: ThemeManager
     @State private var showingFilters = false
     @State private var searchText = ""
@@ -197,7 +197,7 @@ struct SpellsTabView: View {
                 LazyVStack(spacing: 12) {
                     ForEach(store.filteredSpells) { spell in
                         CompendiumSpellCard(spell: spell, favorites: favorites)
-                            .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
+                            .id("\(spell.id)-\(favorites.spells.isFavorite(spell.name))")
                     }
                 }
                 .padding(.top)
@@ -220,7 +220,7 @@ struct SpellsTabView: View {
 // MARK: - Backgrounds Tab View
 struct BackgroundsTabView: View {
     @ObservedObject var store: CompendiumStore
-    let favorites: FavoriteSpellsManager
+    let favorites: Favorites
     let themeManager: ThemeManager
     @State private var searchText = ""
     
@@ -257,7 +257,7 @@ struct BackgroundsTabView: View {
 // MARK: - Feats Tab View
 struct FeatsTabView: View {
     @ObservedObject var store: CompendiumStore
-    let favorites: FavoriteSpellsManager
+    let favorites: Favorites
     let themeManager: ThemeManager
     @State private var showingFilters = false
     @State private var searchText = ""
@@ -284,7 +284,7 @@ struct FeatsTabView: View {
                 LazyVStack(spacing: 12) {
                     ForEach(store.filteredFeats) { feat in
                         FeatCard(feat: feat, favorites: favorites)
-                            .id("\(feat.id)-\(favorites.isFeatFavorite(feat.name))")
+                            .id("\(feat.id)-\(favorites.feats.isFavorite(feat.name))")
                     }
                 }
                 .padding(.top)
@@ -536,7 +536,7 @@ struct FeatFiltersView: View {
 // MARK: - Favorites Tab View
 struct FavoritesTabView: View {
     @ObservedObject var store: CompendiumStore
-    let favorites: FavoriteSpellsManager
+    let favorites: Favorites
     let themeManager: ThemeManager
     @State private var spellsCollapsed = false
     @State private var featsCollapsed = false
@@ -548,9 +548,9 @@ struct FavoritesTabView: View {
     
     @MainActor
     private func updateFavorites() {
-        favoriteSpells = favorites.getFavoriteSpells(from: store.spells)
-        favoriteFeats = favorites.getFavoriteFeats(from: store.feats)
-        favoriteBackgrounds = favorites.getFavoriteBackgrounds(from: store.backgrounds)
+        favoriteSpells = store.spells.filter { favorites.spells.isFavorite($0.name) }
+        favoriteFeats = store.feats.filter { favorites.feats.isFavorite($0.name) }
+        favoriteBackgrounds = store.backgrounds.filter { favorites.backgrounds.isFavorite($0.name) }
     }
     
     var body: some View {
@@ -608,7 +608,7 @@ struct FavoritesTabView: View {
                                     if !spellsCollapsed {
                                         ForEach(favoriteSpells) { spell in
                                             CompendiumSpellCard(spell: spell, favorites: favorites)
-                                                .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
+                                                .id("\(spell.id)-\(favorites.spells.isFavorite(spell.name))")
                                         }
                                     }
                                 }
@@ -632,7 +632,7 @@ struct FavoritesTabView: View {
                                     if !featsCollapsed {
                                         ForEach(favoriteFeats) { feat in
                                             FeatCard(feat: feat, favorites: favorites)
-                                                .id("\(feat.id)-\(favorites.isFeatFavorite(feat.name))")
+                                                .id("\(feat.id)-\(favorites.feats.isFavorite(feat.name))")
                                         }
                                     }
                                 }
@@ -656,7 +656,7 @@ struct FavoritesTabView: View {
                                     if !backgroundsCollapsed {
                                         ForEach(favoriteBackgrounds) { background in
                                             BackgroundCard(background: background, favorites: favorites)
-                                                .id("\(background.id)-\(favorites.isBackgroundFavorite(background.name))")
+                                                .id("\(background.id)-\(favorites.backgrounds.isFavorite(background.name))")
                                         }
                                     }
                                 }
@@ -670,13 +670,13 @@ struct FavoritesTabView: View {
         .onAppear {
             updateFavorites()
         }
-        .onChange(of: favorites.favoriteSpells) { _ in
+        .onChange(of: favorites.spells.favorites) { _ in
             updateFavorites()
         }
-        .onChange(of: favorites.favoriteFeats) { _ in
+        .onChange(of: favorites.feats.favorites) { _ in
             updateFavorites()
         }
-        .onChange(of: favorites.favoriteBackgrounds) { _ in
+        .onChange(of: favorites.backgrounds.favorites) { _ in
             updateFavorites()
         }
     }
@@ -689,7 +689,7 @@ struct FavoritesTabView: View {
 // MARK: - Background Card
 struct BackgroundCard: View {
     let background: Background
-    @ObservedObject var favorites: FavoriteSpellsManager
+    @ObservedObject var favorites: Favorites
     @State private var isExpanded = false
     
     var body: some View {
@@ -706,14 +706,14 @@ struct BackgroundCard: View {
                 HStack(spacing: 8) {
                     Button(action: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            favorites.toggleBackground(background.name)
+                            favorites.backgrounds.toggle(background.name)
                         }
                     }) {
-                        Image(systemName: favorites.isBackgroundFavorite(background.name) ? "heart.fill" : "heart")
-                            .foregroundColor(favorites.isBackgroundFavorite(background.name) ? .red : .gray)
+                        Image(systemName: favorites.backgrounds.isFavorite(background.name) ? "heart.fill" : "heart")
+                            .foregroundColor(favorites.backgrounds.isFavorite(background.name) ? .red : .gray)
                             .font(.title2)
-                            .scaleEffect(favorites.isBackgroundFavorite(background.name) ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isBackgroundFavorite(background.name))
+                            .scaleEffect(favorites.backgrounds.isFavorite(background.name) ? 1.1 : 1.0)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.backgrounds.isFavorite(background.name))
                     }
                     
                     Button(action: {

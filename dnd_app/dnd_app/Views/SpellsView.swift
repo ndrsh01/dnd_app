@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Spells View
 struct SpellsView: View {
     @StateObject private var store = CompendiumStore()
-    @StateObject private var favorites = FavoriteSpellsManager()
+    @StateObject private var favorites = Favorites()
     @StateObject private var themeManager = ThemeManager()
 
     var body: some View {
@@ -22,7 +22,7 @@ struct SpellsView: View {
 // MARK: - Search and Filter Section
 struct SearchAndFilterSection: View {
     @ObservedObject var store: CompendiumStore
-    let favorites: FavoriteSpellsManager
+    let favorites: Favorites
     let themeManager: ThemeManager
     let currentTab: Int
     @State private var showingFilters = false
@@ -91,7 +91,7 @@ struct SearchAndFilterSection: View {
 // MARK: - Spell Search View
 struct SpellSearchView: View {
     @ObservedObject var store: CompendiumStore
-    let favorites: FavoriteSpellsManager
+    let favorites: Favorites
     let themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
@@ -143,7 +143,7 @@ struct SpellSearchView: View {
                                 if !spellsCollapsed {
                                     ForEach(store.filteredSpells) { spell in
                                             CompendiumSpellCard(spell: spell, favorites: favorites)
-                                            .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
+                                            .id("\(spell.id)-\(favorites.spells.isFavorite(spell.name))")
                                     }
                                 }
                             }
@@ -167,7 +167,7 @@ struct SpellSearchView: View {
                                 if !featsCollapsed {
                                     ForEach(store.filteredFeats) { feat in
                                         FeatCard(feat: feat, favorites: favorites)
-                                            .id("\(feat.id)-\(favorites.isFeatFavorite(feat.name))")
+                                            .id("\(feat.id)-\(favorites.feats.isFavorite(feat.name))")
                                     }
                                 }
                             }
@@ -192,14 +192,14 @@ struct SpellSearchView: View {
                         if !store.filteredSpells.isEmpty || !store.filteredFeats.isEmpty {
                             Button(action: {
                                 if !store.filteredSpells.isEmpty {
-                                    favorites.toggleMultipleSpells(store.filteredSpells)
+                                    favorites.spells.toggleMultiple(store.filteredSpells.map { $0.name })
                                 }
                                 if !store.filteredFeats.isEmpty {
-                                    favorites.toggleMultipleFeats(store.filteredFeats)
+                                    favorites.feats.toggleMultiple(store.filteredFeats.map { $0.name })
                                 }
                             }) {
-                                let allSpellsFavorite = store.filteredSpells.isEmpty || favorites.areAllSpellsFavorite(store.filteredSpells)
-                                let allFeatsFavorite = store.filteredFeats.isEmpty || favorites.areAllFeatsFavorite(store.filteredFeats)
+                                let allSpellsFavorite = store.filteredSpells.isEmpty || favorites.spells.areAllFavorites(store.filteredSpells.map { $0.name })
+                                let allFeatsFavorite = store.filteredFeats.isEmpty || favorites.feats.areAllFavorites(store.filteredFeats.map { $0.name })
                                 let allFavorite = allSpellsFavorite && allFeatsFavorite
                                 
                                 Image(systemName: allFavorite ? "heart.fill" : "heart")
@@ -374,7 +374,7 @@ struct AdvancedFiltersView: View {
 // MARK: - All Spells Tab (Favorites)
 struct AllSpellsTab: View {
     let store: CompendiumStore
-    let favorites: FavoriteSpellsManager
+    let favorites: Favorites
     let themeManager: ThemeManager
 
     @State private var spellsCollapsed = false
@@ -386,9 +386,9 @@ struct AllSpellsTab: View {
     
     @MainActor
     private func updateFavorites() {
-        favoriteSpells = favorites.getFavoriteSpells(from: store.spells)
-        favoriteFeats = favorites.getFavoriteFeats(from: store.feats)
-        favoriteBackgrounds = favorites.getFavoriteBackgrounds(from: store.backgrounds)
+        favoriteSpells = store.spells.filter { favorites.spells.isFavorite($0.name) }
+        favoriteFeats = store.feats.filter { favorites.feats.isFavorite($0.name) }
+        favoriteBackgrounds = store.backgrounds.filter { favorites.backgrounds.isFavorite($0.name) }
     }
 
     var body: some View {
@@ -434,7 +434,7 @@ struct AllSpellsTab: View {
                                 if !spellsCollapsed {
                                     ForEach(favoriteSpells) { spell in
                                         CompendiumSpellCard(spell: spell, favorites: favorites)
-                                            .id("\(spell.id)-\(favorites.isSpellFavorite(spell.name))")
+                                            .id("\(spell.id)-\(favorites.spells.isFavorite(spell.name))")
                                     }
                                 }
                             }
@@ -458,7 +458,7 @@ struct AllSpellsTab: View {
                                 if !featsCollapsed {
                                     ForEach(favoriteFeats) { feat in
                                         FeatCard(feat: feat, favorites: favorites)
-                                            .id("\(feat.id)-\(favorites.isFeatFavorite(feat.name))")
+                                            .id("\(feat.id)-\(favorites.feats.isFavorite(feat.name))")
                                     }
                                 }
                             }
@@ -483,7 +483,7 @@ struct AllSpellsTab: View {
                                 
                                 ForEach(favoriteBackgrounds) { background in
                                     BackgroundCard(background: background, favorites: favorites)
-                                        .id("\(background.id)-\(favorites.isBackgroundFavorite(background.name))")
+                                        .id("\(background.id)-\(favorites.backgrounds.isFavorite(background.name))")
                                 }
                             }
                         }
@@ -497,12 +497,17 @@ struct AllSpellsTab: View {
                 updateFavorites()
             }
         }
-        .onChange(of: favorites.favoriteSpells) {
+        .onChange(of: favorites.spells.favorites) {
             DispatchQueue.main.async {
                 updateFavorites()
             }
         }
-        .onChange(of: favorites.favoriteFeats) {
+        .onChange(of: favorites.feats.favorites) {
+            DispatchQueue.main.async {
+                updateFavorites()
+            }
+        }
+        .onChange(of: favorites.backgrounds.favorites) {
             DispatchQueue.main.async {
                 updateFavorites()
             }
@@ -541,7 +546,7 @@ struct FilterButton: View {
 // MARK: - Feat Card
 struct FeatCard: View {
     let feat: Feat
-    @ObservedObject var favorites: FavoriteSpellsManager
+    @ObservedObject var favorites: Favorites
     @State private var isExpanded = false
     
     var body: some View {
@@ -558,18 +563,14 @@ struct FeatCard: View {
                 HStack(spacing: 8) {
                     Button(action: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            if favorites.isFeatFavorite(feat) {
-                                favorites.removeFeatFromFavorites(feat)
-                            } else {
-                                favorites.addFeatToFavorites(feat)
-                            }
+                            favorites.feats.toggle(feat.name)
                         }
                     }) {
-                        Image(systemName: favorites.isFeatFavorite(feat) ? "heart.fill" : "heart")
-                            .foregroundColor(favorites.isFeatFavorite(feat) ? .red : .gray)
+                        Image(systemName: favorites.feats.isFavorite(feat.name) ? "heart.fill" : "heart")
+                            .foregroundColor(favorites.feats.isFavorite(feat.name) ? .red : .gray)
                             .font(.title2)
-                            .scaleEffect(favorites.isFeatFavorite(feat) ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isFeatFavorite(feat))
+                            .scaleEffect(favorites.feats.isFavorite(feat.name) ? 1.1 : 1.0)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.feats.isFavorite(feat.name))
                     }
                     
                     Button(action: {
@@ -626,7 +627,7 @@ struct FeatCard: View {
 // MARK: - Compendium Spell Card
 struct CompendiumSpellCard: View {
     let spell: Spell
-    @ObservedObject var favorites: FavoriteSpellsManager
+    @ObservedObject var favorites: Favorites
     @State private var isExpanded = false
     
     var body: some View {
@@ -643,14 +644,14 @@ struct CompendiumSpellCard: View {
                 HStack(spacing: 8) {
                     Button(action: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            favorites.toggleSpell(spell.name)
+                            favorites.spells.toggle(spell.name)
                         }
                     }) {
-                        Image(systemName: favorites.isSpellFavorite(spell.name) ? "heart.fill" : "heart")
-                            .foregroundColor(favorites.isSpellFavorite(spell.name) ? .red : .gray)
+                        Image(systemName: favorites.spells.isFavorite(spell.name) ? "heart.fill" : "heart")
+                            .foregroundColor(favorites.spells.isFavorite(spell.name) ? .red : .gray)
                             .font(.title2)
-                            .scaleEffect(favorites.isSpellFavorite(spell.name) ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.isSpellFavorite(spell.name))
+                            .scaleEffect(favorites.spells.isFavorite(spell.name) ? 1.1 : 1.0)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.spells.isFavorite(spell.name))
                     }
                     
                     Button(action: {

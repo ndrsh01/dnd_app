@@ -583,7 +583,7 @@ struct SkillDetailRow: View {
 struct SpellsDetailView: View {
     let character: Character
     @ObservedObject var compendiumStore: CompendiumStore
-    @StateObject private var favorites = FavoriteSpellsManager()
+    @StateObject private var favorites = Favorites()
     @State private var favoriteSpells: [Spell] = []
     
     var body: some View {
@@ -661,20 +661,14 @@ struct SpellsDetailView: View {
         .onAppear {
             updateFavorites()
         }
-        .onReceive(favorites.$favoriteSpells) { _ in
-            updateFavorites()
-        }
-        .onReceive(favorites.$favoriteFeats) { _ in
-            updateFavorites()
-        }
-        .onReceive(favorites.$favoriteBackgrounds) { _ in
+        .onChange(of: favorites.spells.favorites) { _ in
             updateFavorites()
         }
     }
     
     @MainActor
     private func updateFavorites() {
-        favoriteSpells = favorites.getFavoriteSpells(from: compendiumStore.spells)
+        favoriteSpells = compendiumStore.spells.filter { favorites.spells.isFavorite($0.name) }
     }
 }
 
@@ -881,7 +875,7 @@ struct TreasureDetailView: View {
 // MARK: - Personality Detail View
 struct PersonalityDetailView: View {
     let character: Character
-    @StateObject private var favorites = FavoriteSpellsManager()
+    @StateObject private var favorites = Favorites()
     @StateObject private var store = CompendiumStore()
     @State private var favoriteBackgrounds: [Background] = []
     
@@ -988,21 +982,21 @@ struct PersonalityDetailView: View {
         .onAppear {
             updateFavorites()
         }
-        .onReceive(favorites.$favoriteBackgrounds) { _ in
+        .onChange(of: favorites.backgrounds.favorites) { _ in
             updateFavorites()
         }
     }
     
     @MainActor
     private func updateFavorites() {
-        favoriteBackgrounds = favorites.getFavoriteBackgrounds(from: store.backgrounds)
+        favoriteBackgrounds = store.backgrounds.filter { favorites.backgrounds.isFavorite($0.name) }
     }
 }
 
 // MARK: - Features Detail View
 struct FeaturesDetailView: View {
     let character: Character
-    @StateObject private var favorites = FavoriteSpellsManager()
+    @StateObject private var favorites = Favorites()
     @StateObject private var store = CompendiumStore()
     @State private var favoriteFeats: [Feat] = []
     
@@ -1089,14 +1083,14 @@ struct FeaturesDetailView: View {
         .onAppear {
             updateFavorites()
         }
-        .onReceive(favorites.$favoriteFeats) { _ in
+        .onChange(of: favorites.feats.favorites) { _ in
             updateFavorites()
         }
     }
     
     @MainActor
     private func updateFavorites() {
-        favoriteFeats = favorites.getFavoriteFeats(from: store.feats)
+        favoriteFeats = store.feats.filter { favorites.feats.isFavorite($0.name) }
     }
 }
 
