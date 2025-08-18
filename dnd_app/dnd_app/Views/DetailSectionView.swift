@@ -757,11 +757,21 @@ struct SpellsDetailView: View {
     @ObservedObject var compendiumStore: CompendiumStore
     @StateObject private var favorites = Favorites()
     @State private var favoriteSpells: [Spell] = []
+    @StateObject private var classesStore = ClassesStore()
+    
+    private var classSlug: String? {
+        classesStore.slug(for: character.characterClass)
+    }
+    private var isSpellcaster: Bool {
+        if let slug = classSlug { return classesStore.isSpellcaster(slug: slug) }
+        return false
+    }
     
     var body: some View {
         VStack(spacing: 20) {
-            // Ячейки заклинаний
-            VStack(alignment: .leading, spacing: 16) {
+            // Ячейки заклинаний (только для заклинательных классов)
+            if isSpellcaster {
+                VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     ZStack {
                         Circle()
@@ -781,35 +791,36 @@ struct SpellsDetailView: View {
                     Spacer()
                 }
                 
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 12) {
-                    ForEach(1...5, id: \.self) { level in
-                        SpellSlotCard(level: level, slots: character.spellSlots[level] ?? 0)
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 12) {
+                        ForEach(1...5, id: \.self) { level in
+                            SpellSlotCard(level: level, slots: character.spellSlots[level] ?? 0)
+                        }
                     }
                 }
-            }
-            .padding(24)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color(.systemBackground),
-                                Color(.systemBackground).opacity(0.95)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(.systemBackground),
+                                    Color(.systemBackground).opacity(0.95)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                    )
-                    .stroke(
-                        LinearGradient(
-                            colors: [.purple.opacity(0.3), .purple.opacity(0.1)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
-                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
-            )
+                        .stroke(
+                            LinearGradient(
+                                colors: [.purple.opacity(0.3), .purple.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                )
+            }
             
             // Избранные заклинания
             if !favoriteSpells.isEmpty {
@@ -866,8 +877,76 @@ struct SpellsDetailView: View {
                 )
             }
             
-            // Список заклинаний персонажа
-            if !character.spells.isEmpty {
+            // Классовые умения по уровням
+            if let slug = classSlug {
+                let featurePairs = classesStore.features(for: slug, upTo: character.level)
+                if !featurePairs.isEmpty {
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.green.opacity(0.2))
+                                    .frame(width: 32, height: 32)
+                                Image(systemName: "star.circle")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.green)
+                            }
+                            Text("Классовые умения по уровням")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            Spacer()
+                        }
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(featurePairs, id: \.0) { pair in
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Уровень \(pair.0)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    ForEach(pair.1, id: \.name) { feat in
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(feat.name)
+                                                .font(.headline)
+                                                .foregroundColor(.primary)
+                                            Text(feat.text)
+                                                .font(.footnote)
+                                                .foregroundColor(.primary)
+                                        }
+                                        .padding(12)
+                                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(.systemBackground),
+                                        Color(.systemBackground).opacity(0.95)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.green.opacity(0.3), .green.opacity(0.1)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                    )
+                }
+            }
+
+            // Список заклинаний персонажа (только для заклинательных классов)
+            if isSpellcaster, !character.spells.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
                         ZStack {

@@ -5,7 +5,7 @@ enum CharacterDetailSection: String, CaseIterable, Identifiable {
     case abilities = "Характеристики"
     case combat = "Боевые характеристики"
     case skills = "Навыки"
-    case spells = "Заклинания"
+    case spells = "Классовые умения"
     case equipment = "Снаряжение"
     case treasure = "Сокровища"
     case personality = "Личность"

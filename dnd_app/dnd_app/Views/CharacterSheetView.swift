@@ -495,8 +495,19 @@ struct CharacterViewerView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.988, green: 0.933, blue: 0.855),
+                        Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                        Color(red: 0.988, green: 0.933, blue: 0.855)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ).ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 20) {
                     // Заголовок персонажа
                     CharacterDisplayHeaderView(character: character)
                     
@@ -1118,101 +1129,7 @@ struct AttackViewerCard: View {
     }
 }
 
-// MARK: - Character Editor View
-
-struct CharacterEditorView: View {
-    let store: CharacterStore
-    let character: Character?
-    
-    @Environment(\.dismiss) private var dismiss
-    @State private var editedCharacter: Character
-    @State private var showingImport = false
-    
-    init(store: CharacterStore, character: Character? = nil) {
-        self.store = store
-        self.character = character
-        self._editedCharacter = State(initialValue: character ?? Character())
-    }
-    
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Основная информация
-                    BasicInfoSection(character: $editedCharacter)
-                    
-                    // Боевые характеристики
-                    CombatStatsSection(character: $editedCharacter)
-                    
-                    // Характеристики
-                    AbilityScoresSection(character: $editedCharacter)
-                    
-                    // Спасброски и навыки
-                    SkillsSection(character: $editedCharacter)
-                    
-                    // Черты характера
-                    PersonalitySection(character: $editedCharacter)
-                    
-                    // Снаряжение и способности
-                    EquipmentSection(character: $editedCharacter)
-                    
-                    // Атаки и заклинания
-                    AttacksSection(character: $editedCharacter)
-                }
-                .padding()
-            }
-            .background(Color("BackgroundColor"))
-            .navigationTitle(character == nil ? "Новый персонаж" : "Редактирование")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Отмена") {
-                        dismiss()
-                    }
-                    .foregroundColor(.orange)
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        if character == nil {
-                            Button(action: { showingImport = true }) {
-                                Image(systemName: "doc.badge.plus")
-                                    .foregroundColor(.orange)
-                            }
-                        }
-                        
-                        Button("Сохранить") {
-                            saveCharacter()
-                        }
-                        .fontWeight(.semibold)
-                        .foregroundColor(.orange)
-                    }
-                }
-            }
-            .sheet(isPresented: $showingImport) {
-                CharacterImportView(store: store) { importedCharacter in
-                    editedCharacter = importedCharacter
-                    showingImport = false
-                }
-            }
-        }
-    }
-    
-    @MainActor
-    private func saveCharacter() {
-        var characterToSave = editedCharacter
-        characterToSave.dateModified = Date()
-        
-        if character == nil {
-            characterToSave.dateCreated = Date()
-            store.add(characterToSave)
-        } else {
-            store.update(characterToSave)
-        }
-        
-        dismiss()
-    }
-}
+// CharacterEditorView moved to its own file for clarity
 
 // MARK: - Basic Info Section
 
@@ -1221,9 +1138,13 @@ struct BasicInfoSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Основная информация")
-                .font(.headline)
-                .fontWeight(.semibold)
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle().fill(Color.orange.opacity(0.2)).frame(width: 28, height: 28)
+                    Image(systemName: "person.circle").foregroundColor(.orange).font(.caption)
+                }
+                Text("Основная информация").font(.headline).fontWeight(.semibold)
+            }
             
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -1321,9 +1242,13 @@ struct BasicInfoSection: View {
                 }
             }
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(LinearGradient(colors: [Color(.systemBackground), Color(.systemBackground).opacity(0.95)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                .stroke(LinearGradient(colors: [.orange.opacity(0.3), .orange.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.5)
+                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+        )
     }
 }
 
@@ -1334,9 +1259,13 @@ struct CombatStatsSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Боевые характеристики")
-                .font(.headline)
-                .fontWeight(.semibold)
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle().fill(Color.red.opacity(0.2)).frame(width: 28, height: 28)
+                    Image(systemName: "shield.fill").foregroundColor(.red).font(.caption)
+                }
+                Text("Боевые характеристики").font(.headline).fontWeight(.semibold)
+            }
             
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -1472,9 +1401,13 @@ struct CombatStatsSection: View {
                 }
             }
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(LinearGradient(colors: [Color(.systemBackground), Color(.systemBackground).opacity(0.95)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                .stroke(LinearGradient(colors: [.red.opacity(0.3), .red.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.5)
+                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+        )
     }
 }
 
@@ -1494,9 +1427,13 @@ struct AbilityScoresSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Характеристики")
-                .font(.headline)
-                .fontWeight(.semibold)
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle().fill(Color.purple.opacity(0.2)).frame(width: 28, height: 28)
+                    Image(systemName: "sparkles").foregroundColor(.purple).font(.caption)
+                }
+                Text("Характеристики").font(.headline).fontWeight(.semibold)
+            }
             
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 12)], spacing: 12) {
                 ForEach(abilities, id: \.0) { ability in
@@ -1510,9 +1447,13 @@ struct AbilityScoresSection: View {
                 }
             }
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(LinearGradient(colors: [Color(.systemBackground), Color(.systemBackground).opacity(0.95)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                .stroke(LinearGradient(colors: [.purple.opacity(0.3), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.5)
+                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+        )
     }
     
     private func binding(for ability: String) -> Binding<Int> {
@@ -1673,9 +1614,13 @@ struct SkillsSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Навыки")
-                .font(.headline)
-                .fontWeight(.semibold)
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle().fill(Color.green.opacity(0.2)).frame(width: 28, height: 28)
+                    Image(systemName: "brain.head.profile").foregroundColor(.green).font(.caption)
+                }
+                Text("Навыки").font(.headline).fontWeight(.semibold)
+            }
             
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                 ForEach(skills, id: \.0) { skill in
@@ -1723,9 +1668,13 @@ struct SkillsSection: View {
                     .lineLimit(3...6)
             }
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(LinearGradient(colors: [Color(.systemBackground), Color(.systemBackground).opacity(0.95)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                .stroke(LinearGradient(colors: [.green.opacity(0.3), .green.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.5)
+                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+        )
     }
     
     private func binding(for key: String, in keyPath: WritableKeyPath<Character, [String: Bool]>) -> Binding<Bool> {
@@ -2267,4 +2216,5 @@ struct SaveItem: View {
         }
         .padding(.vertical, 4)
     }
+}
 }
