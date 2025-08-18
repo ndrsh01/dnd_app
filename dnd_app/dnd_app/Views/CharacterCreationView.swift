@@ -466,16 +466,14 @@ struct SkillsStepView: View {
                     .fontWeight(.semibold)
                 
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 1), spacing: 8) {
-                    ForEach(Array(skillNames.keys.sorted()), id: \.self) { skillKey in
-                        if let skillName = skillNames[skillKey] {
-                            SkillToggleRow(
-                                name: skillName,
-                                isProficient: Binding(
-                                    get: { character.skills[skillKey] == true },
-                                    set: { character.skills[skillKey] = $0 }
-                                )
+                    ForEach(skillNames.sorted(by: { $0.value < $1.value }), id: \.key) { skillKey, skillName in
+                        SkillToggleRow(
+                            name: skillName,
+                            isProficient: Binding(
+                                get: { character.skills[skillKey] == true },
+                                set: { character.skills[skillKey] = $0 }
                             )
-                        }
+                        )
                     }
                 }
             }

@@ -55,6 +55,12 @@ struct CharacterEditorView: View {
 				showingImport = false
 			}
 		}
+		.onChange(of: editedCharacter) { newValue in
+			// Auto-save changes when editing existing character
+			if character != nil {
+				autoSaveCharacter()
+			}
+		}
 	}
 
 	@MainActor
@@ -68,5 +74,12 @@ struct CharacterEditorView: View {
 			store.update(characterToSave)
 		}
 		dismiss()
+	}
+	
+	@MainActor
+	private func autoSaveCharacter() {
+		var characterToSave = editedCharacter
+		characterToSave.dateModified = Date()
+		store.update(characterToSave)
 	}
 }

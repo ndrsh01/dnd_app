@@ -9,6 +9,7 @@ struct CharacterSheetView: View {
     @StateObject private var themeManager = ThemeManager()
     @State private var showingAdd = false
     @State private var showCharacterSelection = false
+    @State private var isEditingMode = false
     
     var body: some View {
         NavigationStack {
@@ -27,7 +28,15 @@ struct CharacterSheetView: View {
                 VStack(spacing: 0) {
                     // Всегда показываем лист выбранного персонажа
                     if let character = characterStore.selectedCharacter {
-                        CompactCharacterSheetView(character: character, store: characterStore, compendiumStore: compendiumStore)
+                        CompactCharacterSheetView(
+                            character: character, 
+                            store: characterStore, 
+                            compendiumStore: compendiumStore, 
+                            isEditingMode: $isEditingMode,
+                            onSaveChanges: { updatedCharacter in
+                                characterStore.update(updatedCharacter)
+                            }
+                        )
                     } else {
                         // Fallback если по какой-то причине персонаж не выбран
                         VStack(spacing: 20) {
@@ -65,8 +74,14 @@ struct CharacterSheetView: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if characterStore.selectedCharacter != nil {
-                        Button(action: { showingAdd = true }) {
-                            Image(systemName: "pencil.circle.fill")
+                        Button(action: { 
+                            if isEditingMode {
+                                // Отправляем уведомление о сохранении изменений
+                                NotificationCenter.default.post(name: .saveCharacterChanges, object: nil)
+                            }
+                            isEditingMode.toggle() 
+                        }) {
+                            Image(systemName: isEditingMode ? "checkmark.circle.fill" : "pencil.circle.fill")
                                 .font(.title2)
                                 .foregroundColor(.orange)
                         }
@@ -430,7 +445,7 @@ struct CharacterCard: View {
                         .font(.headline)
                         .fontWeight(.semibold)
                     
-                    Text("\(character.race) \(character.characterClass)")
+                    Text("\(character.race) • \(character.displayClassName)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -442,7 +457,7 @@ struct CharacterCard: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text("Уровень \(character.level)")
+                    Text("Уровень \(character.totalLevel > 0 ? character.totalLevel : character.level)")
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundColor(.orange)
@@ -1875,11 +1890,11 @@ struct CharacterDisplayHeaderView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
-                    Text("\(character.race) • \(character.characterClass)")
+                    Text("\(character.race) • \(character.displayClassName)")
                         .font(.headline)
                         .foregroundColor(.secondary)
                     
-                    Text("Уровень \(character.level)")
+                    Text("Уровень \(character.totalLevel > 0 ? character.totalLevel : character.level)")
                         .font(.subheadline)
                         .foregroundColor(.orange)
                         .fontWeight(.semibold)
@@ -1982,7 +1997,7 @@ struct CharacterCombatView: View {
                         .foregroundColor(.red)
                 }
                 
-                ProgressView(value: Double(character.currentHitPoints), total: Double(character.maxHitPoints))
+                ProgressView(value: min(1.0, max(0.0, Double(character.currentHitPoints) / Double(character.maxHitPoints))))
                     .progressViewStyle(LinearProgressViewStyle(tint: .red))
             }
             .padding()
@@ -2045,14 +2060,12 @@ struct CharacterSkillsView: View {
     
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
-            ForEach(Array(skillNames.keys.sorted()), id: \.self) { skillKey in
-                if let skillName = skillNames[skillKey] {
-                    SkillItem(
-                        name: skillName,
-                        modifier: character.skillModifier(for: skillKey),
-                        isProficient: character.skills[skillKey] == true
-                    )
-                }
+            ForEach(skillNames.sorted(by: { $0.value < $1.value }), id: \.key) { skillKey, skillName in
+                SkillItem(
+                    name: skillName,
+                    modifier: character.skillModifier(for: skillKey),
+                    isProficient: character.skills[skillKey] == true
+                )
             }
         }
     }

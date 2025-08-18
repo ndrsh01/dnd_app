@@ -1,5 +1,19 @@
 import SwiftUI
 
+// MARK: - Character Class Models
+
+struct CharacterClass: Codable, Identifiable {
+    let id = UUID()
+    let slug: String
+    let name: String
+    let level: Int
+    let subclass: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case slug, name, level, subclass
+    }
+}
+
 // MARK: - JSON Import Models
 
 struct ImportedCharacter: Codable {
@@ -214,7 +228,8 @@ struct Character: Identifiable, Codable, Equatable {
     var name: String = ""
     var playerName: String = ""
     var race: String = ""
-    var characterClass: String = ""
+    var characterClasses: [CharacterClass] = []
+    var characterClass: String = "" // For backward compatibility
     var background: String = ""
     var alignment: String = ""
     var experience: Int = 0
@@ -339,7 +354,7 @@ struct Character: Identifiable, Codable, Equatable {
     
     // MARK: - Codable Implementation
     enum CodingKeys: String, CodingKey {
-        case id, name, playerName, race, characterClass, background, alignment, experience, level
+        case id, name, playerName, race, characterClass, characterClasses, background, alignment, experience, level
         case armorClass, initiative, speed, maxHitPoints, currentHitPoints, temporaryHitPoints
         case hitDiceTotal, hitDiceType, proficiencyBonus, inspiration
         case deathSaveSuccesses, deathSaveFailures, exhaustionLevel
@@ -359,7 +374,8 @@ struct Character: Identifiable, Codable, Equatable {
         name = try container.decode(String.self, forKey: .name)
         playerName = try container.decode(String.self, forKey: .playerName)
         race = try container.decode(String.self, forKey: .race)
-        characterClass = try container.decode(String.self, forKey: .characterClass)
+        characterClass = try container.decodeIfPresent(String.self, forKey: .characterClass) ?? ""
+        characterClasses = try container.decodeIfPresent([CharacterClass].self, forKey: .characterClasses) ?? []
         background = try container.decode(String.self, forKey: .background)
         alignment = try container.decode(String.self, forKey: .alignment)
         experience = try container.decode(Int.self, forKey: .experience)
@@ -421,6 +437,7 @@ struct Character: Identifiable, Codable, Equatable {
         try container.encode(playerName, forKey: .playerName)
         try container.encode(race, forKey: .race)
         try container.encode(characterClass, forKey: .characterClass)
+        try container.encode(characterClasses, forKey: .characterClasses)
         try container.encode(background, forKey: .background)
         try container.encode(alignment, forKey: .alignment)
         try container.encode(experience, forKey: .experience)
@@ -486,6 +503,16 @@ struct Character: Identifiable, Codable, Equatable {
     var intelligenceModifier: Int { (intelligence - 10) / 2 }
     var wisdomModifier: Int { (wisdom - 10) / 2 }
     var charismaModifier: Int { (charisma - 10) / 2 }
+    
+    // Multiclass properties
+    var totalLevel: Int { characterClasses.reduce(0) { $0 + $1.level } }
+    var primaryClass: CharacterClass? { characterClasses.first }
+    var displayClassName: String {
+        if characterClasses.isEmpty {
+            return characterClass.isEmpty ? "—" : characterClass
+        }
+        return characterClasses.map { "\($0.name) \($0.level)" }.joined(separator: " / ")
+    }
     
     var passivePerception: Int { 10 + wisdomModifier + (skills["perception"] == true ? proficiencyBonus : 0) }
     

@@ -9,7 +9,7 @@
     "subclasses": []
   },
   {
-    "class": "Barbarian",
+    "class": "Варвар",
     "slug": "barbarian",
     "source_url": "https://next.dnd.su/class/barbarian",
     "description": "",
@@ -242,7 +242,7 @@
     ]
   },
   {
-    "class": "Bard",
+    "class": "Бард",
     "slug": "bard",
     "source_url": "https://next.dnd.su/class/bard",
     "description": "",
@@ -427,7 +427,7 @@
     ]
   },
   {
-    "class": "Cleric",
+    "class": "Жрец",
     "slug": "cleric",
     "source_url": "https://next.dnd.su/class/cleric",
     "description": "",
@@ -618,7 +618,7 @@
     ]
   },
   {
-    "class": "Druid",
+    "class": "Друид",
     "slug": "druid",
     "source_url": "https://next.dnd.su/class/druid",
     "description": "",
@@ -853,7 +853,7 @@
     ]
   },
   {
-    "class": "Fighter",
+    "class": "Воин",
     "slug": "fighter",
     "source_url": "https://next.dnd.su/class/fighter",
     "description": "",
@@ -1110,7 +1110,7 @@
     ]
   },
   {
-    "class": "Monk",
+    "class": "Монах",
     "slug": "monk",
     "source_url": "https://next.dnd.su/class/monk",
     "description": "",
@@ -1357,7 +1357,7 @@
     ]
   },
   {
-    "class": "Paladin",
+    "class": "Паладин",
     "slug": "paladin",
     "source_url": "https://next.dnd.su/class/paladin",
     "description": "",
@@ -1642,7 +1642,7 @@
     ]
   },
   {
-    "class": "Ranger",
+    "class": "Следопыт",
     "slug": "ranger",
     "source_url": "https://next.dnd.su/class/ranger",
     "description": "",
@@ -1875,7 +1875,7 @@
     ]
   },
   {
-    "class": "Rogue",
+    "class": "Плут",
     "slug": "rogue",
     "source_url": "https://next.dnd.su/class/rogue",
     "description": "",
@@ -2116,7 +2116,7 @@
     ]
   },
   {
-    "class": "Sorcerer",
+    "class": "Чародей",
     "slug": "sorcerer",
     "source_url": "https://next.dnd.su/class/sorcerer",
     "description": "",
@@ -2321,7 +2321,7 @@
     ]
   },
   {
-    "class": "Warlock",
+    "class": "Колдун",
     "slug": "warlock",
     "source_url": "https://next.dnd.su/class/warlock",
     "description": "",
@@ -2532,7 +2532,7 @@
     ]
   },
   {
-    "class": "Wizard",
+    "class": "Волшебник",
     "slug": "wizard",
     "source_url": "https://next.dnd.su/class/wizard",
     "description": "",

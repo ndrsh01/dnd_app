@@ -19,7 +19,7 @@ struct DetailSectionView: View {
                     case .skills:
                         SkillsDetailView(character: character)
                     case .spells:
-                        SpellsDetailView(character: character, compendiumStore: compendiumStore)
+                        ClassAbilitiesDetailView(character: character, compendiumStore: compendiumStore)
                     case .equipment:
                         EquipmentDetailView(character: character)
                     case .treasure:
@@ -659,15 +659,13 @@ struct SkillsDetailView: View {
                 }
                 
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 1), spacing: 12) {
-                    ForEach(Array(skillNames.keys.sorted()), id: \.self) { skillKey in
-                        if let (skillName, ability) = skillNames[skillKey] {
-                            SkillDetailRow(
-                                skillName: skillName,
-                                ability: ability,
-                                modifier: character.skillModifier(for: skillKey),
-                                isProficient: character.skills[skillKey] == true
-                            )
-                        }
+                    ForEach(skillNames.sorted(by: { $0.value.0 < $1.value.0 }), id: \.key) { skillKey, skillData in
+                        SkillDetailRow(
+                            skillName: skillData.0,
+                            ability: skillData.1,
+                            modifier: character.skillModifier(for: skillKey),
+                            isProficient: character.skills[skillKey] == true
+                        )
                     }
                 }
             }
@@ -751,26 +749,68 @@ struct SkillDetailRow: View {
     }
 }
 
-// MARK: - Spells Detail View
-struct SpellsDetailView: View {
+// MARK: - Class Abilities Detail View
+struct ClassAbilitiesDetailView: View {
     let character: Character
     @ObservedObject var compendiumStore: CompendiumStore
     @StateObject private var favorites = Favorites()
     @State private var favoriteSpells: [Spell] = []
     @StateObject private var classesStore = ClassesStore()
     
-    private var classSlug: String? {
-        classesStore.slug(for: character.characterClass)
-    }
-    private var isSpellcaster: Bool {
-        if let slug = classSlug { return classesStore.isSpellcaster(slug: slug) }
-        return false
+    private var hasSpellcasters: Bool {
+        return character.characterClasses.contains { characterClass in
+            classesStore.isSpellcaster(slug: characterClass.slug)
+        }
     }
     
     var body: some View {
         VStack(spacing: 20) {
+            // Class abilities for each class
+            ForEach(character.characterClasses, id: \.id) { characterClass in
+                ClassAbilitiesCard(
+                    characterClass: characterClass,
+                    gameClass: classesStore.classesBySlug[characterClass.slug]
+                )
+            }
+            
+            // Legacy message if no classes
+            if character.characterClasses.isEmpty {
+        VStack(spacing: 16) {
+                    HStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color.orange.opacity(0.2))
+                                .frame(width: 32, height: 32)
+                            
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.orange)
+                        }
+                        
+                        Text("Классы не настроены")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                    }
+                    
+                    Text("Перейдите в редактирование персонажа, чтобы добавить классы и увидеть их способности.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(LinearGradient(colors: [Color(.systemBackground), Color(.systemBackground).opacity(0.95)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .stroke(LinearGradient(colors: [.orange.opacity(0.3), .orange.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.5)
+                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+                )
+            }
+            
             // Ячейки заклинаний (только для заклинательных классов)
-            if isSpellcaster {
+            if hasSpellcasters {
                 VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     ZStack {
@@ -791,12 +831,12 @@ struct SpellsDetailView: View {
                     Spacer()
                 }
                 
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 12) {
-                        ForEach(1...5, id: \.self) { level in
-                            SpellSlotCard(level: level, slots: character.spellSlots[level] ?? 0)
-                        }
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 12) {
+                    ForEach(1...5, id: \.self) { level in
+                        SpellSlotCard(level: level, slots: character.spellSlots[level] ?? 0)
                     }
                 }
+            }
                 .padding(24)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
@@ -877,76 +917,10 @@ struct SpellsDetailView: View {
                 )
             }
             
-            // Классовые умения по уровням
-            if let slug = classSlug {
-                let featurePairs = classesStore.features(for: slug, upTo: character.level)
-                if !featurePairs.isEmpty {
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.green.opacity(0.2))
-                                    .frame(width: 32, height: 32)
-                                Image(systemName: "star.circle")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.green)
-                            }
-                            Text("Классовые умения по уровням")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.primary)
-                            Spacer()
-                        }
-                        VStack(alignment: .leading, spacing: 12) {
-                            ForEach(featurePairs, id: \.0) { pair in
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Уровень \(pair.0)")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                    ForEach(pair.1, id: \.name) { feat in
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(feat.name)
-                                                .font(.headline)
-                                                .foregroundColor(.primary)
-                                            Text(feat.text)
-                                                .font(.footnote)
-                                                .foregroundColor(.primary)
-                                        }
-                                        .padding(12)
-                                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding(24)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        Color(.systemBackground),
-                                        Color(.systemBackground).opacity(0.95)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.green.opacity(0.3), .green.opacity(0.1)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1.5
-                            )
-                            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
-                    )
-                }
-            }
+            // This section is now handled by ClassAbilitiesCard components above
 
             // Список заклинаний персонажа (только для заклинательных классов)
-            if isSpellcaster, !character.spells.isEmpty {
+            if hasSpellcasters, !character.spells.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
                         ZStack {
@@ -1948,3 +1922,66 @@ struct FeaturesDetailView: View {
 }
 
 
+
+// MARK: - Background Card for DetailSectionView
+struct BackgroundCard: View {
+    let background: Background
+    @ObservedObject var favorites: Favorites
+    @State private var isExpanded = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header with name and expand button
+            HStack {
+                Text(background.name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                HStack(spacing: 8) {
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                            favorites.backgrounds.toggle(background.name)
+                        }
+                    }) {
+                        Image(systemName: favorites.backgrounds.isFavorite(background.name) ? "heart.fill" : "heart")
+                            .foregroundColor(favorites.backgrounds.isFavorite(background.name) ? .red : .gray)
+                            .font(.title2)
+                            .scaleEffect(favorites.backgrounds.isFavorite(background.name) ? 1.1 : 1.0)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.backgrounds.isFavorite(background.name))
+                    }
+                    
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isExpanded.toggle()
+                        }
+                    }) {
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .foregroundColor(.orange)
+                            .font(.title3)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
+            
+            // Expanded details (description)
+            if isExpanded {
+                Text(background.description)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
+            }
+        }
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+        .padding(.horizontal)
+    }
+}

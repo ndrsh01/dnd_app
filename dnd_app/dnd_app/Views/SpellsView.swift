@@ -605,15 +605,43 @@ struct FeatCard: View {
                 .padding(.bottom, 12)
             }
             
-            // Description (expandable)
+            // Expanded details
             if isExpanded {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(feat.description)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 16)
+                    // Attributes section
+                    VStack(alignment: .leading, spacing: 8) {
+                        if !feat.category.isEmpty {
+                            AttributeRow(title: "Категория", value: feat.category, icon: "folder.fill", color: .blue)
+                        }
+                        
+                        if !feat.abilityIncrease.isEmpty {
+                            AttributeRow(title: "Повышение характеристики", value: feat.abilityIncrease, icon: "arrow.up.circle.fill", color: .green)
+                        }
+                    }
+                    
+                    // Description
+                    if !feat.description.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Image(systemName: "text.alignleft")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
+                                Text("Описание")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                            }
+                            
+                            Text(feat.description)
+                                .font(.body)
+                                .foregroundColor(.primary)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
                 }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
@@ -824,6 +852,33 @@ struct CompendiumSpellCard: View {
             "wizard": "Чародей"
         ]
         return classNames[className] ?? className
+    }
+}
+
+// MARK: - Attribute Row
+struct AttributeRow: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .font(.caption)
+            
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.secondary)
+            
+            Spacer()
+            
+            Text(value)
+                .font(.caption)
+                .foregroundColor(.primary)
+        }
     }
 }
 

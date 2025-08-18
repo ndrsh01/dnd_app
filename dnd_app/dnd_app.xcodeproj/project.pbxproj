@@ -18,6 +18,8 @@
 		272ADF612E532E1C007AF452 /* classes.json in Resources */ = {isa = PBXBuildFile; fileRef = 272ADF602E532E1C007AF452 /* classes.json */; };
 		272ADF632E533B85007AF452 /* CharacterEditorComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF622E533B85007AF452 /* CharacterEditorComponents.swift */; };
 		272ADF652E533BC9007AF452 /* CharacterEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF642E533BC9007AF452 /* CharacterEditorView.swift */; };
+		272ADF692E533F3E007AF452 /* ClassAbilitiesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF682E533F3E007AF452 /* ClassAbilitiesSection.swift */; };
+		272ADF6B2E53613A007AF452 /* bestiary_5e.ndjson in Resources */ = {isa = PBXBuildFile; fileRef = 272ADF6A2E53613A007AF452 /* bestiary_5e.ndjson */; };
 		275B2C182E4E2F89008AA77B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 275B2C172E4E2F89008AA77B /* Assets.xcassets */; };
 		275B2C1C2E4F666F008AA77B /* backgrounds.json in Resources */ = {isa = PBXBuildFile; fileRef = 275B2C1B2E4F666E008AA77B /* backgrounds.json */; };
 		275B2C1E2E4F68E9008AA77B /* CompendiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */; };
@@ -76,6 +78,8 @@
 		272ADF602E532E1C007AF452 /* classes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = classes.json; sourceTree = "<group>"; };
 		272ADF622E533B85007AF452 /* CharacterEditorComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterEditorComponents.swift; sourceTree = "<group>"; };
 		272ADF642E533BC9007AF452 /* CharacterEditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterEditorView.swift; sourceTree = "<group>"; };
+		272ADF682E533F3E007AF452 /* ClassAbilitiesSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassAbilitiesSection.swift; sourceTree = "<group>"; };
+		272ADF6A2E53613A007AF452 /* bestiary_5e.ndjson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bestiary_5e.ndjson; sourceTree = "<group>"; };
 		275B2C172E4E2F89008AA77B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		275B2C1B2E4F666E008AA77B /* backgrounds.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = backgrounds.json; sourceTree = "<group>"; };
 		275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompendiumView.swift; sourceTree = "<group>"; };
@@ -139,6 +143,7 @@
 				275B2C1B2E4F666E008AA77B /* backgrounds.json */,
 				272ADF602E532E1C007AF452 /* classes.json */,
 				2792B75D2E4CC2EF0064FC97 /* quotes.json */,
+				272ADF6A2E53613A007AF452 /* bestiary_5e.ndjson */,
 				272ADF5E2E532E16007AF452 /* class_tables.json */,
 				2792B7612E4CC35B0064FC97 /* feats.json */,
 				2792B75F2E4CC3540064FC97 /* spells.json */,
@@ -165,6 +170,7 @@
 				272ADF522E51D346007AF452 /* CharacterCreationView.swift */,
 				272ADF4E2E51D306007AF452 /* CompactCharacterSheetView.swift */,
 				272ADF642E533BC9007AF452 /* CharacterEditorView.swift */,
+				272ADF682E533F3E007AF452 /* ClassAbilitiesSection.swift */,
 				272ADF4C2E516017007AF452 /* CharacterSelectionView.swift */,
 				272ADF502E51D327007AF452 /* DetailSectionView.swift */,
 				275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */,
@@ -355,6 +361,7 @@
 				2792B7622E4CC35C0064FC97 /* feats.json in Resources */,
 				2792B75E2E4CC2EF0064FC97 /* quotes.json in Resources */,
 				275B2C182E4E2F89008AA77B /* Assets.xcassets in Resources */,
+				272ADF6B2E53613A007AF452 /* bestiary_5e.ndjson in Resources */,
 				272ADF5F2E532E16007AF452 /* class_tables.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -405,6 +412,7 @@
 				272ADF4D2E516017007AF452 /* CharacterSelectionView.swift in Sources */,
 				27D1A0172E4700000042C0AB /* ThemeManager.swift in Sources */,
 				272ADF512E51D327007AF452 /* DetailSectionView.swift in Sources */,
+				272ADF692E533F3E007AF452 /* ClassAbilitiesSection.swift in Sources */,
 				27D304A92E4DF91900CEDEF1 /* QuoteModels.swift in Sources */,
 				27D304A72E4DF91300CEDEF1 /* JSONQuoteView.swift in Sources */,
 			);

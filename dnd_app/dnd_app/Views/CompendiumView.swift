@@ -24,187 +24,143 @@ struct CompendiumView: View {
                     List {
                         NavigationLink(destination: SpellsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.purple.opacity(0.2))
-                                        .frame(width: 40, height: 40)
-                                    
-                                    Image(systemName: "wand.and.stars")
-                                        .foregroundColor(.purple)
-                                        .font(.title3)
-                                }
-
+                                Image(systemName: "wand.and.stars")
+                                    .foregroundColor(.purple)
+                                    .font(.title2)
+                                    .frame(width: 30)
+                                
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Заклинания")
                                         .font(.headline)
-                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Магические заклинания и их описания")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-
+                                
                                 Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemBackground))
-                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-                            )
+                            .padding(.vertical, 16)
                         }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-
+                        .listRowBackground(Color(.systemBackground))
+                        .listRowSeparator(.visible)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
+                        
                         NavigationLink(destination: BackgroundsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.blue.opacity(0.2))
-                                        .frame(width: 40, height: 40)
-                                    
-                                    Image(systemName: "person.3.sequence")
-                                        .foregroundColor(.blue)
-                                        .font(.title3)
-                                }
-
+                                Image(systemName: "person.3.sequence")
+                                    .foregroundColor(.blue)
+                                    .font(.title2)
+                                    .frame(width: 30)
+                                
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Предыстории")
                                         .font(.headline)
-                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Происхождение и история персонажа")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-
+                                
                                 Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemBackground))
-                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-                            )
+                            .padding(.vertical, 16)
                         }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-
+                        .listRowBackground(Color(.systemBackground))
+                        .listRowSeparator(.visible)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
+                        
                         NavigationLink(destination: FeatsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.orange.opacity(0.2))
-                                        .frame(width: 40, height: 40)
-                                    
-                                    Image(systemName: "star.circle")
-                                        .foregroundColor(.orange)
-                                        .font(.title3)
-                                }
-
+                                Image(systemName: "star.circle")
+                                    .foregroundColor(.orange)
+                                    .font(.title2)
+                                    .frame(width: 30)
+                                
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Черты")
                                         .font(.headline)
-                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Особые способности и умения")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-
+                                
                                 Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemBackground))
-                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-                            )
+                            .padding(.vertical, 16)
                         }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-
+                        .listRowBackground(Color(.systemBackground))
+                        .listRowSeparator(.visible)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
+                        
                         NavigationLink(destination: BestiaryTabView()) {
                             HStack {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.green.opacity(0.2))
-                                        .frame(width: 40, height: 40)
-                                    
-                                    Image(systemName: "pawprint.circle")
-                                        .foregroundColor(.green)
-                                        .font(.title3)
-                                }
-
+                                Image(systemName: "pawprint.circle")
+                                    .foregroundColor(.green)
+                                    .font(.title2)
+                                    .frame(width: 30)
+                                
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Бестиарий")
                                         .font(.headline)
-                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Монстры и существа")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-
+                                
                                 Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemBackground))
-                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-                            )
+                            .padding(.vertical, 16)
                         }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-
+                        .listRowBackground(Color(.systemBackground))
+                        .listRowSeparator(.visible)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
+                        
                         NavigationLink(destination: FavoritesTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.red.opacity(0.2))
-                                        .frame(width: 40, height: 40)
-                                    
-                                    Image(systemName: "heart.circle")
-                                        .foregroundColor(.red)
-                                        .font(.title3)
-                                }
-
+                                Image(systemName: "heart.circle")
+                                    .foregroundColor(.red)
+                                    .font(.title2)
+                                    .frame(width: 30)
+                                
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Избранное")
                                         .font(.headline)
-                                        .fontWeight(.semibold)
                                         .foregroundColor(.primary)
                                     Text("Сохраненные элементы")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-
+                                
                                 Spacer()
-
+                                
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemBackground))
-                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-                            )
+                            .padding(.vertical, 16)
                         }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                        .listRowBackground(Color(.systemBackground))
+                        .listRowSeparator(.visible)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
                     }
                     .listStyle(PlainListStyle())
                     .scrollContentBackground(.hidden)
@@ -581,7 +537,6 @@ struct FeatFiltersView: View {
 }
 
 
-
 // MARK: - Favorites Tab View
 struct FavoritesTabView: View {
     @ObservedObject var store: CompendiumStore
@@ -680,7 +635,7 @@ struct FavoritesTabView: View {
                                     
                                     if !featsCollapsed {
                                         ForEach(favoriteFeats) { feat in
-                                            FeatCard(feat: feat, favorites: favorites)
+                                            FavoriteFeatCard(feat: feat, favorites: favorites)
                                                 .id("\(feat.id)-\(favorites.feats.isFavorite(feat.name))")
                                         }
                                     }
@@ -704,7 +659,7 @@ struct FavoritesTabView: View {
                                     
                                     if !backgroundsCollapsed {
                                         ForEach(favoriteBackgrounds) { background in
-                                            BackgroundCard(background: background, favorites: favorites)
+                                            FavoriteBackgroundCard(background: background, favorites: favorites)
                                                 .id("\(background.id)-\(favorites.backgrounds.isFavorite(background.name))")
                                         }
                                     }
@@ -731,65 +686,147 @@ struct FavoritesTabView: View {
     }
 }
 
+// MARK: - Favorite Cards (without expand arrow)
 
-
-
-
-// MARK: - Background Card
-struct BackgroundCard: View {
-    let background: Background
+struct FavoriteSpellCard: View {
+    let spell: Spell
     @ObservedObject var favorites: Favorites
-    @State private var isExpanded = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header with name and expand button
+        VStack(alignment: .leading, spacing: 12) {
+            // Header with name only (no expand button)
             HStack {
-                Text(background.name)
+                Text(spell.name)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                 
                 Spacer()
                 
-                HStack(spacing: 8) {
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            favorites.backgrounds.toggle(background.name)
-                        }
-                    }) {
-                        Image(systemName: favorites.backgrounds.isFavorite(background.name) ? "heart.fill" : "heart")
-                            .foregroundColor(favorites.backgrounds.isFavorite(background.name) ? .red : .gray)
-                            .font(.title2)
-                            .scaleEffect(favorites.backgrounds.isFavorite(background.name) ? 1.1 : 1.0)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.backgrounds.isFavorite(background.name))
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        favorites.spells.toggle(spell.name)
                     }
-                    
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isExpanded.toggle()
-                        }
-                    }) {
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .foregroundColor(.orange)
-                            .font(.title3)
-                    }
+                }) {
+                    Image(systemName: favorites.spells.isFavorite(spell.name) ? "heart.fill" : "heart")
+                        .foregroundColor(favorites.spells.isFavorite(spell.name) ? .red : .gray)
+                        .font(.title2)
+                        .scaleEffect(favorites.spells.isFavorite(spell.name) ? 1.1 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.spells.isFavorite(spell.name))
                 }
             }
             .padding(.horizontal, 20)
             .padding(.top, 16)
-            .padding(.bottom, 12)
             
-            // Expanded details (description)
-            if isExpanded {
-                Text(background.description)
-                    .font(.body)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
+            // Level and School badges
+            HStack(spacing: 8) {
+                Text(spell.level == 0 ? "Заговор" : "\(spell.level) уровень")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.15))
+                    .foregroundColor(.blue)
+                    .cornerRadius(12)
+                
+                Text(getSchoolName(spell.school))
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
+                    .background(Color.purple.opacity(0.15))
+                    .foregroundColor(.purple)
+                    .cornerRadius(12)
+                
+                Spacer()
             }
+            .padding(.horizontal, 20)
+            
+            // Always show description (no expand/collapse)
+            Text(spell.description)
+                .font(.body)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
+        }
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+        .padding(.horizontal)
+    }
+    
+    private func getSchoolName(_ school: String) -> String {
+        switch school.lowercased() {
+        case "evocation": return "Воплощение"
+        case "abjuration": return "Ограждение"
+        case "conjuration": return "Вызов"
+        case "divination": return "Прорицание"
+        case "enchantment": return "Очарование"
+        case "illusion": return "Иллюзия"
+        case "necromancy": return "Некромантия"
+        case "transmutation": return "Преобразование"
+        default: return school
+        }
+    }
+}
+
+struct FavoriteFeatCard: View {
+    let feat: Feat
+    @ObservedObject var favorites: Favorites
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header with name only (no expand button)
+            HStack {
+                Text(feat.name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        favorites.feats.toggle(feat.name)
+                    }
+                }) {
+                    Image(systemName: favorites.feats.isFavorite(feat.name) ? "heart.fill" : "heart")
+                        .foregroundColor(favorites.feats.isFavorite(feat.name) ? .red : .gray)
+                        .font(.title2)
+                        .scaleEffect(favorites.feats.isFavorite(feat.name) ? 1.1 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.feats.isFavorite(feat.name))
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            
+            // Category badge
+            if !feat.category.isEmpty {
+                HStack(spacing: 8) {
+                    Text(feat.category)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.orange.opacity(0.15))
+                        .foregroundColor(.orange)
+                        .cornerRadius(12)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+            }
+            
+            // Always show description (no expand/collapse)
+            Text(feat.description)
+                .font(.body)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
         }
         .background(Color(.systemBackground))
         .cornerRadius(12)
@@ -798,12 +835,48 @@ struct BackgroundCard: View {
     }
 }
 
-
-
-
-
-
-
-
-
-
+struct FavoriteBackgroundCard: View {
+    let background: Background
+    @ObservedObject var favorites: Favorites
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header with name only (no expand button)
+            HStack {
+                Text(background.name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        favorites.backgrounds.toggle(background.name)
+                    }
+                }) {
+                    Image(systemName: favorites.backgrounds.isFavorite(background.name) ? "heart.fill" : "heart")
+                        .foregroundColor(favorites.backgrounds.isFavorite(background.name) ? .red : .gray)
+                        .font(.title2)
+                        .scaleEffect(favorites.backgrounds.isFavorite(background.name) ? 1.1 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.backgrounds.isFavorite(background.name))
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            
+            // Always show description (no expand/collapse)
+            Text(background.description)
+                .font(.body)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
+        }
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+        .padding(.horizontal)
+    }
+}
