@@ -6,8 +6,8 @@ struct CharacterClass: Codable, Identifiable {
     let id = UUID()
     let slug: String
     let name: String
-    let level: Int
-    let subclass: String?
+    var level: Int
+    var subclass: String?
     
     enum CodingKeys: String, CodingKey {
         case slug, name, level, subclass
@@ -718,7 +718,10 @@ final class CharacterStore: ObservableObject {
     }
     
     func add(_ character: Character) {
+        print("➕ [CHARACTER] Adding character: \(character.name) (ID: \(character.id))")
+        print("➕ [CHARACTER] Total characters before: \(characters.count)")
         characters.append(character)
+        print("✅ [CHARACTER] Character added successfully. Total characters: \(characters.count)")
     }
     
     func remove(at offsets: IndexSet) {
@@ -738,13 +741,21 @@ final class CharacterStore: ObservableObject {
     }
     
     func update(_ character: Character) {
+        print("🔄 [CHARACTER] Updating character: \(character.name) (ID: \(character.id))")
+        print("🔄 [CHARACTER] Total characters: \(characters.count)")
+        
         if let idx = characters.firstIndex(where: { $0.id == character.id }) {
+            print("✅ [CHARACTER] Character found at index: \(idx)")
             characters[idx] = character
             
             // Если это выбранный персонаж, обновляем его
             if selectedCharacter?.id == character.id {
                 selectedCharacter = character
+                print("✅ [CHARACTER] Selected character updated")
             }
+            print("✅ [CHARACTER] Character updated successfully")
+        } else {
+            print("❌ [CHARACTER] Character not found for update")
         }
     }
     

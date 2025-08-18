@@ -56,6 +56,7 @@ final class CacheManager: ObservableObject {
         case spells = "spells_cache"
         case backgrounds = "backgrounds_cache"
         case feats = "feats_cache"
+        case monsters = "monsters_cache"
         case quotes = "quotes_cache"
         case relationships = "relationships_cache"
         case notes = "notes_cache"
@@ -67,6 +68,7 @@ final class CacheManager: ObservableObject {
         case favoritesSpells = "favorites_spells"
         case favoritesFeats = "favorites_feats"
         case favoritesBackgrounds = "favorites_backgrounds"
+        case favoritesMonsters = "favorites_monsters"
     }
     
     // MARK: - Cache Statistics
@@ -388,6 +390,16 @@ extension CacheManager {
     
     func getCachedFeats() -> [Feat]? {
         return get(for: CacheKey.feats.rawValue)
+    }
+    
+    // MARK: - Monsters Caching
+    func cacheMonsters(_ monsters: [Monster]) {
+        cache(monsters, for: CacheKey.monsters.rawValue)
+        logger.debug("Cached \(monsters.count) monsters")
+    }
+    
+    func getCachedMonsters() -> [Monster]? {
+        return get(for: CacheKey.monsters.rawValue)
     }
     
     // MARK: - Quotes Caching

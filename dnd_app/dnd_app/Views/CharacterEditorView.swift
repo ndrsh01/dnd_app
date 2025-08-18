@@ -19,6 +19,8 @@ struct CharacterEditorView: View {
 			ScrollView {
 				VStack(spacing: 20) {
 					BasicInfoSection(character: $editedCharacter)
+					CharacterClassesSection(character: $editedCharacter)
+					ClassAbilitiesSection(character: $editedCharacter)
 					CombatStatsSection(character: $editedCharacter)
 					AbilityScoresSection(character: $editedCharacter)
 					SkillsSection(character: $editedCharacter)

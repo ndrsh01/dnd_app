@@ -769,7 +769,8 @@ struct ClassAbilitiesDetailView: View {
             ForEach(character.characterClasses, id: \.id) { characterClass in
                 ClassAbilitiesCard(
                     characterClass: characterClass,
-                    gameClass: classesStore.classesBySlug[characterClass.slug]
+                    gameClass: classesStore.classesBySlug[characterClass.slug],
+                    classTable: classesStore.classTablesBySlug[characterClass.slug]
                 )
             }
             

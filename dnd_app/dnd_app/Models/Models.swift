@@ -216,3 +216,131 @@ struct FeatFilters: Codable {
         }
     }
 }
+
+// MARK: - Monster Models
+
+struct Monster: Identifiable, Codable, Equatable {
+    let id = UUID()
+    let name: String
+    let slug: String
+    let url: String
+    let image: String?
+    let subtitle: String
+    let size: String
+    let type: String
+    let alignment: String
+    let ac: ArmorClass
+    let hp: HitPoints
+    let speed: Speed
+    let saves: [String: String]
+    let skills: [String: String]
+    let damageResistances: String
+    let damageImmunities: String
+    let damageVulnerabilities: String
+    let conditionImmunities: String
+    let senses: String
+    let languages: String
+    let challenge: Challenge
+    let abilities: Abilities
+    let blocks: Blocks
+    
+    enum CodingKeys: String, CodingKey {
+        case name, slug, url, image, subtitle, size, type, alignment, ac, hp, speed, saves, skills
+        case damageResistances = "damage_resistances"
+        case damageImmunities = "damage_immunities"
+        case damageVulnerabilities = "damage_vulnerabilities"
+        case conditionImmunities = "condition_immunities"
+        case senses, languages, challenge, abilities, blocks
+    }
+}
+
+struct ArmorClass: Codable, Equatable {
+    let ac: Int
+    let notes: String
+}
+
+struct HitPoints: Codable, Equatable {
+    let hp: Int
+    let formula: String
+}
+
+struct Speed: Codable, Equatable {
+    let walk: String?
+    let fly: String?
+    let swim: String?
+    let climb: String?
+    let burrow: String?
+    
+    var displayString: String {
+        var speeds: [String] = []
+        if let walk = walk { speeds.append("ходьба \(walk)") }
+        if let fly = fly { speeds.append("полёт \(fly)") }
+        if let swim = swim { speeds.append("плавание \(swim)") }
+        if let climb = climb { speeds.append("лазание \(climb)") }
+        if let burrow = burrow { speeds.append("рытьё \(burrow)") }
+        return speeds.joined(separator: ", ")
+    }
+}
+
+struct Challenge: Codable, Equatable {
+    let cr: String
+    let xp: Int
+    let raw: String
+    let proficiencyBonus: String
+    let special: String
+    
+    enum CodingKeys: String, CodingKey {
+        case cr, xp, raw, special
+        case proficiencyBonus = "proficiency_bonus"
+    }
+}
+
+struct Abilities: Codable, Equatable {
+    let str: AbilityScore
+    let dex: AbilityScore
+    let con: AbilityScore
+    let int: AbilityScore
+    let wis: AbilityScore
+    let cha: AbilityScore
+}
+
+struct AbilityScore: Codable, Equatable {
+    let score: Int
+    let mod: Int
+    
+    var modifierString: String {
+        return mod >= 0 ? "+\(mod)" : "\(mod)"
+    }
+}
+
+struct Blocks: Codable, Equatable {
+    let actions: [Action]?
+    let legendaryActions: [Action]?
+    let reactions: [Action]?
+    let traits: [Action]?
+    
+    enum CodingKeys: String, CodingKey {
+        case actions, traits, reactions
+        case legendaryActions = "legendary_actions"
+    }
+}
+
+struct Action: Codable, Equatable {
+    let name: String
+    let text: String
+}
+
+// MARK: - Monster Filters
+
+struct MonsterFilters: Codable {
+    var searchText: String = ""
+    var selectedSizes: [String] = []
+    var selectedTypes: [String] = []
+    var selectedCRs: [String] = []
+    var selectedAlignments: [String] = []
+    
+    let sizes = ["крошечное", "маленькое", "средний", "большой", "огромный", "гигантский"]
+    let types = ["аберрация", "зверь", "небожитель", "дракон", "фея", "элементаль", "великан", "гуманоид", "монстр", "животное", "растение", "нежить"]
+    let challengeRatings = ["0", "1/8", "1/4", "1/2", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"]
+    let alignments = ["законно-добрый", "нейтрально-добрый", "хаотично-добрый", "законно-нейтральный", "нейтральный", "хаотично-нейтральный", "законно-злой", "нейтрально-злой", "хаотично-злой", "неопределённый"]
+}

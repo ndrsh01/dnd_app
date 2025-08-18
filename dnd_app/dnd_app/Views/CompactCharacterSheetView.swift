@@ -11,13 +11,28 @@ struct CompactCharacterSheetView: View {
     @ObservedObject var compendiumStore: CompendiumStore
     @State private var showingDetailSection: CharacterDetailSection?
     @Binding var isEditingMode: Bool
+    let onSaveChanges: ((Character) -> Void)?
+    
+    init(character: Character, store: CharacterStore, compendiumStore: CompendiumStore, isEditingMode: Binding<Bool>, onSaveChanges: ((Character) -> Void)? = nil) {
+        self.character = character
+        self.store = store
+        self.compendiumStore = compendiumStore
+        self._isEditingMode = isEditingMode
+        self.onSaveChanges = onSaveChanges
+    }
     
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 if let current = store.selectedCharacter {
                 // Заголовок персонажа
-                    CharacterHeaderCompactView(character: current, store: store, compendiumStore: compendiumStore, isEditingMode: isEditingMode)
+                    CharacterHeaderCompactView(
+                        character: current, 
+                        store: store, 
+                        compendiumStore: compendiumStore, 
+                        isEditingMode: isEditingMode,
+                        onSaveChanges: onSaveChanges
+                    )
                 
                 // Хиты (отдельно)
                     HitPointsView(store: store, isEditingMode: isEditingMode)
@@ -89,7 +104,7 @@ struct CharacterHeaderCompactView: View {
         do {
             let data = try Data(contentsOf: url)
             let classes = try JSONDecoder().decode([GameClass].self, from: data)
-            availableClasses = classes.compactMap { $0.class != "Class" ? $0.class : nil }
+            availableClasses = classes.compactMap { $0.name != "Class" ? $0.name : nil }
         } catch {
             print("Error loading classes: \(error)")
             // Fallback to default classes

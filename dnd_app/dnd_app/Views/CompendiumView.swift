@@ -106,7 +106,7 @@ struct CompendiumView: View {
                         .listRowSeparator(.visible)
                         .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
                         
-                        NavigationLink(destination: BestiaryTabView()) {
+                        NavigationLink(destination: BestiaryTabView(store: store, favorites: favorites, themeManager: themeManager)) {
                             HStack {
                                 Image(systemName: "pawprint.circle")
                                     .foregroundColor(.green)
@@ -309,28 +309,439 @@ struct FeatsTabView: View {
     }
 }
 
-// MARK: - Bestiary Tab View
-struct BestiaryTabView: View {
+// MARK: - Monster Card
+
+struct MonsterCard: View {
+    let monster: Monster
+    let favorites: Favorites
+    @State private var isExpanded = false
+    
     var body: some View {
-        VStack(spacing: 30) {
-            Spacer()
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(monster.name)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    if !monster.subtitle.isEmpty {
+                        Text(monster.subtitle)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Spacer()
+                
+                // Favorite button
+                Button(action: {
+                    favorites.monsters.toggle(monster.name)
+                }) {
+                    Image(systemName: favorites.monsters.isFavorite(monster.name) ? "heart.fill" : "heart")
+                        .foregroundColor(favorites.monsters.isFavorite(monster.name) ? .red : .gray)
+                        .font(.title3)
+                }
+            }
             
-            Image(systemName: "pawprint.circle.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.orange)
+            // Basic stats
+            HStack(spacing: 16) {
+                StatItem(title: "КД", value: "\(monster.ac.ac)", icon: "shield.fill", color: .blue)
+                StatItem(title: "ХП", value: "\(monster.hp.hp)", icon: "heart.fill", color: .red)
+                StatItem(title: "CR", value: monster.challenge.cr, icon: "star.fill", color: .orange)
+            }
             
-            Text("Бестиарий")
-                .font(.title2)
+            // Expandable content
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Abilities
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Характеристики")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        HStack(spacing: 12) {
+                            AbilityItem(name: "СИЛ", score: monster.abilities.str.score, modifier: monster.abilities.str.modifierString)
+                            AbilityItem(name: "ЛОВ", score: monster.abilities.dex.score, modifier: monster.abilities.dex.modifierString)
+                            AbilityItem(name: "ТЕЛ", score: monster.abilities.con.score, modifier: monster.abilities.con.modifierString)
+                            AbilityItem(name: "ИНТ", score: monster.abilities.int.score, modifier: monster.abilities.int.modifierString)
+                            AbilityItem(name: "МДР", score: monster.abilities.wis.score, modifier: monster.abilities.wis.modifierString)
+                            AbilityItem(name: "ХАР", score: monster.abilities.cha.score, modifier: monster.abilities.cha.modifierString)
+                        }
+                    }
+                    
+                    // Speed
+                    if !monster.speed.displayString.isEmpty {
+                        MonsterInfoRow(title: "Скорость", value: monster.speed.displayString, icon: "figure.walk", color: .green)
+                    }
+                    
+                    // Skills
+                    if !monster.skills.isEmpty {
+                        MonsterInfoRow(title: "Навыки", value: monster.skills.map { "\($0.key) \($0.value)" }.joined(separator: ", "), icon: "brain.head.profile", color: .purple)
+                    }
+                    
+                    // Actions
+                    if let actions = monster.blocks.actions, !actions.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Действия")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            
+                            ForEach(actions, id: \.name) { action in
+                                ActionItem(action: action)
+                            }
+                        }
+                    }
+                    
+                    // Legendary Actions
+                    if let legendaryActions = monster.blocks.legendaryActions, !legendaryActions.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Легендарные действия")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            
+                            ForEach(legendaryActions, id: \.name) { action in
+                                ActionItem(action: action)
+                            }
+                        }
+                    }
+                }
+                .padding(.top, 8)
+            }
+            
+            // Expand/Collapse button
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Text(isExpanded ? "Свернуть" : "Развернуть")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                    
+                    Spacer()
+                    
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(.systemBackground),
+                            Color(.systemBackground).opacity(0.95)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .stroke(
+                    LinearGradient(
+                        colors: [.red.opacity(0.3), .red.opacity(0.1)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.5
+                )
+                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+        )
+    }
+}
+
+struct StatItem: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundColor(color)
+            
+            Text(title)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            Text(value)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct AbilityItem: View {
+    let name: String
+    let score: Int
+    let modifier: String
+    
+    var body: some View {
+        VStack(spacing: 2) {
+            Text(name)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            Text("\(score)")
+                .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.primary)
             
-            Text("Скоро здесь появится бестиарий с монстрами и существами")
-                .font(.body)
+            Text(modifier)
+                .font(.caption2)
                 .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct MonsterInfoRow: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundColor(color)
+            
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.secondary)
             
             Spacer()
+            
+            Text(value)
+                .font(.caption)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.trailing)
+        }
+    }
+}
+
+struct ActionItem: View {
+    let action: Action
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(action.name)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+            
+            Text(action.text)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.leading, 8)
+    }
+}
+
+// MARK: - Bestiary Tab View
+
+struct BestiaryTabView: View {
+    @ObservedObject var store: CompendiumStore
+    @ObservedObject var favorites: Favorites
+    @ObservedObject var themeManager: ThemeManager
+    @State private var searchText = ""
+    @State private var showingFilters = false
+    
+    private func getActiveMonsterFiltersCount() -> Int {
+        return store.monsterFilters.selectedSizes.count + 
+               store.monsterFilters.selectedTypes.count + 
+               store.monsterFilters.selectedCRs.count +
+               store.monsterFilters.selectedAlignments.count
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Search bar
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                TextField("Поиск монстров...", text: $searchText)
+                    .onChange(of: searchText) { 
+                        store.updateMonsterSearchText(searchText)
+                    }
+            }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
+            .padding(.horizontal)
+            .padding(.top)
+            
+            // Results
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    ForEach(store.filteredMonsters) { monster in
+                        MonsterCard(monster: monster, favorites: favorites)
+                            .id("\(monster.id)-\(favorites.monsters.isFavorite(monster.name))")
+                    }
+                }
+                .padding(.top)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { showingFilters = true }) {
+                    ZStack {
+                        Image(systemName: "slider.horizontal.3")
+                            .foregroundColor(.orange)
+                        
+                        if getActiveMonsterFiltersCount() > 0 {
+                            VStack {
+                                HStack {
+                                    Spacer()
+                                    Text("\(getActiveMonsterFiltersCount())")
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .padding(4)
+                                        .background(Color.red)
+                                        .clipShape(Circle())
+                                }
+                                Spacer()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showingFilters) {
+            MonsterFiltersView(store: store)
+        }
+    }
+}
+
+// MARK: - Monster Filters View
+
+struct MonsterFiltersView: View {
+    @ObservedObject var store: CompendiumStore
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color(red: 0.988, green: 0.933, blue: 0.855)
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 32) {
+                        // Размер
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Размер")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                            
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                                ForEach(store.monsterFilters.sizes, id: \.self) { size in
+                                    FilterButton(
+                                        title: size,
+                                        isSelected: store.monsterFilters.selectedSizes.contains(size)
+                                    ) {
+                                        store.updateMonsterSizeFilter(size)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Тип
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Тип")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                            
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                                ForEach(store.monsterFilters.types, id: \.self) { type in
+                                    FilterButton(
+                                        title: type,
+                                        isSelected: store.monsterFilters.selectedTypes.contains(type)
+                                    ) {
+                                        store.updateMonsterTypeFilter(type)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // CR
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Класс опасности")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                            
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
+                                ForEach(store.monsterFilters.challengeRatings, id: \.self) { cr in
+                                    FilterButton(
+                                        title: cr,
+                                        isSelected: store.monsterFilters.selectedCRs.contains(cr)
+                                    ) {
+                                        store.updateMonsterCRFilter(cr)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Мировоззрение
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Мировоззрение")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                            
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                                ForEach(store.monsterFilters.alignments, id: \.self) { alignment in
+                                    FilterButton(
+                                        title: alignment,
+                                        isSelected: store.monsterFilters.selectedAlignments.contains(alignment)
+                                    ) {
+                                        store.updateMonsterAlignmentFilter(alignment)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Кнопка очистки
+                        Button(action: {
+                            store.clearMonsterFilters()
+                        }) {
+                            Text("Очистить все фильтры")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.orange)
+                                .cornerRadius(12)
+                        }
+                    }
+                    .padding(16)
+                }
+            }
+            .navigationTitle("Фильтры монстров")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Готово") {
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
         }
     }
 }
@@ -545,16 +956,19 @@ struct FavoritesTabView: View {
     @State private var spellsCollapsed = false
     @State private var featsCollapsed = false
     @State private var backgroundsCollapsed = false
+    @State private var monstersCollapsed = false
     
     @State private var favoriteSpells: [Spell] = []
     @State private var favoriteFeats: [Feat] = []
     @State private var favoriteBackgrounds: [Background] = []
+    @State private var favoriteMonsters: [Monster] = []
     
     @MainActor
     private func updateFavorites() {
         favoriteSpells = store.spells.filter { favorites.spells.isFavorite($0.name) }
         favoriteFeats = store.feats.filter { favorites.feats.isFavorite($0.name) }
         favoriteBackgrounds = store.backgrounds.filter { favorites.backgrounds.isFavorite($0.name) }
+        favoriteMonsters = store.monsters.filter { favorites.monsters.isFavorite($0.name) }
     }
     
     var body: some View {
@@ -571,7 +985,7 @@ struct FavoritesTabView: View {
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                if favoriteSpells.isEmpty && favoriteFeats.isEmpty && favoriteBackgrounds.isEmpty {
+                if favoriteSpells.isEmpty && favoriteFeats.isEmpty && favoriteBackgrounds.isEmpty && favoriteMonsters.isEmpty {
                     VStack(spacing: 20) {
                         Spacer()
                         
@@ -665,6 +1079,30 @@ struct FavoritesTabView: View {
                                     }
                                 }
                             }
+                            
+                            if !favoriteMonsters.isEmpty {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Button(action: { monstersCollapsed.toggle() }) {
+                                        HStack {
+                                            Text("Избранные монстры (\(favoriteMonsters.count))")
+                                                .font(.headline)
+                                                .foregroundColor(.primary)
+                                            Spacer()
+                                            Image(systemName: monstersCollapsed ? "chevron.down" : "chevron.up")
+                                                .foregroundColor(.secondary)
+                                        }
+                                        .padding(.horizontal)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                    
+                                    if !monstersCollapsed {
+                                        ForEach(favoriteMonsters) { monster in
+                                            FavoriteMonsterCard(monster: monster, favorites: favorites)
+                                                .id("\(monster.id)-\(favorites.monsters.isFavorite(monster.name))")
+                                        }
+                                    }
+                                }
+                            }
                         }
                         .padding(.top)
                     }
@@ -681,6 +1119,9 @@ struct FavoritesTabView: View {
             updateFavorites()
         }
         .onChange(of: favorites.backgrounds.favorites) {
+            updateFavorites()
+        }
+        .onChange(of: favorites.monsters.favorites) {
             updateFavorites()
         }
     }
@@ -873,6 +1314,62 @@ struct FavoriteBackgroundCard: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
+        }
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+        .padding(.horizontal)
+    }
+}
+
+struct FavoriteMonsterCard: View {
+    let monster: Monster
+    @ObservedObject var favorites: Favorites
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header with name only (no expand button)
+            HStack {
+                Text(monster.name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        favorites.monsters.toggle(monster.name)
+                    }
+                }) {
+                    Image(systemName: favorites.monsters.isFavorite(monster.name) ? "heart.fill" : "heart")
+                        .foregroundColor(favorites.monsters.isFavorite(monster.name) ? .red : .gray)
+                        .font(.title2)
+                        .scaleEffect(favorites.monsters.isFavorite(monster.name) ? 1.1 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.monsters.isFavorite(monster.name))
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            
+            // Basic stats
+            HStack(spacing: 16) {
+                StatItem(title: "КД", value: "\(monster.ac.ac)", icon: "shield.fill", color: .blue)
+                StatItem(title: "ХП", value: "\(monster.hp.hp)", icon: "heart.fill", color: .red)
+                StatItem(title: "CR", value: monster.challenge.cr, icon: "star.fill", color: .orange)
+            }
+            .padding(.horizontal, 20)
+            
+            // Always show description (no expand/collapse)
+            if !monster.subtitle.isEmpty {
+                Text(monster.subtitle)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
+            }
         }
         .background(Color(.systemBackground))
         .cornerRadius(12)

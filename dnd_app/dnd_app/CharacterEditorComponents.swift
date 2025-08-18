@@ -41,14 +41,6 @@ struct BasicInfoSection: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Класс")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    TextField("Введите класс", text: $character.characterClass)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
                     Text("Предыстория")
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -71,41 +63,6 @@ struct BasicInfoSection: View {
                     TextField("Введите опыт", value: $character.experience, format: .number)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.numberPad)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Уровень")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    HStack(spacing: 8) {
-                        Button(action: {
-                            if character.level > 1 {
-                                character.level -= 1
-                                character.proficiencyBonus = (character.level - 1) / 4 + 2
-                            }
-                        }) {
-                            Image(systemName: "minus.circle.fill")
-                                .font(.title3)
-                                .foregroundColor(.red)
-                        }
-                        
-                        Text("\(character.level)")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                            .frame(minWidth: 40)
-                        
-                        Button(action: {
-                            if character.level < 20 {
-                                character.level += 1
-                                character.proficiencyBonus = (character.level - 1) / 4 + 2
-                            }
-                        }) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title3)
-                                .foregroundColor(.green)
-                        }
-                    }
                 }
             }
         }

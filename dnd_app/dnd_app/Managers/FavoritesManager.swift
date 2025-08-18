@@ -63,6 +63,7 @@ final class Favorites: ObservableObject {
     let spells = FavoritesManager<String>(storageKey: "favoriteSpells")
     let feats = FavoritesManager<String>(storageKey: "favoriteFeats")
     let backgrounds = FavoritesManager<String>(storageKey: "favoriteBackgrounds")
+    let monsters = FavoritesManager<String>(storageKey: "favoriteMonsters")
 
     private var cancellables: Set<AnyCancellable> = []
 
@@ -76,6 +77,10 @@ final class Favorites: ObservableObject {
         }.store(in: &cancellables)
 
         backgrounds.objectWillChange.sink { [weak self] _ in
+            self?.objectWillChange.send()
+        }.store(in: &cancellables)
+        
+        monsters.objectWillChange.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &cancellables)
     }

@@ -13,6 +13,10 @@ final class CompendiumStore: ObservableObject {
     @Published var filteredFeats: [Feat] = []
     @Published var featFilters = FeatFilters()
     
+    @Published var monsters: [Monster] = []
+    @Published var filteredMonsters: [Monster] = []
+    @Published var monsterFilters = MonsterFilters()
+    
     @Published var isLoading = false
     
     private let cacheManager = CacheManager.shared
@@ -27,6 +31,7 @@ final class CompendiumStore: ObservableObject {
         loadSpells()
         loadBackgrounds()
         loadFeats()
+        loadMonsters()
         
         isLoading = false
     }
@@ -265,6 +270,132 @@ final class CompendiumStore: ObservableObject {
                 let searchText = featFilters.searchText.lowercased()
                 return feat.name.lowercased().contains(searchText) ||
                        feat.description.lowercased().contains(searchText)
+            }
+            
+            return true
+        }
+    }
+    
+    // MARK: - Monster Methods
+    
+    private func loadMonsters() {
+        // Пытаемся загрузить из кэша
+        if let cachedMonsters = cacheManager.getCachedMonsters() {
+            self.monsters = cachedMonsters
+            self.filteredMonsters = cachedMonsters
+            return
+        }
+        
+        // Загружаем из файла
+        guard let url = Bundle.main.url(forResource: "bestiary_5e", withExtension: "ndjson") else {
+            print("❌ [MONSTERS] Не найден файл bestiary_5e.ndjson")
+            return
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let content = String(data: data, encoding: .utf8) ?? ""
+            let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
+            
+            var loadedMonsters: [Monster] = []
+            
+            for line in lines {
+                if let lineData = line.data(using: .utf8) {
+                    do {
+                        let monster = try JSONDecoder().decode(Monster.self, from: lineData)
+                        loadedMonsters.append(monster)
+                    } catch {
+                        print("❌ [MONSTERS] Ошибка парсинга строки: \(error)")
+                        continue
+                    }
+                }
+            }
+            
+            self.monsters = loadedMonsters
+            self.filteredMonsters = loadedMonsters
+            
+            // Кэшируем
+            cacheManager.cacheMonsters(loadedMonsters)
+            print("✅ [MONSTERS] Загружено \(loadedMonsters.count) монстров")
+        } catch {
+            print("❌ [MONSTERS] Ошибка загрузки: \(error)")
+        }
+    }
+    
+    func updateMonsterSearchText(_ text: String) {
+        monsterFilters.searchText = text
+        applyMonsterFilters()
+    }
+    
+    func updateMonsterSizeFilter(_ size: String) {
+        if monsterFilters.selectedSizes.contains(size) {
+            monsterFilters.selectedSizes.removeAll { $0 == size }
+        } else {
+            monsterFilters.selectedSizes.append(size)
+        }
+        applyMonsterFilters()
+    }
+    
+    func updateMonsterTypeFilter(_ type: String) {
+        if monsterFilters.selectedTypes.contains(type) {
+            monsterFilters.selectedTypes.removeAll { $0 == type }
+        } else {
+            monsterFilters.selectedTypes.append(type)
+        }
+        applyMonsterFilters()
+    }
+    
+    func updateMonsterCRFilter(_ cr: String) {
+        if monsterFilters.selectedCRs.contains(cr) {
+            monsterFilters.selectedCRs.removeAll { $0 == cr }
+        } else {
+            monsterFilters.selectedCRs.append(cr)
+        }
+        applyMonsterFilters()
+    }
+    
+    func updateMonsterAlignmentFilter(_ alignment: String) {
+        if monsterFilters.selectedAlignments.contains(alignment) {
+            monsterFilters.selectedAlignments.removeAll { $0 == alignment }
+        } else {
+            monsterFilters.selectedAlignments.append(alignment)
+        }
+        applyMonsterFilters()
+    }
+    
+    func clearMonsterFilters() {
+        monsterFilters = MonsterFilters()
+        applyMonsterFilters()
+    }
+    
+    func applyMonsterFilters() {
+        filteredMonsters = monsters.filter { monster in
+            // Фильтр по размеру
+            if !monsterFilters.selectedSizes.isEmpty && !monsterFilters.selectedSizes.contains(monster.size) {
+                return false
+            }
+            
+            // Фильтр по типу
+            if !monsterFilters.selectedTypes.isEmpty && !monsterFilters.selectedTypes.contains(monster.type) {
+                return false
+            }
+            
+            // Фильтр по CR
+            if !monsterFilters.selectedCRs.isEmpty && !monsterFilters.selectedCRs.contains(monster.challenge.cr) {
+                return false
+            }
+            
+            // Фильтр по мировоззрению
+            if !monsterFilters.selectedAlignments.isEmpty && !monsterFilters.selectedAlignments.contains(monster.alignment) {
+                return false
+            }
+            
+            // Поиск по тексту
+            if !monsterFilters.searchText.isEmpty {
+                let searchText = monsterFilters.searchText.lowercased()
+                return monster.name.lowercased().contains(searchText) ||
+                       monster.subtitle.lowercased().contains(searchText) ||
+                       monster.type.lowercased().contains(searchText)
             }
             
             return true

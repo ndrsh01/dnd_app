@@ -20,6 +20,10 @@
 		272ADF652E533BC9007AF452 /* CharacterEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF642E533BC9007AF452 /* CharacterEditorView.swift */; };
 		272ADF692E533F3E007AF452 /* ClassAbilitiesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF682E533F3E007AF452 /* ClassAbilitiesSection.swift */; };
 		272ADF6B2E53613A007AF452 /* bestiary_5e.ndjson in Resources */ = {isa = PBXBuildFile; fileRef = 272ADF6A2E53613A007AF452 /* bestiary_5e.ndjson */; };
+		272ADF6D2E53C0B3007AF452 /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF6C2E53C0B3007AF452 /* SharedComponents.swift */; };
+		272ADF6F2E53C2DB007AF452 /* ClassAbilitiesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF6E2E53C2DB007AF452 /* ClassAbilitiesSection.swift */; };
+		272ADF712E53C2E2007AF452 /* InteractiveComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF702E53C2E2007AF452 /* InteractiveComponents.swift */; };
+		272ADF732E53C3B1007AF452 /* CharacterClassesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF722E53C3B1007AF452 /* CharacterClassesSection.swift */; };
 		275B2C182E4E2F89008AA77B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 275B2C172E4E2F89008AA77B /* Assets.xcassets */; };
 		275B2C1C2E4F666F008AA77B /* backgrounds.json in Resources */ = {isa = PBXBuildFile; fileRef = 275B2C1B2E4F666E008AA77B /* backgrounds.json */; };
 		275B2C1E2E4F68E9008AA77B /* CompendiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */; };
@@ -80,6 +84,10 @@
 		272ADF642E533BC9007AF452 /* CharacterEditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterEditorView.swift; sourceTree = "<group>"; };
 		272ADF682E533F3E007AF452 /* ClassAbilitiesSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassAbilitiesSection.swift; sourceTree = "<group>"; };
 		272ADF6A2E53613A007AF452 /* bestiary_5e.ndjson */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bestiary_5e.ndjson; sourceTree = "<group>"; };
+		272ADF6C2E53C0B3007AF452 /* SharedComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharedComponents.swift; sourceTree = "<group>"; };
+		272ADF6E2E53C2DB007AF452 /* ClassAbilitiesSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassAbilitiesSection.swift; sourceTree = "<group>"; };
+		272ADF702E53C2E2007AF452 /* InteractiveComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveComponents.swift; sourceTree = "<group>"; };
+		272ADF722E53C3B1007AF452 /* CharacterClassesSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterClassesSection.swift; sourceTree = "<group>"; };
 		275B2C172E4E2F89008AA77B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		275B2C1B2E4F666E008AA77B /* backgrounds.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = backgrounds.json; sourceTree = "<group>"; };
 		275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompendiumView.swift; sourceTree = "<group>"; };
@@ -166,19 +174,23 @@
 		272ADF562E51D3B8007AF452 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				27D1A0062E4700000042C0AB /* SpellsView.swift */,
 				272ADF522E51D346007AF452 /* CharacterCreationView.swift */,
-				272ADF4E2E51D306007AF452 /* CompactCharacterSheetView.swift */,
 				272ADF642E533BC9007AF452 /* CharacterEditorView.swift */,
-				272ADF682E533F3E007AF452 /* ClassAbilitiesSection.swift */,
 				272ADF4C2E516017007AF452 /* CharacterSelectionView.swift */,
-				272ADF502E51D327007AF452 /* DetailSectionView.swift */,
-				275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */,
-				27D304A62E4DF91200CEDEF1 /* JSONQuoteView.swift */,
 				27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */,
+				272ADF682E533F3E007AF452 /* ClassAbilitiesSection.swift */,
+				272ADF4E2E51D306007AF452 /* CompactCharacterSheetView.swift */,
+				272ADF722E53C3B1007AF452 /* CharacterClassesSection.swift */,
+				275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */,
+				272ADF502E51D327007AF452 /* DetailSectionView.swift */,
+				272ADF702E53C2E2007AF452 /* InteractiveComponents.swift */,
+				27D304A62E4DF91200CEDEF1 /* JSONQuoteView.swift */,
 				27D1A0102E4700000042C0AB /* NotesView.swift */,
 				27D1A0122E4700000042C0AB /* RelationshipView.swift */,
 				27D1A0142E4700000042C0AB /* SettingsView.swift */,
+				272ADF6C2E53C0B3007AF452 /* SharedComponents.swift */,
+				27D1A0062E4700000042C0AB /* SpellsView.swift */,
+				272ADF6E2E53C2DB007AF452 /* ClassAbilitiesSection.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -392,13 +404,17 @@
 				272ADF4F2E51D307007AF452 /* CompactCharacterSheetView.swift in Sources */,
 				275B2C1E2E4F68E9008AA77B /* CompendiumView.swift in Sources */,
 				27D1A0032E4700000042C0AB /* ContentView.swift in Sources */,
+				272ADF6D2E53C0B3007AF452 /* SharedComponents.swift in Sources */,
 				27D1A0052E4700000042C0AB /* Models.swift in Sources */,
+				272ADF712E53C2E2007AF452 /* InteractiveComponents.swift in Sources */,
+				272ADF732E53C3B1007AF452 /* CharacterClassesSection.swift in Sources */,
 				27D1A0072E4700000042C0AB /* SpellsView.swift in Sources */,
 				272ADF582E51E207007AF452 /* DetailSection.swift in Sources */,
 				275B2C202E4F68EF008AA77B /* CompendiumStore.swift in Sources */,
 				27D1A00B2E4700000042C0AB /* FavoritesManager.swift in Sources */,
 				272ADF532E51D346007AF452 /* CharacterCreationView.swift in Sources */,
 				27D304AB2E4DF92000CEDEF1 /* CommonStyles.swift in Sources */,
+				272ADF6F2E53C2DB007AF452 /* ClassAbilitiesSection.swift in Sources */,
 				272ADF632E533B85007AF452 /* CharacterEditorComponents.swift in Sources */,
 				272ADF5D2E532CB5007AF452 /* ClassesStore.swift in Sources */,
 				27D1A00F2E4700000042C0AB /* QuoteManager.swift in Sources */,
