@@ -34,9 +34,9 @@ struct CharacterCreationView: View {
                 // Современный градиентный фон
                 LinearGradient(
                     colors: [
-                        Color("BackgroundColor").opacity(0.95),
-                        Color("BackgroundColor").opacity(0.8),
-                        Color("BackgroundColor")
+                        CommonColors.background.opacity(0.95),
+                        CommonColors.background.opacity(0.8),
+                        CommonColors.background
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing

@@ -298,7 +298,7 @@ struct CharacterImportView: View {
                 Spacer()
             }
             .padding()
-            .background(Color("BackgroundColor"))
+            .background(CommonColors.background)
             .navigationTitle("Импорт")
             .navigationBarTitleDisplayMode(.inline)
             .alert(isSuccess ? "Успех!" : "Ошибка", isPresented: $showingAlert) {
@@ -552,8 +552,8 @@ struct CharacterViewerView: View {
             .background(
                 LinearGradient(
                     colors: [
-                        Color("BackgroundColor"),
-                        Color("BackgroundColor").opacity(0.9)
+                        CommonColors.background,
+                        CommonColors.background.opacity(0.9)
                     ],
                     startPoint: .top,
                     endPoint: .bottom

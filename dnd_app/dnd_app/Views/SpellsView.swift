@@ -234,7 +234,7 @@ struct AdvancedFiltersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color("BackgroundColor")
+                CommonColors.background
                     .ignoresSafeArea()
                 
                 ScrollView {

@@ -103,7 +103,7 @@ struct RelationshipView: View {
         NavigationStack {
             ZStack {
                 // Фон #fceeda
-                Color("BackgroundColor")
+                CommonColors.background
                 .ignoresSafeArea()
 
                 Group {
@@ -521,7 +521,7 @@ struct AddPersonView: View {
         NavigationStack {
             ZStack {
                 // Фон #fceeda
-                Color("BackgroundColor")
+                CommonColors.background
                     .ignoresSafeArea()
                 
                 ScrollView {

@@ -110,9 +110,9 @@ struct CharacterSelectionView: View {
                     .background(
             LinearGradient(
                 colors: [
-                    Color("BackgroundColor"),
-                    Color("BackgroundColor").opacity(0.8),
-                    Color("BackgroundColor")
+                    CommonColors.background,
+                    CommonColors.background.opacity(0.8),
+                    CommonColors.background
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing

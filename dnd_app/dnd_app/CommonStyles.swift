@@ -219,6 +219,20 @@ struct CommonColors {
     static let textSecondary = Color(.secondaryLabel)
 }
 
+// MARK: - Common Gradients
+
+struct CommonGradients {
+    static let background = LinearGradient(
+        colors: [
+            CommonColors.background,
+            CommonColors.background.opacity(0.8),
+            CommonColors.background
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+}
+
 // MARK: - Common Fonts
 
 struct CommonFonts {
@@ -248,6 +262,10 @@ extension View {
     
     func commonSectionHeader() -> some View {
         self.modifier(SectionHeaderStyle())
+    }
+
+    func commonBackground() -> some View {
+        self.background(CommonGradients.background)
     }
 }
 
