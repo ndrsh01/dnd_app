@@ -10,6 +10,12 @@ struct CharacterSelectionView: View {
     @State private var showImportSuccess = false
     @State private var showImportError = false
     @State private var importMessage = ""
+    @State private var searchText = ""
+    @State private var editingCharacter: Character?
+
+    private var filteredCharacters: [Character] {
+        characterStore.filteredCharacters(searchText: searchText)
+    }
     
     var body: some View {
         NavigationView {
@@ -49,19 +55,38 @@ struct CharacterSelectionView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(characterStore.characters) { character in
-                                CharacterCardView(
-                                    character: character,
-                                    isSelected: characterStore.selectedCharacter?.id == character.id
-                                ) {
-                                    characterStore.selectedCharacter = character
+                    List {
+                        ForEach(filteredCharacters) { character in
+                            CharacterCardView(
+                                character: character,
+                                isSelected: characterStore.selectedCharacter?.id == character.id
+                            ) {
+                                characterStore.selectedCharacter = character
+                            }
+                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                Button {
+                                    editingCharacter = character
+                                } label: {
+                                    Label("Изменить", systemImage: "pencil")
+                                }
+
+                                Button {
+                                    characterStore.duplicate(character)
+                                } label: {
+                                    Label("Дублировать", systemImage: "doc.on.doc")
+                                }
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    characterStore.remove(character: character)
+                                } label: {
+                                    Label("Удалить", systemImage: "trash")
                                 }
                             }
                         }
-                        .padding(.horizontal)
                     }
+                    .listStyle(PlainListStyle())
+                    .searchable(text: $searchText, prompt: "Поиск персонажей")
                 }
                 
                 Spacer()
@@ -145,6 +170,9 @@ struct CharacterSelectionView: View {
         .sheet(isPresented: $showCharacterCreation) {
             CharacterCreationView(characterStore: characterStore)
         }
+        .sheet(item: $editingCharacter) { character in
+            CharacterEditorView(store: characterStore, character: character)
+        }
         .fileExporter(
             isPresented: $isExporting,
             document: CharacterExportDocument(characters: characterStore.characters),
@@ -214,6 +242,7 @@ struct CharacterSelectionView: View {
         }
         }
     }
+    
 }
 
 struct CharacterCardView: View {
