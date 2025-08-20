@@ -10,6 +10,9 @@ struct CharacterSelectionView: View {
     @State private var showImportSuccess = false
     @State private var showImportError = false
     @State private var importMessage = ""
+    @State private var actionCharacter: Character?
+    @State private var characterToEdit: Character?
+    @State private var showCharacterOptions = false
     
     var body: some View {
         NavigationView {
@@ -54,10 +57,15 @@ struct CharacterSelectionView: View {
                             ForEach(characterStore.characters) { character in
                                 CharacterCardView(
                                     character: character,
-                                    isSelected: characterStore.selectedCharacter?.id == character.id
-                                ) {
-                                    characterStore.selectedCharacter = character
-                                }
+                                    isSelected: characterStore.selectedCharacter?.id == character.id,
+                                    onTap: {
+                                        characterStore.selectedCharacter = character
+                                    },
+                                    onLongPress: {
+                                        actionCharacter = character
+                                        showCharacterOptions = true
+                                    }
+                                )
                             }
                         }
                         .padding(.horizontal)
@@ -212,6 +220,19 @@ struct CharacterSelectionView: View {
         } message: {
             Text(importMessage)
         }
+        .sheet(item: $characterToEdit) { character in
+            CharacterEditorView(store: characterStore, character: character)
+        }
+        .confirmationDialog(
+            "Действия с персонажем",
+            isPresented: $showCharacterOptions,
+            presenting: actionCharacter
+        ) { character in
+            Button("Редактировать") { characterToEdit = character }
+            Button("Удалить", role: .destructive) {
+                characterStore.remove(character: character)
+            }
+        }
         }
     }
 }
@@ -220,69 +241,70 @@ struct CharacterCardView: View {
     let character: Character
     let isSelected: Bool
     let onTap: () -> Void
-    
+    let onLongPress: () -> Void
+
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 16) {
-                // Аватар персонажа
-                ZStack {
-                    Circle()
-                        .fill(Color.orange.opacity(0.2))
-                        .frame(width: 60, height: 60)
-                    
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 30))
-                        .foregroundColor(.orange)
-                }
-                
-                // Информация о персонаже
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(character.name)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                    
-                    Text("\(character.race) • \(character.characterClass)")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                    
-                    Text("Уровень \(character.level)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                // Статистика
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("HP: \(character.currentHitPoints)/\(character.maxHitPoints)")
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                    
-                    Text("КЗ: \(character.armorClass)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                // Индикатор выбора
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.orange)
-                }
+        HStack(spacing: 16) {
+            // Аватар персонажа
+            ZStack {
+                Circle()
+                    .fill(Color.orange.opacity(0.2))
+                    .frame(width: 60, height: 60)
+
+                Image(systemName: "person.fill")
+                    .font(.system(size: 30))
+                    .foregroundColor(.orange)
             }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.primary.opacity(0.05))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color.orange : Color.clear, lineWidth: 2)
-                    )
-            )
+
+            // Информация о персонаже
+            VStack(alignment: .leading, spacing: 4) {
+                Text(character.name)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+
+                Text("\(character.race) • \(character.characterClass)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+
+                Text("Уровень \(character.level)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            // Статистика
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("HP: \(character.currentHitPoints)/\(character.maxHitPoints)")
+                    .font(.caption)
+                    .foregroundColor(.primary)
+
+                Text("КЗ: \(character.armorClass)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            // Индикатор выбора
+            if isSelected {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.orange)
+            }
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.primary.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(isSelected ? Color.orange : Color.clear, lineWidth: 2)
+                )
+        )
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onTap)
+        .onLongPressGesture(perform: onLongPress)
     }
 }
 
