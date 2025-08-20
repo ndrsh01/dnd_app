@@ -52,32 +52,55 @@ final class ClassesStore: ObservableObject {
 	}
 
 	func loadClasses() {
-		guard let url = Bundle.main.url(forResource: "classes", withExtension: "json"),
-			  let data = try? Data(contentsOf: url) else { return }
+		guard let url = Bundle.main.url(forResource: "classes", withExtension: "json") else {
+			print("❌ [ClassesStore] classes.json not found in bundle")
+			return
+		}
+		
+		guard let data = try? Data(contentsOf: url) else {
+			print("❌ [ClassesStore] Failed to read classes.json data")
+			return
+		}
+		
 		do {
 			let decoded = try JSONDecoder().decode([GameClass].self, from: data)
 			var map: [String: GameClass] = [:]
 			for gameClass in decoded {
 				map[gameClass.slug] = gameClass
 			}
-			DispatchQueue.main.async { self.classesBySlug = map }
+			
+			DispatchQueue.main.async { 
+				self.classesBySlug = map
+			}
 		} catch {
-			print("[ClassesStore] Failed to decode classes.json: \(error)")
+			print("❌ [ClassesStore] Failed to decode classes.json: \(error)")
 		}
 	}
 
 	func loadClassTables() {
-		guard let url = Bundle.main.url(forResource: "class_tables", withExtension: "json"),
-			  let data = try? Data(contentsOf: url) else { return }
+		guard let url = Bundle.main.url(forResource: "class_tables", withExtension: "json") else {
+			print("❌ [ClassesStore] class_tables.json not found in bundle")
+			return
+		}
+		
+		guard let data = try? Data(contentsOf: url) else {
+			print("❌ [ClassesStore] Failed to read class_tables.json data")
+			return
+		}
+		
 		do {
 			let decoded = try JSONDecoder().decode([ClassTable].self, from: data)
 			var map: [String: ClassTable] = [:]
 			for table in decoded {
 				map[table.slug] = table
 			}
-			DispatchQueue.main.async { self.classTablesBySlug = map }
+			
+			DispatchQueue.main.async { 
+				self.classTablesBySlug = map
+				print("✅ [ClassesStore] Class tables loaded successfully. Total: \(self.classTablesBySlug.count)")
+			}
 		} catch {
-			print("[ClassesStore] Failed to decode class_tables.json: \(error)")
+			print("❌ [ClassesStore] Failed to decode class_tables.json: \(error)")
 		}
 	}
 

@@ -488,7 +488,7 @@ struct CharacterCard: View {
             showingViewer = true
         }
         .sheet(isPresented: $showingViewer) {
-            CharacterViewerView(character: character, store: store)
+            CharacterViewerView(originalCharacter: character, store: store)
         }
         .sheet(isPresented: $showingEditor) {
             CharacterEditorView(store: store, character: character)
@@ -503,10 +503,14 @@ struct CharacterCard: View {
 // MARK: - Character Viewer View
 
 struct CharacterViewerView: View {
-    let character: Character
+    let originalCharacter: Character
     let store: CharacterStore
     @Environment(\.dismiss) private var dismiss
     @State private var showingEditor = false
+    
+    private var character: Character {
+        store.characters.first(where: { $0.id == originalCharacter.id }) ?? originalCharacter
+    }
     
     var body: some View {
         NavigationStack {

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // MARK: - Character Class Models
 
@@ -322,6 +323,10 @@ struct Character: Identifiable, Codable, Equatable {
     var bonds: String = ""
     var flaws: String = ""
     
+    // Class Features and Abilities (cached from JSON)
+    var classFeatures: [String: [String: [ClassFeature]]] = [:] // [classSlug: [level: [features]]]
+    var classProgression: [String: ClassTable] = [:] // [classSlug: progressionTable]
+    
     // Equipment and Features
     var equipment: String = ""
     var featuresAndTraits: String = ""
@@ -361,6 +366,7 @@ struct Character: Identifiable, Codable, Equatable {
         case strength, dexterity, constitution, intelligence, wisdom, charisma
         case savingThrows, skills, skillAbilities
         case personalityTraits, ideals, bonds, flaws
+        case classFeatures, classProgression
         case equipment, featuresAndTraits, otherProficiencies
         case attacks, spellSlots, spells
         case treasure, specialResources, languages, hitDiceUsed
@@ -411,6 +417,9 @@ struct Character: Identifiable, Codable, Equatable {
         ideals = try container.decode(String.self, forKey: .ideals)
         bonds = try container.decode(String.self, forKey: .bonds)
         flaws = try container.decode(String.self, forKey: .flaws)
+        
+        classFeatures = try container.decodeIfPresent([String: [String: [ClassFeature]]].self, forKey: .classFeatures) ?? [:]
+        classProgression = try container.decodeIfPresent([String: ClassTable].self, forKey: .classProgression) ?? [:]
         
         equipment = try container.decode(String.self, forKey: .equipment)
         featuresAndTraits = try container.decode(String.self, forKey: .featuresAndTraits)
@@ -473,6 +482,9 @@ struct Character: Identifiable, Codable, Equatable {
         try container.encode(ideals, forKey: .ideals)
         try container.encode(bonds, forKey: .bonds)
         try container.encode(flaws, forKey: .flaws)
+        
+        try container.encode(classFeatures, forKey: .classFeatures)
+        try container.encode(classProgression, forKey: .classProgression)
         
         try container.encode(equipment, forKey: .equipment)
         try container.encode(featuresAndTraits, forKey: .featuresAndTraits)
@@ -596,10 +608,10 @@ final class CharacterStore: ObservableObject {
     
     private func addTestCharacter() {
         var testCharacter = Character()
-        testCharacter.name = "Андрей"
-        testCharacter.playerName = "Panikoid"
+        testCharacter.name = "Абоба"
+        testCharacter.playerName = "Тест"
         testCharacter.race = "Человек"
-        testCharacter.characterClass = "Плут 1/Воин 1"
+        testCharacter.characterClass = "Монах"
         testCharacter.background = "Чужеземец"
         testCharacter.alignment = "Хаотично-нейтральный"
         testCharacter.level = 2
@@ -718,10 +730,9 @@ final class CharacterStore: ObservableObject {
     }
     
     func add(_ character: Character) {
-        print("➕ [CHARACTER] Adding character: \(character.name) (ID: \(character.id))")
-        print("➕ [CHARACTER] Total characters before: \(characters.count)")
-        characters.append(character)
-        print("✅ [CHARACTER] Character added successfully. Total characters: \(characters.count)")
+        var newCharacters = characters
+        newCharacters.append(character)
+        characters = newCharacters
     }
     
     func remove(at offsets: IndexSet) {
@@ -741,22 +752,29 @@ final class CharacterStore: ObservableObject {
     }
     
     func update(_ character: Character) {
-        print("🔄 [CHARACTER] Updating character: \(character.name) (ID: \(character.id))")
-        print("🔄 [CHARACTER] Total characters: \(characters.count)")
-        
         if let idx = characters.firstIndex(where: { $0.id == character.id }) {
-            print("✅ [CHARACTER] Character found at index: \(idx)")
-            characters[idx] = character
-            
-            // Если это выбранный персонаж, обновляем его
-            if selectedCharacter?.id == character.id {
-                selectedCharacter = character
-                print("✅ [CHARACTER] Selected character updated")
-            }
-            print("✅ [CHARACTER] Character updated successfully")
-        } else {
-            print("❌ [CHARACTER] Character not found for update")
+            var newCharacters = characters
+            newCharacters[idx] = character
+            characters = newCharacters
+            if selectedCharacter?.id == character.id { selectedCharacter = character }
         }
+    }
+    
+    func updateCharacterClasses(_ character: Character, classesStore: ClassesStore) {
+        var updatedCharacter = character
+        
+        // Update cached class data for all classes
+        for characterClass in character.characterClasses {
+            if let gameClass = classesStore.classesBySlug[characterClass.slug] {
+                updatedCharacter.classFeatures[characterClass.slug] = gameClass.featuresByLevel
+            }
+            
+            if let classTable = classesStore.classTablesBySlug[characterClass.slug] {
+                updatedCharacter.classProgression[characterClass.slug] = classTable
+            }
+        }
+        
+        update(updatedCharacter)
     }
     
     func importFromJSON(_ jsonString: String) -> Bool {

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CharacterClassesSection: View {
     @Binding var character: Character
-    @StateObject private var classesStore = ClassesStore()
+    let classesStore: ClassesStore
     @State private var showingAddClass = false
     
     var body: some View {
@@ -51,7 +51,13 @@ struct CharacterClassesSection: View {
                         CharacterClassCard(
                             characterClass: $character.characterClasses[index],
                             onDelete: {
+                                let removedClass = character.characterClasses[index]
                                 character.characterClasses.remove(at: index)
+                                
+                                // Clear cached data for removed class
+                                character.classFeatures.removeValue(forKey: removedClass.slug)
+                                character.classProgression.removeValue(forKey: removedClass.slug)
+                                
                                 // Update character's total level and proficiency bonus
                                 character.level = character.totalLevel
                                 character.proficiencyBonus = (character.totalLevel - 1) / 4 + 2
@@ -323,6 +329,15 @@ struct AddClassView: View {
         )
         character.characterClasses.append(newClass)
         
+        // Cache class features and progression data
+        if let gameClass = classesStore.classesBySlug[selectedClass] {
+            character.classFeatures[selectedClass] = gameClass.featuresByLevel
+        }
+        
+        if let classTable = classesStore.classTablesBySlug[selectedClass] {
+            character.classProgression[selectedClass] = classTable
+        }
+        
         // Update character's total level and proficiency bonus
         character.level = character.totalLevel
         character.proficiencyBonus = (character.totalLevel - 1) / 4 + 2
@@ -440,6 +455,11 @@ struct EditClassView: View {
         
         // Update character's total level and proficiency bonus
         onUpdate()
+        
+        // Update cached data if needed
+        // Note: This would need access to ClassesStore, but for now we'll rely on the cached data
+        // being updated when the class was first added
+        
         dismiss()
     }
 }

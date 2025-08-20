@@ -7,6 +7,7 @@ struct CharacterEditorView: View {
 	@Environment(\.dismiss) private var dismiss
 	@State private var editedCharacter: Character
 	@State private var showingImport = false
+	@StateObject private var classesStore = ClassesStore()
 
 	init(store: CharacterStore, character: Character? = nil) {
 		self.store = store
@@ -17,18 +18,18 @@ struct CharacterEditorView: View {
 	var body: some View {
 		NavigationStack {
 			ScrollView {
-				VStack(spacing: 20) {
-					BasicInfoSection(character: $editedCharacter)
-					CharacterClassesSection(character: $editedCharacter)
-					ClassAbilitiesSection(character: $editedCharacter)
-					CombatStatsSection(character: $editedCharacter)
-					AbilityScoresSection(character: $editedCharacter)
-					SkillsSection(character: $editedCharacter)
-					PersonalitySection(character: $editedCharacter)
-					EquipmentSection(character: $editedCharacter)
-					AttacksSection(character: $editedCharacter)
+				LazyVStack(spacing: 24) {
+					GroupBox { BasicInfoSection(character: $editedCharacter) }
+					GroupBox { CharacterClassesSection(character: $editedCharacter, classesStore: classesStore) }
+					GroupBox { ClassAbilitiesSection(character: $editedCharacter) }
+					GroupBox { CombatStatsSection(character: $editedCharacter) }
+					GroupBox { AbilityScoresSection(character: $editedCharacter) }
+					GroupBox { SkillsSection(character: $editedCharacter) }
+					GroupBox { PersonalitySection(character: $editedCharacter) }
+					GroupBox { EquipmentSection(character: $editedCharacter) }
+					GroupBox { AttacksSection(character: $editedCharacter) }
 				}
-				.padding()
+				.padding(16)
 			}
 		}
 		.navigationTitle(character == nil ? "Новый персонаж" : "Редактирование")
@@ -45,9 +46,11 @@ struct CharacterEditorView: View {
 							Image(systemName: "doc.badge.plus").foregroundColor(.orange)
 						}
 					}
-					Button("Сохранить") { saveCharacter() }
-						.fontWeight(.semibold)
-						.foregroundColor(.orange)
+					Button(action: { saveCharacter() }) {
+						Image(systemName: "checkmark.circle.fill")
+							.font(.title3)
+							.foregroundColor(.orange)
+					}
 				}
 			}
 		}
@@ -57,31 +60,33 @@ struct CharacterEditorView: View {
 				showingImport = false
 			}
 		}
-		.onChange(of: editedCharacter) { newValue in
-			// Auto-save changes when editing existing character
-			if character != nil {
-				autoSaveCharacter()
-			}
-		}
+
 	}
 
 	@MainActor
 	private func saveCharacter() {
 		var characterToSave = editedCharacter
 		characterToSave.dateModified = Date()
+		
+		// Update class data before saving
+		for characterClass in characterToSave.characterClasses {
+			if let gameClass = classesStore.classesBySlug[characterClass.slug] {
+				characterToSave.classFeatures[characterClass.slug] = gameClass.featuresByLevel
+			}
+			
+			if let classTable = classesStore.classTablesBySlug[characterClass.slug] {
+				characterToSave.classProgression[characterClass.slug] = classTable
+			}
+		}
+		
 		if character == nil {
 			characterToSave.dateCreated = Date()
 			store.add(characterToSave)
 		} else {
 			store.update(characterToSave)
 		}
+		// Обновляем выбранного персонажа, чтобы лист мгновенно перерисовался
+		store.selectedCharacter = characterToSave
 		dismiss()
-	}
-	
-	@MainActor
-	private func autoSaveCharacter() {
-		var characterToSave = editedCharacter
-		characterToSave.dateModified = Date()
-		store.update(characterToSave)
 	}
 }

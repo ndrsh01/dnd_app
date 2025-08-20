@@ -2,7 +2,6 @@ import SwiftUI
 
 struct ClassAbilitiesSection: View {
     @Binding var character: Character
-    @StateObject private var classesStore = ClassesStore()
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -41,8 +40,8 @@ struct ClassAbilitiesSection: View {
                 ForEach(character.characterClasses, id: \.id) { characterClass in
                     ClassAbilitiesCard(
                         characterClass: characterClass,
-                        gameClass: classesStore.classesBySlug[characterClass.slug],
-                        classTable: classesStore.classTablesBySlug[characterClass.slug]
+                        classFeatures: character.classFeatures[characterClass.slug] ?? [:],
+                        classTable: character.classProgression[characterClass.slug]
                     )
                 }
             }
@@ -59,7 +58,7 @@ struct ClassAbilitiesSection: View {
 
 struct ClassAbilitiesCard: View {
     let characterClass: CharacterClass
-    let gameClass: GameClass?
+    let classFeatures: [String: [ClassFeature]]
     let classTable: ClassTable?
     @State private var showingProgressionTable = false
     @State private var showingFeatures = false
@@ -96,7 +95,7 @@ struct ClassAbilitiesCard: View {
                                 .fill(LinearGradient(colors: [.purple, .purple.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing))
                         )
                     
-                    if let table = classTable {
+                    if classTable != nil {
                         Text("Таблица прогрессии")
                             .font(.caption2)
                             .foregroundColor(.secondary)
@@ -188,8 +187,8 @@ struct ClassAbilitiesCard: View {
                 ProgressionTableView(classTable: table, currentLevel: characterClass.level)
             }
             
-            if showingFeatures, let gameClass = gameClass {
-                ClassFeaturesView(gameClass: gameClass, characterClass: characterClass)
+            if showingFeatures {
+                ClassFeaturesView(classFeatures: classFeatures, characterClass: characterClass)
             }
         }
         .padding(16)
@@ -264,7 +263,7 @@ struct ProgressionTableView: View {
 }
 
 struct ClassFeaturesView: View {
-    let gameClass: GameClass
+    let classFeatures: [String: [ClassFeature]]
     let characterClass: CharacterClass
     
     var body: some View {
@@ -276,7 +275,8 @@ struct ClassFeaturesView: View {
             
             // Main class features
             ForEach(1...characterClass.level, id: \.self) { level in
-                if let features = gameClass.featuresByLevel["\(level)"], !features.isEmpty {
+                let features = classFeatures["\(level)"] ?? []
+                if !features.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Text("Уровень \(level)")
@@ -318,81 +318,7 @@ struct ClassFeaturesView: View {
                 }
             }
             
-            // Subclass features
-            if let subclassName = characterClass.subclass,
-               let subclass = gameClass.subclasses.first(where: { $0.name.contains(subclassName) || subclassName.contains($0.name) }) {
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Умения подкласса")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
-                        
-                        Text(subclassName)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.purple)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.purple.opacity(0.1))
-                            )
-                    }
-                    
-                    ForEach(3...characterClass.level, id: \.self) { level in
-                        if let features = subclass.featuresByLevel["\(level)"], !features.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text("Уровень \(level)")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .fill(Color.orange)
-                                        )
-                                    
-                                    Spacer()
-                                }
-                                
-                                ForEach(features, id: \.name) { feature in
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(feature.name)
-                                            .font(.caption)
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.primary)
-                                        
-                                        if !feature.text.isEmpty {
-                                            Text(feature.text)
-                                                .font(.caption2)
-                                                .foregroundColor(.secondary)
-                                                .lineLimit(6)
-                                                .padding(.leading, 8)
-                                        }
-                                    }
-                                    .padding(8)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .fill(Color(.systemGray6))
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(.systemBackground))
-                        .stroke(Color.orange.opacity(0.2), lineWidth: 1)
-                )
-            }
+
         }
         .padding(12)
         .background(
@@ -402,6 +328,7 @@ struct ClassFeaturesView: View {
         )
     }
 }
+
 
 
 
