@@ -19,156 +19,99 @@ struct CompendiumView: View {
                 )
                 .ignoresSafeArea()
                 
-                VStack(spacing: 0) {
-                    // Main list
-                    List {
+                ScrollView {
+                    LazyVStack(spacing: 16) {
                         NavigationLink(destination: SpellsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
-                            HStack {
-                                Image(systemName: "wand.and.stars")
-                                    .foregroundColor(.purple)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Заклинания")
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    Text("Магические заклинания и их описания")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
-                            .padding(.vertical, 16)
+                            CompendiumItem(
+                                icon: "wand.and.stars",
+                                color: .purple,
+                                title: "Заклинания",
+                                subtitle: "Магические заклинания и их описания"
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
-                        .listRowSeparator(.visible)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
-                        
+
                         NavigationLink(destination: BackgroundsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
-                            HStack {
-                                Image(systemName: "person.3.sequence")
-                                    .foregroundColor(.blue)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Предыстории")
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    Text("Происхождение и история персонажа")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
-                            .padding(.vertical, 16)
+                            CompendiumItem(
+                                icon: "person.3.sequence",
+                                color: .blue,
+                                title: "Предыстории",
+                                subtitle: "Происхождение и история персонажа"
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
-                        .listRowSeparator(.visible)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
-                        
+
                         NavigationLink(destination: FeatsTabView(store: store, favorites: favorites, themeManager: themeManager)) {
-                            HStack {
-                                Image(systemName: "star.circle")
-                                    .foregroundColor(.orange)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Черты")
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    Text("Особые способности и умения")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
-                            .padding(.vertical, 16)
+                            CompendiumItem(
+                                icon: "star.circle",
+                                color: .orange,
+                                title: "Черты",
+                                subtitle: "Особые способности и умения"
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
-                        .listRowSeparator(.visible)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
-                        
+
                         NavigationLink(destination: BestiaryTabView(store: store, favorites: favorites, themeManager: themeManager)) {
-                            HStack {
-                                Image(systemName: "pawprint.circle")
-                                    .foregroundColor(.green)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Бестиарий")
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    Text("Монстры и существа")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
-                            .padding(.vertical, 16)
+                            CompendiumItem(
+                                icon: "pawprint.circle",
+                                color: .green,
+                                title: "Бестиарий",
+                                subtitle: "Монстры и существа"
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
-                        .listRowSeparator(.visible)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
-                        
+
                         NavigationLink(destination: FavoritesTabView(store: store, favorites: favorites, themeManager: themeManager)) {
-                            HStack {
-                                Image(systemName: "heart.circle")
-                                    .foregroundColor(.red)
-                                    .font(.title2)
-                                    .frame(width: 30)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Избранное")
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    Text("Сохраненные элементы")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
-                            .padding(.vertical, 16)
+                            CompendiumItem(
+                                icon: "heart.circle",
+                                color: .red,
+                                title: "Избранное",
+                                subtitle: "Сохраненные элементы"
+                            )
                         }
-                        .listRowBackground(Color(.systemBackground))
-                        .listRowSeparator(.visible)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
                     }
-                    .listStyle(PlainListStyle())
-                    .scrollContentBackground(.hidden)
+                    .padding()
                 }
             }
             .navigationTitle("Компендиум")
             .navigationBarTitleDisplayMode(.large)
         }
+    }
+}
+
+struct CompendiumItem: View {
+    let icon: String
+    let color: Color
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .font(.title2)
+                .frame(width: 30)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .foregroundColor(.secondary)
+                .font(.caption)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.primary.opacity(0.05))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.primary.opacity(0.1))
+        )
     }
 }
 
@@ -434,26 +377,12 @@ struct MonsterCard: View {
         }
         .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(.systemBackground),
-                            Color(.systemBackground).opacity(0.95)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .stroke(
-                    LinearGradient(
-                        colors: [.red.opacity(0.3), .red.opacity(0.1)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1.5
-                )
-                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.primary.opacity(0.05))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
         )
     }
 }
@@ -1334,9 +1263,9 @@ struct FavoriteMonsterCard: View {
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                         favorites.monsters.toggle(monster.name)
@@ -1349,8 +1278,6 @@ struct FavoriteMonsterCard: View {
                         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.monsters.isFavorite(monster.name))
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
             
             // Basic stats
             HStack(spacing: 16) {
@@ -1358,7 +1285,6 @@ struct FavoriteMonsterCard: View {
                 StatItem(title: "ХП", value: "\(monster.hp.hp)", icon: "heart.fill", color: .red)
                 StatItem(title: "CR", value: monster.challenge.cr, icon: "star.fill", color: .orange)
             }
-            .padding(.horizontal, 20)
             
             // Always show description (no expand/collapse)
             if !monster.subtitle.isEmpty {
@@ -1367,13 +1293,18 @@ struct FavoriteMonsterCard: View {
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 20)
                     .padding(.bottom, 16)
             }
         }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.primary.opacity(0.05))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+        )
         .padding(.horizontal)
     }
 }
