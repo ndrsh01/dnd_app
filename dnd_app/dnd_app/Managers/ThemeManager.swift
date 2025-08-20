@@ -20,7 +20,7 @@ final class ThemeManager: ObservableObject {
     }
     
     // Базовый цвет из ассетов
-    static let backgroundColor = Color("BackgroundColor")
+    static let backgroundColor = CommonColors.background
     
     // Цвета для темной темы  
     static let darkBackgroundGradient = LinearGradient(

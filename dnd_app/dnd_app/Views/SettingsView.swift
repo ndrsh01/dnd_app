@@ -11,9 +11,9 @@ struct SettingsView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color("BackgroundColor"),
-                        Color("BackgroundColor").opacity(0.9),
-                        Color("BackgroundColor")
+                        CommonColors.background,
+                        CommonColors.background.opacity(0.9),
+                        CommonColors.background
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -358,9 +358,9 @@ struct QuoteManagerView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color("BackgroundColor"),
-                        Color("BackgroundColor").opacity(0.9),
-                        Color("BackgroundColor")
+                        CommonColors.background,
+                        CommonColors.background.opacity(0.9),
+                        CommonColors.background
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -949,9 +949,9 @@ struct ModernAddQuoteView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color("BackgroundColor"),
-                        Color("BackgroundColor").opacity(0.9),
-                        Color("BackgroundColor")
+                        CommonColors.background,
+                        CommonColors.background.opacity(0.9),
+                        CommonColors.background
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -1051,9 +1051,9 @@ struct ModernEditCategoryView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color("BackgroundColor"),
-                        Color("BackgroundColor").opacity(0.9),
-                        Color("BackgroundColor")
+                        CommonColors.background,
+                        CommonColors.background.opacity(0.9),
+                        CommonColors.background
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -1190,7 +1190,7 @@ struct QuoteEditorAddView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color("BackgroundColor")
+                CommonColors.background
                     .ignoresSafeArea()
                 
                 VStack(spacing: 24) {

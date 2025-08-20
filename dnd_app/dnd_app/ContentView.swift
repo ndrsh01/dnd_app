@@ -39,17 +39,7 @@ struct ContentView: View {
             //         Label("Настройки", systemImage: "gearshape.fill")
             //     }
         }
-        .background(
-            LinearGradient(
-                colors: [
-                    Color("BackgroundColor"),
-                    Color("BackgroundColor").opacity(0.8),
-                    Color("BackgroundColor")
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .commonBackground()
         .preferredColorScheme(themeManager.preferredColorScheme)
         .accentColor(.orange)
 
