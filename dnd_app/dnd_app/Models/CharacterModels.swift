@@ -732,7 +732,9 @@ final class CharacterStore: ObservableObject {
     func add(_ character: Character) {
         var newCharacters = characters
         newCharacters.append(character)
-        characters = newCharacters
+        characters = newCharacters.sorted {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
     }
     
     func remove(at offsets: IndexSet) {
@@ -750,14 +752,30 @@ final class CharacterStore: ObservableObject {
             print("❌ [CHARACTER] Персонаж не найден для удаления")
         }
     }
+
+    func duplicate(_ character: Character) {
+        var copy = character
+        copy.id = UUID()
+        copy.name += " копия"
+        copy.dateCreated = Date()
+        copy.dateModified = Date()
+        add(copy)
+    }
     
     func update(_ character: Character) {
         if let idx = characters.firstIndex(where: { $0.id == character.id }) {
             var newCharacters = characters
             newCharacters[idx] = character
-            characters = newCharacters
+            characters = newCharacters.sorted {
+                $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+            }
             if selectedCharacter?.id == character.id { selectedCharacter = character }
         }
+    }
+
+    func filteredCharacters(searchText: String) -> [Character] {
+        if searchText.isEmpty { return characters }
+        return characters.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
     
     func updateCharacterClasses(_ character: Character, classesStore: ClassesStore) {
@@ -1157,6 +1175,10 @@ final class CharacterStore: ObservableObject {
             }
         }
         
+        characters.sort {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
+
         // Загружаем выбранного персонажа
         loadSelectedCharacter()
     }
