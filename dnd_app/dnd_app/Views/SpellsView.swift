@@ -1,6 +1,8 @@
 import SwiftUI
 
 // MARK: - Spells View
+
+
 struct SpellsView: View {
     @StateObject private var store = CompendiumStore()
     @StateObject private var favorites = Favorites()
@@ -577,9 +579,9 @@ struct FeatCard: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    Text(feat.requirements)
-                        .font(.caption)
-                        .foregroundColor(.primary)
+                    Text(feat.requirements.parseMarkdown())
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
                     
                     Spacer()
                 }
@@ -614,7 +616,7 @@ struct FeatCard: View {
                                     .foregroundColor(.primary)
                             }
                             
-                            Text(feat.description)
+                            Text(feat.description.parseMarkdown())
                                 .font(.body)
                                 .foregroundColor(.primary)
                                 .multilineTextAlignment(.leading)
@@ -795,8 +797,7 @@ struct CompendiumSpellCard: View {
                         .padding(.horizontal, 20)
                     
                     // Description
-                    Text(spell.description)
-                        .font(.body)
+                    Text(spell.description.parseMarkdown())
                         .foregroundColor(.primary)
                         .padding(.horizontal, 20)
                         .padding(.bottom, 16)

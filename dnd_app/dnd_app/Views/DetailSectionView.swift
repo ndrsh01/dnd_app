@@ -5,6 +5,7 @@ struct DetailSectionView: View {
     let section: CharacterDetailSection
     @ObservedObject var store: CharacterStore
     @ObservedObject var compendiumStore: CompendiumStore
+    @ObservedObject var classesStore: ClassesStore
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -19,15 +20,15 @@ struct DetailSectionView: View {
                     case .skills:
                         SkillsDetailView(character: character)
                     case .spells:
-                        ClassAbilitiesDetailView(character: character, compendiumStore: compendiumStore)
+                        ClassAbilitiesDetailView(character: character, compendiumStore: compendiumStore, classesStore: classesStore)
                     case .equipment:
-                        EquipmentDetailView(character: character)
+                        EquipmentDetailView(character: character, store: store)
                     case .treasure:
-                        TreasureDetailView(character: character)
+                        TreasureDetailView(character: character, store: store)
                     case .personality:
-                        PersonalityDetailView(character: character)
+                        PersonalityDetailView(character: character, store: store)
                     case .features:
-                        FeaturesDetailView(character: character)
+                        FeaturesDetailView(character: character, store: store)
                     }
                 }
                 .padding()
@@ -753,9 +754,9 @@ struct SkillDetailRow: View {
 struct ClassAbilitiesDetailView: View {
     let character: Character
     @ObservedObject var compendiumStore: CompendiumStore
+    @ObservedObject var classesStore: ClassesStore
     @StateObject private var favorites = Favorites()
     @State private var favoriteSpells: [Spell] = []
-    @StateObject private var classesStore = ClassesStore()
     
     private var hasSpellcasters: Bool {
         return character.characterClasses.contains { characterClass in
@@ -770,7 +771,8 @@ struct ClassAbilitiesDetailView: View {
                 ClassAbilitiesCard(
                     characterClass: characterClass,
                     classFeatures: character.classFeatures[characterClass.slug] ?? [:],
-                    classTable: character.classProgression[characterClass.slug]
+                    classTable: character.classProgression[characterClass.slug],
+                    classesStore: classesStore
                 )
             }
             
@@ -1094,8 +1096,7 @@ struct SpellCard: View {
                     .foregroundColor(.secondary)
             }
             
-            Text(spell.description)
-                .font(.subheadline)
+                            Text(spell.description.parseMarkdown())
                 .foregroundColor(.primary)
                 .lineLimit(3)
         }
@@ -1108,6 +1109,7 @@ struct SpellCard: View {
 // MARK: - Equipment Detail View
 struct EquipmentDetailView: View {
     let character: Character
+    @ObservedObject var store: CharacterStore
     
     var body: some View {
         VStack(spacing: 20) {
@@ -1131,17 +1133,17 @@ struct EquipmentDetailView: View {
                     Spacer()
                 }
                 
-                if !character.equipment.isEmpty {
-                    Text(character.equipment)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Снаряжение не указано")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.equipment },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.equipment = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Снаряжение не указано"
+                )
             }
             .padding(24)
             .background(
@@ -1260,6 +1262,7 @@ struct AttackCard: View {
 // MARK: - Treasure Detail View
 struct TreasureDetailView: View {
     let character: Character
+    @ObservedObject var store: CharacterStore
     
     var body: some View {
         VStack(spacing: 20) {
@@ -1283,17 +1286,17 @@ struct TreasureDetailView: View {
                     Spacer()
                 }
                 
-                if !character.treasure.isEmpty {
-                    Text(character.treasure)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Сокровища не указаны")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.treasure },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.treasure = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Сокровища не указаны"
+                )
             }
             .padding(24)
             .background(
@@ -1339,17 +1342,17 @@ struct TreasureDetailView: View {
                     Spacer()
                 }
                 
-                if !character.specialResources.isEmpty {
-                    Text(character.specialResources)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Особые ресурсы не указаны")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.specialResources },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.specialResources = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Особые ресурсы не указаны"
+                )
             }
             .padding(24)
             .background(
@@ -1381,8 +1384,9 @@ struct TreasureDetailView: View {
 // MARK: - Personality Detail View
 struct PersonalityDetailView: View {
     let character: Character
+    @ObservedObject var store: CharacterStore
     @StateObject private var favorites = Favorites()
-    @StateObject private var store = CompendiumStore()
+    @StateObject private var compendiumStore = CompendiumStore()
     @State private var favoriteBackgrounds: [Background] = []
     
     var body: some View {
@@ -1460,17 +1464,17 @@ struct PersonalityDetailView: View {
                     Spacer()
                 }
                 
-                if !character.personalityTraits.isEmpty {
-                    Text(character.personalityTraits)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Черты характера не указаны")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.personalityTraits },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.personalityTraits = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Черты характера не указаны"
+                )
             }
             .padding(24)
             .background(
@@ -1516,17 +1520,17 @@ struct PersonalityDetailView: View {
                     Spacer()
                 }
                 
-                if !character.ideals.isEmpty {
-                    Text(character.ideals)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Идеалы не указаны")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.ideals },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.ideals = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Идеалы не указаны"
+                )
             }
             .padding(24)
             .background(
@@ -1572,17 +1576,17 @@ struct PersonalityDetailView: View {
                     Spacer()
                 }
                 
-                if !character.bonds.isEmpty {
-                    Text(character.bonds)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Привязанности не указаны")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.bonds },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.bonds = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Привязанности не указаны"
+                )
             }
             .padding(24)
             .background(
@@ -1628,17 +1632,17 @@ struct PersonalityDetailView: View {
                     Spacer()
                 }
                 
-                if !character.flaws.isEmpty {
-                    Text(character.flaws)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Слабости не указаны")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.flaws },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.flaws = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Слабости не указаны"
+                )
             }
             .padding(24)
             .background(
@@ -1674,15 +1678,16 @@ struct PersonalityDetailView: View {
     
     @MainActor
     private func updateFavorites() {
-        favoriteBackgrounds = store.backgrounds.filter { favorites.backgrounds.isFavorite($0.name) }
+        favoriteBackgrounds = compendiumStore.backgrounds.filter { favorites.backgrounds.isFavorite($0.name) }
     }
 }
 
 // MARK: - Features Detail View
 struct FeaturesDetailView: View {
     let character: Character
+    @ObservedObject var store: CharacterStore
     @StateObject private var favorites = Favorites()
-    @StateObject private var store = CompendiumStore()
+    @StateObject private var compendiumStore = CompendiumStore()
     @State private var favoriteFeats: [Feat] = []
     
     var body: some View {
@@ -1760,17 +1765,17 @@ struct FeaturesDetailView: View {
                     Spacer()
                 }
                 
-                if !character.featuresAndTraits.isEmpty {
-                    Text(character.featuresAndTraits)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Умения и способности не указаны")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.featuresAndTraits },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.featuresAndTraits = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Умения и способности не указаны"
+                )
             }
             .padding(24)
             .background(
@@ -1816,17 +1821,17 @@ struct FeaturesDetailView: View {
                     Spacer()
                 }
                 
-                if !character.otherProficiencies.isEmpty {
-                    Text(character.otherProficiencies)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Прочие владения не указаны")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.otherProficiencies },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.otherProficiencies = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Прочие владения не указаны"
+                )
             }
             .padding(24)
             .background(
@@ -1872,17 +1877,17 @@ struct FeaturesDetailView: View {
                     Spacer()
                 }
                 
-                if !character.languages.isEmpty {
-                    Text(character.languages)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .lineSpacing(4)
-                } else {
-                    Text("Языки не указаны")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .italic()
-                }
+                RichTextField(
+                    text: Binding(
+                        get: { character.languages },
+                        set: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.languages = newValue
+                            store.selectedCharacter = updatedCharacter
+                        }
+                    ),
+                    placeholder: "Языки не указаны"
+                )
             }
             .padding(24)
             .background(
@@ -1918,13 +1923,16 @@ struct FeaturesDetailView: View {
     
     @MainActor
     private func updateFavorites() {
-        favoriteFeats = store.feats.filter { favorites.feats.isFavorite($0.name) }
+        favoriteFeats = compendiumStore.feats.filter { favorites.feats.isFavorite($0.name) }
     }
 }
 
 
 
 // MARK: - Background Card for DetailSectionView
+
+
+
 struct BackgroundCard: View {
     let background: Background
     @ObservedObject var favorites: Favorites
@@ -1969,15 +1977,95 @@ struct BackgroundCard: View {
             .padding(.top, 16)
             .padding(.bottom, 12)
             
-            // Expanded details (description)
+            // Expanded details
             if isExpanded {
-                Text(background.description)
-                    .font(.body)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
+                VStack(alignment: .leading, spacing: 12) {
+                    // Характеристики
+                    if !background.characteristics.isEmpty {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "chart.bar.fill")
+                                .foregroundColor(.blue)
+                                .font(.caption)
+                            Text(background.characteristics.parseMarkdown())
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                        }
+                    }
+                    
+                    // Черта
+                    if !background.trait.isEmpty {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "sparkles")
+                                .foregroundColor(.purple)
+                                .font(.caption)
+                            Text(background.trait.parseMarkdown())
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                        }
+                    }
+                    
+                    // Навыки
+                    if !background.skills.isEmpty {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "brain.head.profile")
+                                .foregroundColor(.green)
+                                .font(.caption)
+                            Text(background.skills.parseMarkdown())
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                        }
+                    }
+                    
+                    // Инструменты
+                    if !background.tools.isEmpty {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "wrench.and.screwdriver.fill")
+                                .foregroundColor(.orange)
+                                .font(.caption)
+                            Text(background.tools.parseMarkdown())
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                        }
+                    }
+                    
+                    // Снаряжение
+                    if !background.equipment.isEmpty {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "bag.fill")
+                                .foregroundColor(.brown)
+                                .font(.caption)
+                            Text(background.equipment.parseMarkdown())
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                        }
+                    }
+                    
+                    // Описание
+                    if !background.description.isEmpty {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "text.quote")
+                                .foregroundColor(.indigo)
+                                .font(.caption)
+                            Text(background.description.parseMarkdown())
+                                .font(.body)
+                                .foregroundColor(.primary)
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
             }
         }
         .background(Color(.systemBackground))

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ClassAbilitiesSection: View {
     @Binding var character: Character
+    @StateObject private var classesStore = ClassesStore()
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -37,12 +38,26 @@ struct ClassAbilitiesSection: View {
                         .stroke(Color.purple.opacity(0.2), style: StrokeStyle(lineWidth: 1, dash: [5]))
                 )
             } else {
-                ForEach(character.characterClasses, id: \.id) { characterClass in
-                    ClassAbilitiesCard(
-                        characterClass: characterClass,
-                        classFeatures: character.classFeatures[characterClass.slug] ?? [:],
-                        classTable: character.classProgression[characterClass.slug]
-                    )
+                if classesStore.isLoading {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .scaleEffect(1.2)
+                        
+                        Text("Загрузка классовых умений...")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                } else {
+                    ForEach(character.characterClasses, id: \.id) { characterClass in
+                        ClassAbilitiesCard(
+                            characterClass: characterClass,
+                            classFeatures: character.classFeatures[characterClass.slug] ?? [:],
+                            classTable: character.classProgression[characterClass.slug],
+                            classesStore: classesStore
+                        )
+                    }
                 }
             }
         }
@@ -60,6 +75,7 @@ struct ClassAbilitiesCard: View {
     let characterClass: CharacterClass
     let classFeatures: [String: [ClassFeature]]
     let classTable: ClassTable?
+    @ObservedObject var classesStore: ClassesStore
     @State private var showingProgressionTable = false
     @State private var showingFeatures = false
     
@@ -104,7 +120,10 @@ struct ClassAbilitiesCard: View {
             }
             
             // Quick stats from progression table
-            if let table = classTable, let currentLevelRow = table.rows.first(where: { $0["Уровень"] == "\(characterClass.level)" }) {
+            let table = classesStore.classTablesBySlug[characterClass.slug]
+            let currentLevelRow = table?.rows.first(where: { $0["Уровень"] == "\(characterClass.level)" })
+            
+            if let table = table, let currentLevelRow = currentLevelRow {
                 VStack(spacing: 8) {
                     Text("Характеристики уровня \(characterClass.level)")
                         .font(.subheadline)
@@ -183,12 +202,12 @@ struct ClassAbilitiesCard: View {
             }
             
             // Expanded content
-            if showingProgressionTable, let table = classTable {
+            if showingProgressionTable, let table = classesStore.classTablesBySlug[characterClass.slug] {
                 ProgressionTableView(classTable: table, currentLevel: characterClass.level)
             }
             
             if showingFeatures {
-                ClassFeaturesView(classFeatures: classFeatures, characterClass: characterClass)
+                ClassFeaturesView(classFeatures: classFeatures, characterClass: characterClass, classesStore: classesStore)
             }
         }
         .padding(16)
@@ -265,6 +284,7 @@ struct ProgressionTableView: View {
 struct ClassFeaturesView: View {
     let classFeatures: [String: [ClassFeature]]
     let characterClass: CharacterClass
+    @ObservedObject var classesStore: ClassesStore
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -274,8 +294,10 @@ struct ClassFeaturesView: View {
                 .foregroundColor(.primary)
             
             // Main class features
+            let allFeatures = classesStore.features(for: characterClass.slug, upTo: characterClass.level)
+            
             ForEach(1...characterClass.level, id: \.self) { level in
-                let features = classFeatures["\(level)"] ?? []
+                let features = allFeatures.first(where: { $0.0 == level })?.1 ?? []
                 if !features.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {

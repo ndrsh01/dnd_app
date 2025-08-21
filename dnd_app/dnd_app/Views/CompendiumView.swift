@@ -558,8 +558,7 @@ struct ActionItem: View {
                 .fontWeight(.semibold)
                 .foregroundColor(.primary)
             
-            Text(action.text)
-                .font(.caption2)
+                            Text(action.text.parseMarkdown())
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }

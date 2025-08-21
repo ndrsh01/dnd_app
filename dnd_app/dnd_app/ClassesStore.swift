@@ -45,6 +45,7 @@ struct ClassTable: Codable, Equatable {
 final class ClassesStore: ObservableObject {
 	@Published var classesBySlug: [String: GameClass] = [:]
 	@Published var classTablesBySlug: [String: ClassTable] = [:]
+	@Published var isLoading: Bool = true
 
 	init() {
 		loadClasses()
@@ -71,6 +72,7 @@ final class ClassesStore: ObservableObject {
 			
 			DispatchQueue.main.async { 
 				self.classesBySlug = map
+				self.isLoading = false
 			}
 		} catch {
 			print("❌ [ClassesStore] Failed to decode classes.json: \(error)")
@@ -97,7 +99,6 @@ final class ClassesStore: ObservableObject {
 			
 			DispatchQueue.main.async { 
 				self.classTablesBySlug = map
-				print("✅ [ClassesStore] Class tables loaded successfully. Total: \(self.classTablesBySlug.count)")
 			}
 		} catch {
 			print("❌ [ClassesStore] Failed to decode class_tables.json: \(error)")

@@ -2,6 +2,8 @@ import SwiftUI
 
 // MARK: - Models
 
+
+
 enum NoteCategory: String, CaseIterable, Codable {
     case places = "Места"
     case people = "Люди"
@@ -35,11 +37,8 @@ struct Note: Identifiable, Codable, Equatable {
     var title: String
     var description: String
     var category: NoteCategory
-    var importance: Int // 1-5 звезд
     var dateCreated: Date
     var dateModified: Date
-    
-    static let maxImportance = 5
 }
 
 // MARK: - Store
@@ -87,9 +86,7 @@ final class NotesStore: ObservableObject {
         return notes.filter { $0.category == category }
     }
 
-    func notesByImportance(_ importance: Int) -> [Note] {
-        return notes.filter { $0.importance == importance }
-    }
+
 
     private func scheduleSave() {
         saveWorkItem?.cancel()
@@ -105,7 +102,6 @@ final class NotesStore: ObservableObject {
             let data = try JSONEncoder().encode(notes)
             guard data != lastSavedData else { return }
             UserDefaults.standard.set(data, forKey: key)
-            // Обновляем кэш
             cacheManager.cacheNotes(notes)
             lastSavedData = data
             saveCallCount += 1
@@ -115,36 +111,31 @@ final class NotesStore: ObservableObject {
     }
 
     private func load() {
-        // Сначала пытаемся загрузить из кэша
         if let cachedNotes = cacheManager.getCachedNotes() {
             notes = cachedNotes
             lastSavedData = try? JSONEncoder().encode(notes)
-            print("✅ [NOTES] Загружено \(cachedNotes.count) заметок из кэша")
             return
         }
 
-        // Если кэша нет, загружаем из UserDefaults
         guard let data = UserDefaults.standard.data(forKey: key) else { return }
         do {
             notes = try JSONDecoder().decode([Note].self, from: data)
-            // Кэшируем заметки
             cacheManager.cacheNotes(notes)
             lastSavedData = data
-            print("✅ [NOTES] Загружено \(notes.count) заметок из UserDefaults и закэшировано")
         } catch {
             print("❌ Failed to decode notes: \(error)")
         }
     }
 }
 
-// MARK: - Views
+// MARK: - Notes View
 
 struct NotesView: View {
     @StateObject private var store = NotesStore()
-    @StateObject private var themeManager = ThemeManager()
     @State private var showingAdd = false
     @State private var selectedCategory: NoteCategory? = nil
     @State private var searchText = ""
+    @State private var showingEmptyState = false
     
     var filteredNotes: [Note] {
         var notes = store.notes
@@ -162,18 +153,19 @@ struct NotesView: View {
             notes = notes.filter { $0.category == category }
         }
         
-        // Сортировка по важности (от высокой к низкой)
-        return notes.sorted { $0.importance > $1.importance }
+        // Сортировка по дате изменения (новые сверху)
+        return notes.sorted { $0.dateModified > $1.dateModified }
     }
     
     var body: some View {
         NavigationStack {
             ZStack {
+                // Фон
                 LinearGradient(
                     colors: [
-                        Color("BackgroundColor"),
-                        Color("BackgroundColor").opacity(0.9),
-                        Color("BackgroundColor")
+                        Color(red: 0.988, green: 0.933, blue: 0.855),
+                        Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                        Color(red: 0.988, green: 0.933, blue: 0.855)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -181,123 +173,32 @@ struct NotesView: View {
                 .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // Поиск
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.secondary)
-                        
-                        TextField("Поиск заметок...", text: $searchText)
-                            .textFieldStyle(PlainTextFieldStyle())
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemGray6))
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                ),
-                                lineWidth: 1
-                            )
+                    // Поисковая панель
+                    SearchPanel(
+                        searchText: $searchText,
+                        selectedCategory: $selectedCategory
                     )
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                    .padding(.top)
                     
-                    // Категории
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            // Кнопка "Все"
-                            Button(action: {
-                                selectedCategory = nil
-                            }) {
-                                HStack {
-                                    Image(systemName: "list.bullet")
-                                    Text("Все")
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(
-                                    LinearGradient(
-                                        colors: selectedCategory == nil ? 
-                                            [Color.orange, Color.orange.opacity(0.8)] : 
-                                            [Color(.systemGray5), Color(.systemGray5)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .foregroundColor(selectedCategory == nil ? .white : .primary)
-                                .cornerRadius(20)
-                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                            }
-                            
-                            // Категории
-                            ForEach(NoteCategory.allCases, id: \.self) { category in
-                                Button(action: {
-                                    selectedCategory = selectedCategory == category ? nil : category
-                                }) {
-                                    HStack {
-                                        Image(systemName: category.icon)
-                                        Text(category.rawValue)
-                                    }
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        LinearGradient(
-                                            colors: selectedCategory == category ? 
-                                                [category.color, category.color.opacity(0.8)] : 
-                                                [Color(.systemGray5), Color(.systemGray5)],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .foregroundColor(selectedCategory == category ? .white : .primary)
-                                    .cornerRadius(20)
-                                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                    }
-                    
-                    // Список заметок
+                    // Контент
                     if filteredNotes.isEmpty {
-                        VStack(spacing: 20) {
-                            Image(systemName: "note.text")
-                                .font(.system(size: 60))
-                                .foregroundColor(.orange)
-                            
-                            Text("Нет заметок")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                            
-                            Text("Добавьте свою первую заметку")
-                                .font(.body)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        EmptyStateView(
+                            searchText: searchText,
+                            selectedCategory: selectedCategory,
+                            onAddNote: { showingAdd = true }
+                        )
                     } else {
-                        List {
-                            ForEach(filteredNotes) { note in
-                                NoteCard(note: note, store: store)
-                                    .listRowSeparator(.hidden)
-                                    .listRowBackground(Color.clear)
-                                    .padding(.vertical, 4)
+                        NotesGridView(
+                            notes: filteredNotes,
+                            store: store,
+                            onDelete: { note in
+                                store.remove(note: note)
                             }
-                            .onDelete(perform: deleteNotes)
-                        }
-                        .listStyle(PlainListStyle())
-                        .background(Color.clear)
+                        )
                     }
                 }
             }
-            .onTapGesture {
-                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-            }
             .navigationTitle("Заметки")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAdd = true }) {
@@ -312,324 +213,556 @@ struct NotesView: View {
             }
         }
     }
+}
+
+// MARK: - Search Panel
+
+struct SearchPanel: View {
+    @Binding var searchText: String
+    @Binding var selectedCategory: NoteCategory?
     
-    private func deleteNotes(at offsets: IndexSet) {
-        store.remove(at: offsets)
+    var body: some View {
+        VStack(spacing: 16) {
+            // Поиск
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                
+                TextField("Поиск заметок...", text: $searchText)
+                    .textFieldStyle(PlainTextFieldStyle())
+                
+                if !searchText.isEmpty {
+                    Button(action: { searchText = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground))
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+            )
+            .padding(.horizontal)
+            .padding(.top)
+            
+            // Фильтры и сортировка
+            HStack {
+                // Категории
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        CategoryButton(
+                            title: "Все",
+                            icon: "list.bullet",
+                            color: .orange,
+                            isSelected: selectedCategory == nil
+                        ) {
+                            selectedCategory = nil
+                        }
+                        
+                        ForEach(NoteCategory.allCases, id: \.self) { category in
+                            CategoryButton(
+                                title: category.rawValue,
+                                icon: category.icon,
+                                color: category.color,
+                                isSelected: selectedCategory == category
+                            ) {
+                                selectedCategory = selectedCategory == category ? nil : category
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                
+
+            }
+        }
     }
 }
 
-// MARK: - Components
+// MARK: - Category Button
 
-struct NoteCard: View {
+struct CategoryButton: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.caption)
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.medium)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        isSelected ? 
+                            LinearGradient(colors: [color, color.opacity(0.8)], startPoint: .leading, endPoint: .trailing) :
+                            LinearGradient(colors: [Color(.systemBackground), Color(.systemBackground)], startPoint: .leading, endPoint: .trailing)
+                    )
+                    .stroke(isSelected ? Color.clear : color.opacity(0.3), lineWidth: 1)
+            )
+            .foregroundColor(isSelected ? .white : color)
+            .shadow(color: isSelected ? color.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
+        }
+    }
+}
+
+
+
+// MARK: - Empty State
+
+struct EmptyStateView: View {
+    let searchText: String
+    let selectedCategory: NoteCategory?
+    let onAddNote: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            
+            // Иконка
+            ZStack {
+                Circle()
+                    .fill(Color.orange.opacity(0.1))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: searchText.isEmpty ? "note.text" : "magnifyingglass")
+                    .font(.system(size: 50))
+                    .foregroundColor(.orange)
+            }
+            
+            // Текст
+            VStack(spacing: 8) {
+                Text(searchText.isEmpty ? "Нет заметок" : "Ничего не найдено")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Text(searchText.isEmpty ? 
+                     "Добавьте свою первую заметку для отслеживания важной информации" :
+                     "Попробуйте изменить поисковый запрос или фильтры")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
+            
+            Spacer()
+        }
+    }
+}
+
+// MARK: - Notes Grid
+
+struct NotesGridView: View {
+    let notes: [Note]
+    let store: NotesStore
+    let onDelete: (Note) -> Void
+    
+    var body: some View {
+        ScrollView {
+            LazyVGrid(columns: [
+                GridItem(.flexible(), spacing: 16),
+                GridItem(.flexible(), spacing: 16)
+            ], spacing: 16) {
+                ForEach(notes) { note in
+                    ModernNoteCard(note: note, store: store, onDelete: onDelete)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+// MARK: - Modern Note Card
+
+struct ModernNoteCard: View {
     let note: Note
     let store: NotesStore
-    @State private var isEditing = false
-    @State private var editedTitle: String
-    @State private var editedDescription: String
-    @State private var editedCategory: NoteCategory
-    @State private var editedImportance: Int
+    let onDelete: (Note) -> Void
+    
+    @State private var showingDetail = false
+    @State private var showingEdit = false
+    
+    var body: some View {
+        Button(action: { showingDetail = true }) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Заголовок и категория
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: note.category.icon)
+                                .foregroundColor(note.category.color)
+                                .font(.title3)
+                            
+                            Text(note.title)
+                                .font(.headline)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                                .lineLimit(2)
+                        }
+                        
+                        Text(note.category.rawValue)
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(note.category.color.opacity(0.15))
+                            )
+                            .foregroundColor(note.category.color)
+                    }
+                    
+                    Spacer()
+                }
+                
+                // Описание
+                Text(note.description.parseMarkdown())
+                    .foregroundColor(.secondary)
+                    .lineLimit(3)
+                
+                // Дата изменения
+                HStack {
+                    Image(systemName: "clock")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    
+                    Text(note.dateModified, style: .relative)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    // Кнопки действий
+                    HStack(spacing: 8) {
+                        Button(action: { showingEdit = true }) {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.orange)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Button(action: { onDelete(note) }) {
+                            Image(systemName: "trash.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.red)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+        .sheet(isPresented: $showingDetail) {
+            NoteDetailView(note: note, store: store)
+        }
+        .sheet(isPresented: $showingEdit) {
+            EditNoteView(note: note, store: store)
+        }
+    }
+}
+
+// MARK: - Note Detail View
+
+struct NoteDetailView: View {
+    let note: Note
+    let store: NotesStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var showingEdit = false
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Заголовок
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: note.category.icon)
+                                .font(.title)
+                                .foregroundColor(note.category.color)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(note.title)
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.primary)
+                                
+                                Text(note.category.rawValue)
+                                    .font(.subheadline)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                            .fill(note.category.color.opacity(0.15))
+                        )
+                                    .foregroundColor(note.category.color)
+                            }
+                        
+                        Spacer()
+                        }
+                    }
+                    .padding(20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.systemBackground))
+                            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+                    )
+                    
+                    // Описание
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Описание")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        Text(note.description.parseMarkdown())
+                            .foregroundColor(.primary)
+                            .padding(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemGray6))
+                            )
+                    }
+                    
+                    // Метаданные
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Информация")
+                            .font(.headline)
+                                .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        VStack(spacing: 8) {
+                            HStack {
+                                Image(systemName: "calendar.badge.plus")
+                                    .foregroundColor(.orange)
+                                Text("Создано:")
+                                Spacer()
+                                Text(note.dateCreated, style: .date)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            HStack {
+                                Image(systemName: "calendar.badge.clock")
+                                    .foregroundColor(.orange)
+                                Text("Изменено:")
+                                Spacer()
+                                Text(note.dateModified, style: .date)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .font(.subheadline)
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemGray6))
+                        )
+                    }
+                }
+                .padding()
+            }
+            .background(
+                                    LinearGradient(
+                    colors: [
+                        Color(red: 0.988, green: 0.933, blue: 0.855),
+                        Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                        Color(red: 0.988, green: 0.933, blue: 0.855)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .navigationTitle("Заметка")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Закрыть") { dismiss() }
+                        .foregroundColor(.orange)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Редактировать") { showingEdit = true }
+                        .foregroundColor(.orange)
+                }
+            }
+            .sheet(isPresented: $showingEdit) {
+                EditNoteView(note: note, store: store)
+            }
+        }
+    }
+}
+
+// MARK: - Edit Note View
+
+struct EditNoteView: View {
+    let note: Note
+    let store: NotesStore
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var title: String
+    @State private var description: String
+    @State private var selectedCategory: NoteCategory
     
     init(note: Note, store: NotesStore) {
         self.note = note
         self.store = store
-        self._editedTitle = State(initialValue: note.title)
-        self._editedDescription = State(initialValue: note.description)
-        self._editedCategory = State(initialValue: note.category)
-        self._editedImportance = State(initialValue: note.importance)
+        self._title = State(initialValue: note.title)
+        self._description = State(initialValue: note.description)
+        self._selectedCategory = State(initialValue: note.category)
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            if isEditing {
-                // Режим редактирования
-                VStack(alignment: .leading, spacing: 16) {
-                    // Заголовок
-                    VStack(alignment: .leading, spacing: 8) {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Название
+                VStack(alignment: .leading, spacing: 12) {
                         Text("Название")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
-                        
-                        TextField("Введите название", text: $editedTitle)
-                            .font(.title3)
+                            .font(.headline)
                             .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        TextField("Введите название заметки", text: $title)
+                                    .font(.title3)
+                            .fontWeight(.medium)
                             .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
+                            .padding(.vertical, 14)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemGray6))
+                                    .fill(Color(.systemBackground))
                                     .stroke(Color.orange.opacity(0.3), lineWidth: 1)
                             )
-                            .submitLabel(.done)
-                            .onSubmit {
-                                // Скрываем клавиатуру при нажатии "Готово"
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
                     }
                     
                     // Описание
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 12) {
                         Text("Описание")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
                         
-                        TextEditor(text: $editedDescription)
+                        TextEditor(text: $description)
                             .font(.body)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(
+                                .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemGray6))
+                                    .fill(Color(.systemBackground))
                                     .stroke(Color.orange.opacity(0.3), lineWidth: 1)
                             )
-                            .frame(minHeight: 100)
-                            .submitLabel(.done)
-                            .onSubmit {
-                                // Скрываем клавиатуру при нажатии "Готово"
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
+                            .frame(minHeight: 120)
                     }
                     
-                    // Категория и важность
-                    HStack(spacing: 16) {
-                        // Категория
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Категория")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(.secondary)
-                            
-                            Menu {
-                                ForEach(NoteCategory.allCases, id: \.self) { category in
-                                    Button(action: { editedCategory = category }) {
-                                        HStack {
-                                            Image(systemName: category.icon)
-                                            Text(category.rawValue)
-                                        }
-                                    }
-                                }
-                            } label: {
-                                HStack {
-                                    Image(systemName: editedCategory.icon)
-                                    Text(editedCategory.rawValue)
-                                    Spacer()
-                                    Image(systemName: "chevron.down")
-                                        .font(.caption)
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(editedCategory.color.opacity(0.15))
-                                        .stroke(editedCategory.color.opacity(0.3), lineWidth: 1)
-                                )
-                                .foregroundColor(editedCategory.color)
-                            }
-                        }
+                    // Категория
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Категория")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
                         
-                        // Важность
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Важность")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(.secondary)
-                            
-                            HStack(spacing: 4) {
-                                ForEach(1...Note.maxImportance, id: \.self) { star in
-                                    Button(action: { 
-                                        editedImportance = star
-                                        print("⭐ [NOTES] Установлена важность: \(star) для заметки: \(note.title)")
-                                    }) {
-                                        Image(systemName: star <= editedImportance ? "star.fill" : "star")
-                                            .foregroundColor(star <= editedImportance ? .yellow : .gray)
-                                            .font(.title3)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                }
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color(.systemGray6))
-                            )
-                        }
-                    }
-                    
-                    // Кнопки
-                    HStack(spacing: 12) {
-                        Button(action: {
-                            print("🔄 [NOTES] Нажата кнопка 'Отмена' для заметки: \(note.title)")
-                            print("🔄 [NOTES] Текущее состояние: isEditing=\(isEditing)")
-                            
-                            // Сброс изменений
-                            editedTitle = note.title
-                            editedDescription = note.description
-                            editedCategory = note.category
-                            editedImportance = note.importance
-                            
-                            print("🔄 [NOTES] Изменения сброшены")
-                            
-                            // Выход из режима редактирования
-                            isEditing = false
-                            print("🔄 [NOTES] Режим редактирования отключен")
-                        }) {
-                            Text("Отмена")
-                                .fontWeight(.medium)
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color(.systemGray5))
-                        )
-                        .foregroundColor(.secondary)
-                        .buttonStyle(PlainButtonStyle())
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            print("💾 [NOTES] Нажата кнопка 'Сохранить' для заметки: \(note.title)")
-                            print("💾 [NOTES] Текущее состояние: isEditing=\(isEditing)")
-                            print("💾 [NOTES] Новые значения: title=\(editedTitle), importance=\(editedImportance)")
-                            
-                            // Создание обновленной заметки
-                            var updatedNote = note
-                            updatedNote.title = editedTitle
-                            updatedNote.description = editedDescription
-                            updatedNote.category = editedCategory
-                            updatedNote.importance = editedImportance
-                            updatedNote.dateModified = Date()
-                            
-                            // Сохранение в store
-                            store.update(updatedNote)
-                            print("💾 [NOTES] Изменения сохранены: title=\(updatedNote.title), importance=\(updatedNote.importance)")
-                            
-                            // Выход из режима редактирования
-                            isEditing = false
-                            print("💾 [NOTES] Режим редактирования отключен")
-                        }) {
-                            Text("Сохранить")
-                                .fontWeight(.semibold)
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [.orange, .orange.opacity(0.8)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                        )
-                        .foregroundColor(.white)
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-            } else {
-                // Режим просмотра
-                VStack(alignment: .leading, spacing: 12) {
-                    // Заголовок и кнопка редактирования
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Image(systemName: note.category.icon)
-                                    .foregroundColor(note.category.color)
-                                    .font(.title3)
-                                
-                                Text(note.title)
-                                    .font(.title3)
-                                    .fontWeight(.semibold)
-                                    .lineLimit(2)
-                            }
-                            
-                            Text(note.category.rawValue)
-                                .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(note.category.color.opacity(0.15))
-                                )
-                                .foregroundColor(note.category.color)
-                        }
-                        
-                        Spacer()
-                        
-                        // Кнопка редактирования в стиле карточки персонажа
-                        Button(action: { isEditing = true }) {
-                            Image(systemName: "pencil.circle.fill")
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
+                            ForEach(NoteCategory.allCases, id: \.self) { category in
+                                Button(action: { selectedCategory = category }) {
+                                    VStack(spacing: 8) {
+                                        Image(systemName: category.icon)
                                 .font(.title2)
-                                .foregroundColor(.orange)
+                                            .foregroundColor(selectedCategory == category ? .white : category.color)
+                                        
+                                        Text(category.rawValue)
+                                            .font(.subheadline)
+                                            .fontWeight(.medium)
+                                            .foregroundColor(selectedCategory == category ? .white : .primary)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(selectedCategory == category ? 
+                                                  LinearGradient(colors: [category.color, category.color.opacity(0.8)], startPoint: .leading, endPoint: .trailing) :
+                                                  LinearGradient(colors: [Color(.systemBackground), Color(.systemBackground)], startPoint: .leading, endPoint: .trailing)
+                                            )
+                                            .stroke(selectedCategory == category ? Color.clear : category.color.opacity(0.3), lineWidth: 1)
+                                    )
+                                    .shadow(color: selectedCategory == category ? category.color.opacity(0.3) : .clear, radius: 4, x: 0, y: 2)
+                                }
+                            }
                         }
-                        .buttonStyle(PlainButtonStyle())
-                        .allowsHitTesting(true)
-                        .contentShape(Rectangle())
+                                            }
+                        
+                        Spacer(minLength: 100)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+            }
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.988, green: 0.933, blue: 0.855),
+                        Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                        Color(red: 0.988, green: 0.933, blue: 0.855)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .navigationTitle("Редактирование")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Отмена") { dismiss() }
+                        .foregroundColor(.orange)
+                        .fontWeight(.medium)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Сохранить") {
+                        saveChanges()
+                        dismiss()
                     }
-                    
-                    // Описание
-                    Text(note.description)
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .lineLimit(4)
-                    
-                    // Важность внизу карточки
-                    HStack(spacing: 2) {
-                        ForEach(1...Note.maxImportance, id: \.self) { star in
-                            Image(systemName: star <= note.importance ? "star.fill" : "star")
-                                .font(.caption)
-                                .foregroundColor(star <= note.importance ? .yellow : .gray)
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(.systemGray6))
-                    )
+                    .disabled(title.isEmpty || description.isEmpty)
+                    .foregroundColor(title.isEmpty || description.isEmpty ? .gray : .orange)
+                    .fontWeight(.semibold)
                 }
             }
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
-        )
-    }
-    
-    @MainActor
-    private func resetEditing() {
-        print("🔄 [NOTES] Сброс изменений заметки: \(note.title)")
-        print("🔄 [NOTES] Текущие значения: title=\(editedTitle), importance=\(editedImportance)")
-        
-        editedTitle = note.title
-        editedDescription = note.description
-        editedCategory = note.category
-        editedImportance = note.importance
-        
-        print("✅ [NOTES] Изменения сброшены: title=\(editedTitle), importance=\(editedImportance)")
     }
     
     @MainActor
     private func saveChanges() {
-        print("💾 [NOTES] Сохранение изменений заметки: \(note.title)")
-        print("💾 [NOTES] Новые значения: title=\(editedTitle), importance=\(editedImportance)")
-        
         var updatedNote = note
-        updatedNote.title = editedTitle
-        updatedNote.description = editedDescription
-        updatedNote.category = editedCategory
-        updatedNote.importance = editedImportance
+        updatedNote.title = title
+        updatedNote.description = description
+        updatedNote.category = selectedCategory
         updatedNote.dateModified = Date()
         
         store.update(updatedNote)
-        print("✅ [NOTES] Изменения сохранены: title=\(updatedNote.title), importance=\(updatedNote.importance)")
     }
 }
+
+// MARK: - Add Note View
 
 struct AddNoteView: View {
     let store: NotesStore
@@ -638,22 +771,9 @@ struct AddNoteView: View {
     @State private var title = ""
     @State private var description = ""
     @State private var selectedCategory: NoteCategory = .places
-    @State private var importance = 3
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        Color("BackgroundColor"),
-                        Color("BackgroundColor").opacity(0.9),
-                        Color("BackgroundColor")
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
                 ScrollView {
                     VStack(spacing: 24) {
                         // Название
@@ -673,11 +793,6 @@ struct AddNoteView: View {
                                         .fill(Color(.systemBackground))
                                         .stroke(Color.orange.opacity(0.3), lineWidth: 1)
                                 )
-                                .submitLabel(.done)
-                                .onSubmit {
-                                    // Скрываем клавиатуру при нажатии "Готово"
-                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                }
                         }
                         
                         // Описание
@@ -697,11 +812,6 @@ struct AddNoteView: View {
                                         .stroke(Color.orange.opacity(0.3), lineWidth: 1)
                                 )
                                 .frame(minHeight: 120)
-                                .submitLabel(.done)
-                                .onSubmit {
-                                    // Скрываем клавиатуру при нажатии "Готово"
-                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                }
                         }
                         
                         // Категория
@@ -740,66 +850,27 @@ struct AddNoteView: View {
                             }
                         }
                         
-                        // Важность
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Важность")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-                            
-                            VStack(spacing: 12) {
-                                HStack {
-                                    HStack(spacing: 8) {
-                                        ForEach(1...Note.maxImportance, id: \.self) { star in
-                                            Button(action: { importance = star }) {
-                                                Image(systemName: star <= importance ? "star.fill" : "star")
-                                                    .font(.title2)
-                                                    .foregroundColor(star <= importance ? .yellow : .gray)
-                                            }
-                                        }
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Text("\(importance)/\(Note.maxImportance)")
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(.secondary)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .fill(Color(.systemGray6))
-                                        )
-                                }
-                                
-                                Slider(value: Binding(
-                                    get: { Double(importance) },
-                                    set: { importance = Int($0) }
-                                ), in: 1...Double(Note.maxImportance), step: 1)
-                                .accentColor(.orange)
-                            }
-                            .padding(16)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemBackground))
-                                    .stroke(Color.orange.opacity(0.2), lineWidth: 1)
-                            )
-                        }
-                        
                         Spacer(minLength: 100)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
                 }
-            }
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.988, green: 0.933, blue: 0.855),
+                        Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                        Color(red: 0.988, green: 0.933, blue: 0.855)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
             .navigationTitle("Новая заметка")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Отмена") {
-                        dismiss()
-                    }
+                    Button("Отмена") { dismiss() }
                     .foregroundColor(.orange)
                     .fontWeight(.medium)
                 }
@@ -807,6 +878,7 @@ struct AddNoteView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Добавить") {
                         addNote()
+                        dismiss()
                     }
                     .disabled(title.isEmpty || description.isEmpty)
                     .foregroundColor(title.isEmpty || description.isEmpty ? .gray : .orange)
@@ -822,12 +894,10 @@ struct AddNoteView: View {
             title: title,
             description: description,
             category: selectedCategory,
-            importance: importance,
             dateCreated: Date(),
             dateModified: Date()
         )
         
         store.add(note)
-        dismiss()
     }
 }
