@@ -62,7 +62,7 @@ struct CompactCharacterSheetView: View {
         )
         .sheet(item: $showingDetailSection) { section in
             let current = store.selectedCharacter ?? character
-            DetailSectionView(character: current, section: section, store: store, compendiumStore: compendiumStore)
+            DetailSectionView(character: current, section: section, store: store, compendiumStore: compendiumStore, classesStore: classesStore)
         }
     }
 }
