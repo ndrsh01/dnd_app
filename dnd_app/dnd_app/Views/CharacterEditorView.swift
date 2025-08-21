@@ -68,16 +68,28 @@ struct CharacterEditorView: View {
 		var characterToSave = editedCharacter
 		characterToSave.dateModified = Date()
 		
-		// Update class data before saving
-		for characterClass in characterToSave.characterClasses {
-			if let gameClass = classesStore.classesBySlug[characterClass.slug] {
-				characterToSave.classFeatures[characterClass.slug] = gameClass.featuresByLevel
-			}
-			
-			if let classTable = classesStore.classTablesBySlug[characterClass.slug] {
-				characterToSave.classProgression[characterClass.slug] = classTable
-			}
-		}
+                // Update class data before saving
+                for characterClass in characterToSave.characterClasses {
+                        if let gameClass = classesStore.classesBySlug[characterClass.slug] {
+                                var filtered = gameClass.featuresByLevel.filter { key, _ in
+                                        (Int(key) ?? 0) <= characterClass.level
+                                }
+                                if let subclassName = characterClass.subclass,
+                                   let subclass = gameClass.subclasses.first(where: { $0.name == subclassName }) {
+                                        let sub = subclass.featuresByLevel.filter { key, _ in
+                                                (Int(key) ?? 0) <= characterClass.level
+                                        }
+                                        for (k, v) in sub {
+                                                filtered[k, default: []].append(contentsOf: v)
+                                        }
+                                }
+                                characterToSave.classFeatures[characterClass.slug] = filtered
+                        }
+
+                        if let classTable = classesStore.classTablesBySlug[characterClass.slug] {
+                                characterToSave.classProgression[characterClass.slug] = classTable
+                        }
+                }
 		
 		if character == nil {
 			characterToSave.dateCreated = Date()

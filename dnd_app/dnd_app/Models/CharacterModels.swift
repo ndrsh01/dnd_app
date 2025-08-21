@@ -785,9 +785,21 @@ final class CharacterStore: ObservableObject {
         // Update cached class data for all classes
         for characterClass in character.characterClasses {
             if let gameClass = classesStore.classesBySlug[characterClass.slug] {
-                updatedCharacter.classFeatures[characterClass.slug] = gameClass.featuresByLevel
+                var filtered = gameClass.featuresByLevel.filter { key, _ in
+                    (Int(key) ?? 0) <= characterClass.level
+                }
+                if let subclassName = characterClass.subclass,
+                   let subclass = gameClass.subclasses.first(where: { $0.name == subclassName }) {
+                    let sub = subclass.featuresByLevel.filter { key, _ in
+                        (Int(key) ?? 0) <= characterClass.level
+                    }
+                    for (k, v) in sub {
+                        filtered[k, default: []].append(contentsOf: v)
+                    }
+                }
+                updatedCharacter.classFeatures[characterClass.slug] = filtered
             }
-            
+
             if let classTable = classesStore.classTablesBySlug[characterClass.slug] {
                 updatedCharacter.classProgression[characterClass.slug] = classTable
             }

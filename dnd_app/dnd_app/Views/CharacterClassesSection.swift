@@ -53,16 +53,38 @@ struct CharacterClassesSection: View {
                             onDelete: {
                                 let removedClass = character.characterClasses[index]
                                 character.characterClasses.remove(at: index)
-                                
+
                                 // Clear cached data for removed class
                                 character.classFeatures.removeValue(forKey: removedClass.slug)
                                 character.classProgression.removeValue(forKey: removedClass.slug)
-                                
+
                                 // Update character's total level and proficiency bonus
                                 character.level = character.totalLevel
                                 character.proficiencyBonus = (character.totalLevel - 1) / 4 + 2
                             },
                             onUpdate: {
+                                let updatedClass = character.characterClasses[index]
+
+                                if let gameClass = classesStore.classesBySlug[updatedClass.slug] {
+                                    var filtered = gameClass.featuresByLevel.filter { key, _ in
+                                        (Int(key) ?? 0) <= updatedClass.level
+                                    }
+                                    if let subclassName = updatedClass.subclass,
+                                       let sub = gameClass.subclasses.first(where: { $0.name == subclassName }) {
+                                        let subFeatures = sub.featuresByLevel.filter { key, _ in
+                                            (Int(key) ?? 0) <= updatedClass.level
+                                        }
+                                        for (k, v) in subFeatures {
+                                            filtered[k, default: []].append(contentsOf: v)
+                                        }
+                                    }
+                                    character.classFeatures[updatedClass.slug] = filtered
+                                }
+
+                                if let classTable = classesStore.classTablesBySlug[updatedClass.slug] {
+                                    character.classProgression[updatedClass.slug] = classTable
+                                }
+
                                 // Update character's total level and proficiency bonus
                                 character.level = character.totalLevel
                                 character.proficiencyBonus = (character.totalLevel - 1) / 4 + 2
@@ -220,10 +242,8 @@ struct AddClassView: View {
             VStack(spacing: 20) {
                 // Class selection
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Выберите класс")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    
+                    CommonSectionHeader("Выберите класс", icon: "graduationcap")
+
                     Picker("Класс", selection: $selectedClass) {
                         Text("Выберите класс").tag("")
                         ForEach(availableClasses, id: \.self) { className in
@@ -231,19 +251,13 @@ struct AddClassView: View {
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(.systemGray6))
-                    )
+                    .modifier(CommonTextFieldStyle())
                 }
-                
+
                 // Level selection
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Уровень")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    
+                    CommonSectionHeader("Уровень", icon: "number.square")
+
                     HStack {
                         Button(action: { if level > 1 { level -= 1 } }) {
                             Image(systemName: "minus.circle.fill")
@@ -267,21 +281,15 @@ struct AddClassView: View {
                                 .foregroundColor(.green)
                         }
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(.systemGray6))
-                    )
+                    .modifier(CommonTextFieldStyle())
                 }
                 
                 // Subclass selection (if available)
                 if let gameClass = classesStore.classesBySlug[selectedClass],
                    !gameClass.subclasses.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Подкласс (опционально)")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                        
+                        CommonSectionHeader("Подкласс", icon: "line.3.horizontal")
+
                         Picker("Подкласс", selection: $subclass) {
                             Text("Без подкласса").tag("")
                             ForEach(gameClass.subclasses, id: \.name) { subclass in
@@ -289,11 +297,7 @@ struct AddClassView: View {
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color(.systemGray6))
-                        )
+                        .modifier(CommonTextFieldStyle())
                     }
                 }
                 
@@ -331,9 +335,21 @@ struct AddClassView: View {
         
         // Cache class features and progression data
         if let gameClass = classesStore.classesBySlug[selectedClass] {
-            character.classFeatures[selectedClass] = gameClass.featuresByLevel
+            var filtered = gameClass.featuresByLevel.filter { key, _ in
+                (Int(key) ?? 0) <= level
+            }
+            if !subclass.isEmpty,
+               let sub = gameClass.subclasses.first(where: { $0.name == subclass }) {
+                let subFeatures = sub.featuresByLevel.filter { key, _ in
+                    (Int(key) ?? 0) <= level
+                }
+                for (k, v) in subFeatures {
+                    filtered[k, default: []].append(contentsOf: v)
+                }
+            }
+            character.classFeatures[selectedClass] = filtered
         }
-        
+
         if let classTable = classesStore.classTablesBySlug[selectedClass] {
             character.classProgression[selectedClass] = classTable
         }
@@ -383,10 +399,8 @@ struct EditClassView: View {
                 
                 // Level selection
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Уровень")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    
+                    CommonSectionHeader("Уровень", icon: "number.square")
+
                     HStack {
                         Button(action: { if level > 1 { level -= 1 } }) {
                             Image(systemName: "minus.circle.fill")
@@ -410,21 +424,15 @@ struct EditClassView: View {
                                 .foregroundColor(.green)
                         }
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(.systemGray6))
-                    )
+                    .modifier(CommonTextFieldStyle())
                 }
-                
+
                 // Subclass field
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Подкласс")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    
+                    CommonSectionHeader("Подкласс", icon: "line.3.horizontal")
+
                     TextField("Введите подкласс", text: $subclass)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .modifier(CommonTextFieldStyle())
                 }
                 
                 Spacer()
