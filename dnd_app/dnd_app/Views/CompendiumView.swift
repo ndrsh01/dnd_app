@@ -134,11 +134,7 @@ struct SpellsTabView: View {
                         store.updateSpellSearchText(searchText)
                     }
             }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-            .padding(.horizontal)
-            .padding(.top)
+            .compendiumSearchField()
             
             // Results
             ScrollView {
@@ -148,9 +144,12 @@ struct SpellsTabView: View {
                             .id("\(spell.id)-\(favorites.spells.isFavorite(spell.name))")
                     }
                 }
+                .padding(.horizontal, 8)
                 .padding(.top)
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: store.filteredSpells.count)
             }
         }
+        .compendiumBackground()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingFilters = true }) {
@@ -183,22 +182,22 @@ struct BackgroundsTabView: View {
                         store.updateBackgroundSearchText(searchText)
                     }
             }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-            .padding(.horizontal)
-            .padding(.top)
+            .compendiumSearchField()
             
             // Results
             ScrollView {
                 LazyVStack(spacing: 12) {
                     ForEach(store.filteredBackgrounds) { background in
                         BackgroundCard(background: background, favorites: favorites)
+                            .id("\(background.id)-\(favorites.backgrounds.isFavorite(background.name))")
                     }
                 }
+                .padding(.horizontal, 8)
                 .padding(.top)
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: store.filteredBackgrounds.count)
             }
         }
+        .compendiumBackground()
     }
 }
 
@@ -221,11 +220,7 @@ struct FeatsTabView: View {
                         store.updateFeatSearchText(searchText)
                     }
             }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-            .padding(.horizontal)
-            .padding(.top)
+            .compendiumSearchField()
             
             // Results
             ScrollView {
@@ -235,9 +230,12 @@ struct FeatsTabView: View {
                             .id("\(feat.id)-\(favorites.feats.isFavorite(feat.name))")
                     }
                 }
+                .padding(.horizontal, 8)
                 .padding(.top)
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: store.filteredFeats.count)
             }
         }
+        .compendiumBackground()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingFilters = true }) {
@@ -260,40 +258,123 @@ struct MonsterCard: View {
     @State private var isExpanded = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header
+        VStack(alignment: .leading, spacing: 0) {
+            // Header with name and expand button
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
                     Text(monster.name)
-                        .font(.headline)
+                    .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
-                    
-                    if !monster.subtitle.isEmpty {
-                        Text(monster.subtitle)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
                 
                 Spacer()
                 
-                // Favorite button
+                HStack(spacing: 8) {
                 Button(action: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                     favorites.monsters.toggle(monster.name)
+                        }
                 }) {
                     Image(systemName: favorites.monsters.isFavorite(monster.name) ? "heart.fill" : "heart")
                         .foregroundColor(favorites.monsters.isFavorite(monster.name) ? .red : .gray)
+                            .font(.title2)
+                            .scaleEffect(favorites.monsters.isFavorite(monster.name) ? 1.1 : 1.0)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.monsters.isFavorite(monster.name))
+                    }
+                    
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isExpanded.toggle()
+                        }
+                    }) {
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .foregroundColor(.orange)
                         .font(.title3)
                 }
             }
-            
-            // Basic stats
-            HStack(spacing: 16) {
-                StatItem(title: "КД", value: "\(monster.ac.ac)", icon: "shield.fill", color: .blue)
-                StatItem(title: "ХП", value: "\(monster.hp.hp)", icon: "heart.fill", color: .red)
-                StatItem(title: "CR", value: monster.challenge.cr, icon: "star.fill", color: .orange)
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
+            
+            // Monster badges - КД, ХП, CR, иммунитеты и сопротивления
+            VStack(spacing: 8) {
+                HStack(spacing: 12) {
+                    Text("КД \(monster.ac.ac)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.blue.opacity(0.15))
+                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        )
+                        .foregroundColor(.blue)
+                    
+                    Text("ХП \(monster.hp.hp)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.red.opacity(0.15))
+                                .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                        )
+                        .foregroundColor(.red)
+                    
+                    Text("CR \(monster.challenge.cr)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.orange.opacity(0.15))
+                                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                        )
+                        .foregroundColor(.orange)
+                    
+                    Spacer()
+                }
+                
+                // Иммунитеты и сопротивления в свернутом виде
+                if !monster.damageImmunities.isEmpty || !monster.damageResistances.isEmpty {
+                    HStack(spacing: 8) {
+                        if !monster.damageImmunities.isEmpty {
+                            Text("Иммун. \(monster.damageImmunities)")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.purple.opacity(0.15))
+                                        .stroke(Color.purple.opacity(0.3), lineWidth: 1)
+                                )
+                                .foregroundColor(.purple)
+                        }
+                        
+                        if !monster.damageResistances.isEmpty {
+                            Text("Сопр. \(monster.damageResistances)")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.green.opacity(0.15))
+                                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                                )
+                                .foregroundColor(.green)
+                        }
+                        
+                        Spacer()
+                    }
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 8)
             
             // Expandable content
             if isExpanded {
@@ -323,6 +404,36 @@ struct MonsterCard: View {
                     // Skills
                     if !monster.skills.isEmpty {
                         MonsterInfoRow(title: "Навыки", value: monster.skills.map { "\($0.key) \($0.value)" }.joined(separator: ", "), icon: "brain.head.profile", color: .purple)
+                    }
+                    
+                    // Damage Resistances
+                    if !monster.damageResistances.isEmpty {
+                        MonsterInfoRow(title: "Сопротивления", value: monster.damageResistances, icon: "shield.fill", color: .green)
+                    }
+                    
+                    // Damage Immunities
+                    if !monster.damageImmunities.isEmpty {
+                        MonsterInfoRow(title: "Иммунитеты", value: monster.damageImmunities, icon: "bolt.shield", color: .purple)
+                    }
+                    
+                    // Damage Vulnerabilities
+                    if !monster.damageVulnerabilities.isEmpty {
+                        MonsterInfoRow(title: "Уязвимости", value: monster.damageVulnerabilities, icon: "exclamationmark.triangle.fill", color: .red)
+                    }
+                    
+                    // Condition Immunities
+                    if !monster.conditionImmunities.isEmpty {
+                        MonsterInfoRow(title: "Иммунитеты к состояниям", value: monster.conditionImmunities, icon: "heart.slash", color: .orange)
+                    }
+                    
+                    // Senses
+                    if !monster.senses.isEmpty {
+                        MonsterInfoRow(title: "Чувства", value: monster.senses, icon: "eye.fill", color: .blue)
+                    }
+                    
+                    // Languages
+                    if !monster.languages.isEmpty {
+                        MonsterInfoRow(title: "Языки", value: monster.languages, icon: "text.bubble", color: .cyan)
                     }
                     
                     // Actions
@@ -355,35 +466,9 @@ struct MonsterCard: View {
                 }
                 .padding(.top, 8)
             }
-            
-            // Expand/Collapse button
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isExpanded.toggle()
-                }
-            }) {
-                HStack {
-                    Text(isExpanded ? "Свернуть" : "Развернуть")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                    
-                    Spacer()
-                    
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                }
-            }
         }
         .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.primary.opacity(0.05))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
-        )
+        .compendiumCardStyle()
     }
 }
 
@@ -509,11 +594,7 @@ struct BestiaryTabView: View {
                         store.updateMonsterSearchText(searchText)
                     }
             }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-            .padding(.horizontal)
-            .padding(.top)
+            .compendiumSearchField()
             
             // Results
             ScrollView {
@@ -523,9 +604,11 @@ struct BestiaryTabView: View {
                             .id("\(monster.id)-\(favorites.monsters.isFavorite(monster.name))")
                     }
                 }
+                .padding(.horizontal, 8)
                 .padding(.top)
             }
         }
+        .compendiumBackground()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingFilters = true }) {
@@ -579,7 +662,7 @@ struct MonsterFiltersView: View {
                                 .fontWeight(.semibold)
                             
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
-                                ForEach(store.monsterFilters.sizes, id: \.self) { size in
+                                ForEach(MonsterFilters.sizes, id: \.self) { size in
                                     FilterButton(
                                         title: size,
                                         isSelected: store.monsterFilters.selectedSizes.contains(size)
@@ -597,7 +680,7 @@ struct MonsterFiltersView: View {
                                 .fontWeight(.semibold)
                             
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
-                                ForEach(store.monsterFilters.types, id: \.self) { type in
+                                ForEach(MonsterFilters.types, id: \.self) { type in
                                     FilterButton(
                                         title: type,
                                         isSelected: store.monsterFilters.selectedTypes.contains(type)
@@ -615,7 +698,7 @@ struct MonsterFiltersView: View {
                                 .fontWeight(.semibold)
                             
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
-                                ForEach(store.monsterFilters.challengeRatings, id: \.self) { cr in
+                                ForEach(MonsterFilters.challengeRatings, id: \.self) { cr in
                                     FilterButton(
                                         title: cr,
                                         isSelected: store.monsterFilters.selectedCRs.contains(cr)
@@ -633,7 +716,7 @@ struct MonsterFiltersView: View {
                                 .fontWeight(.semibold)
                             
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
-                                ForEach(store.monsterFilters.alignments, id: \.self) { alignment in
+                                ForEach(MonsterFilters.alignments, id: \.self) { alignment in
                                     FilterButton(
                                         title: alignment,
                                         isSelected: store.monsterFilters.selectedAlignments.contains(alignment)
@@ -978,7 +1061,7 @@ struct FavoritesTabView: View {
                                     
                                     if !featsCollapsed {
                                         ForEach(favoriteFeats) { feat in
-                                            FavoriteFeatCard(feat: feat, favorites: favorites)
+                                            FeatCard(feat: feat, favorites: favorites)
                                                 .id("\(feat.id)-\(favorites.feats.isFavorite(feat.name))")
                                         }
                                     }
@@ -1002,7 +1085,7 @@ struct FavoritesTabView: View {
                                     
                                     if !backgroundsCollapsed {
                                         ForEach(favoriteBackgrounds) { background in
-                                            FavoriteBackgroundCard(background: background, favorites: favorites)
+                                            BackgroundCard(background: background, favorites: favorites)
                                                 .id("\(background.id)-\(favorites.backgrounds.isFavorite(background.name))")
                                         }
                                     }
@@ -1026,13 +1109,14 @@ struct FavoritesTabView: View {
                                     
                                     if !monstersCollapsed {
                                         ForEach(favoriteMonsters) { monster in
-                                            FavoriteMonsterCard(monster: monster, favorites: favorites)
+                                            MonsterCard(monster: monster, favorites: favorites)
                                                 .id("\(monster.id)-\(favorites.monsters.isFavorite(monster.name))")
                                         }
                                     }
                                 }
                             }
                         }
+                        .padding(.horizontal, 8)
                         .padding(.top)
                     }
                 }
@@ -1085,7 +1169,6 @@ struct FavoriteSpellCard: View {
                         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: favorites.spells.isFavorite(spell.name))
                 }
             }
-            .padding(.horizontal, 20)
             .padding(.top, 16)
             
             // Level and School badges
@@ -1093,8 +1176,8 @@ struct FavoriteSpellCard: View {
                 Text(spell.level == 0 ? "Заговор" : "\(spell.level) уровень")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 8)
                     .background(Color.blue.opacity(0.15))
                     .foregroundColor(.blue)
                     .cornerRadius(12)
@@ -1102,15 +1185,14 @@ struct FavoriteSpellCard: View {
                 Text(getSchoolName(spell.school))
                     .font(.caption)
                     .fontWeight(.medium)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
                     .background(Color.purple.opacity(0.15))
                     .foregroundColor(.purple)
                     .cornerRadius(12)
                 
                 Spacer()
             }
-            .padding(.horizontal, 20)
             
             // Always show description (no expand/collapse)
             Text(spell.description)
@@ -1121,10 +1203,8 @@ struct FavoriteSpellCard: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
         }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-        .padding(.horizontal)
+        .compendiumCardStyle()
+        .padding(.horizontal, 0)
     }
     
     private func getSchoolName(_ school: String) -> String {
@@ -1198,10 +1278,8 @@ struct FavoriteFeatCard: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
         }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-        .padding(.horizontal)
+        .compendiumCardStyle()
+        .padding(.horizontal, 0)
     }
 }
 
@@ -1244,10 +1322,8 @@ struct FavoriteBackgroundCard: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
         }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-        .padding(.horizontal)
+        .compendiumCardStyle()
+        .padding(.horizontal, 0)
     }
 }
 
@@ -1279,12 +1355,85 @@ struct FavoriteMonsterCard: View {
                 }
             }
             
-            // Basic stats
-            HStack(spacing: 16) {
-                StatItem(title: "КД", value: "\(monster.ac.ac)", icon: "shield.fill", color: .blue)
-                StatItem(title: "ХП", value: "\(monster.hp.hp)", icon: "heart.fill", color: .red)
-                StatItem(title: "CR", value: monster.challenge.cr, icon: "star.fill", color: .orange)
+            // Monster badges - КД, ХП, CR, иммунитеты и сопротивления
+            VStack(spacing: 8) {
+                HStack(spacing: 12) {
+                    Text("КД \(monster.ac.ac)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.blue.opacity(0.15))
+                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        )
+                        .foregroundColor(.blue)
+                    
+                    Text("ХП \(monster.hp.hp)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.red.opacity(0.15))
+                                .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                        )
+                        .foregroundColor(.red)
+                    
+                    Text("CR \(monster.challenge.cr)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.orange.opacity(0.15))
+                                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                        )
+                        .foregroundColor(.orange)
+                    
+                    Spacer()
+                }
+                
+                // Иммунитеты и сопротивления в свернутом виде
+                if !monster.damageImmunities.isEmpty || !monster.damageResistances.isEmpty {
+                    HStack(spacing: 8) {
+                        if !monster.damageImmunities.isEmpty {
+                            Text("Иммун. \(monster.damageImmunities)")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.purple.opacity(0.15))
+                                        .stroke(Color.purple.opacity(0.3), lineWidth: 1)
+                                )
+                                .foregroundColor(.purple)
+                        }
+                        
+                        if !monster.damageResistances.isEmpty {
+                            Text("Сопр. \(monster.damageResistances)")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.green.opacity(0.15))
+                                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                                )
+                                .foregroundColor(.green)
+                        }
+                        
+                        Spacer()
+                    }
+                }
             }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 8)
             
             // Always show description (no expand/collapse)
             if !monster.subtitle.isEmpty {
@@ -1297,14 +1446,7 @@ struct FavoriteMonsterCard: View {
             }
         }
         .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.primary.opacity(0.05))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
-        )
-        .padding(.horizontal)
+        .compendiumCardStyle()
+        .padding(.horizontal, 0)
     }
 }

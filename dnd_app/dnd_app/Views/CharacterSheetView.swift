@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 struct CharacterSheetView: View {
     @ObservedObject var characterStore: CharacterStore
     @StateObject private var compendiumStore = CompendiumStore()
+    @StateObject private var classesStore = ClassesStore()
     @StateObject private var themeManager = ThemeManager()
     @State private var showingAdd = false
     @State private var showCharacterSelection = false
@@ -31,7 +32,8 @@ struct CharacterSheetView: View {
                         CompactCharacterSheetView(
                             character: character, 
                             store: characterStore, 
-                            compendiumStore: compendiumStore, 
+                            compendiumStore: compendiumStore,
+                            classesStore: classesStore,
                             isEditingMode: $isEditingMode,
                             onSaveChanges: { updatedCharacter in
                                 characterStore.update(updatedCharacter)
@@ -72,21 +74,7 @@ struct CharacterSheetView: View {
                     }
                 }
 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if characterStore.selectedCharacter != nil {
-                        Button(action: { 
-                            if isEditingMode {
-                                // Отправляем уведомление о сохранении изменений
-                                NotificationCenter.default.post(name: .saveCharacterChanges, object: nil)
-                            }
-                            isEditingMode.toggle() 
-                        }) {
-                            Image(systemName: isEditingMode ? "checkmark.circle.fill" : "pencil.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(.orange)
-                        }
-                    }
-                }
+                // Убрали кнопку редактирования - теперь редактирование через долгое нажатие
             }
             .sheet(isPresented: $showingAdd) {
                 CharacterEditorView(store: characterStore, character: characterStore.selectedCharacter)

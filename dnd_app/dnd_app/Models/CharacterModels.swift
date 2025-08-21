@@ -231,6 +231,7 @@ struct Character: Identifiable, Codable, Equatable {
     var race: String = ""
     var characterClasses: [CharacterClass] = []
     var characterClass: String = "" // For backward compatibility
+    var subclass: String = "" // Current subclass for the main class
     var background: String = ""
     var alignment: String = ""
     var experience: Int = 0

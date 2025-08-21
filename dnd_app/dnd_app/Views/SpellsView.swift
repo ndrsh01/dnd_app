@@ -136,13 +136,13 @@ struct SpellSearchView: View {
                                         Image(systemName: spellsCollapsed ? "chevron.down" : "chevron.up")
                                             .foregroundColor(.secondary)
                                     }
-                            .padding(.horizontal)
+                                    .padding(.horizontal)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 
                                 if !spellsCollapsed {
                                     ForEach(store.filteredSpells) { spell in
-                                            CompendiumSpellCard(spell: spell, favorites: favorites)
+                                        CompendiumSpellCard(spell: spell, favorites: favorites)
                                             .id("\(spell.id)-\(favorites.spells.isFavorite(spell.name))")
                                     }
                                 }
@@ -173,6 +173,7 @@ struct SpellSearchView: View {
                             }
                         }
                     }
+                    .padding(.horizontal, 8)
                     .padding(.top)
                     }
                 }
@@ -435,6 +436,7 @@ struct AllSpellsTab: View {
                                     ForEach(favoriteSpells) { spell in
                                         CompendiumSpellCard(spell: spell, favorites: favorites)
                                             .id("\(spell.id)-\(favorites.spells.isFavorite(spell.name))")
+                                            .padding(.horizontal, 16)
                                     }
                                 }
                             }
@@ -488,6 +490,7 @@ struct AllSpellsTab: View {
                             }
                         }
                     }
+                    .padding(.horizontal, 8)
                     .padding(.top)
                 }
             }
@@ -624,29 +627,8 @@ struct FeatCard: View {
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(.systemBackground),
-                            Color(.systemBackground).opacity(0.95)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .stroke(
-                    LinearGradient(
-                        colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1.5
-                )
-                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
-        )
-        .padding(.horizontal, 20)
+        .compendiumCardStyle()
+        .padding(.horizontal, 4)
     }
 }
 
@@ -661,7 +643,7 @@ struct CompendiumSpellCard: View {
             // Header with name and expand button
             HStack {
                 Text(spell.name)
-                    .font(.title2)
+                    .font(.title3)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                 
@@ -695,51 +677,55 @@ struct CompendiumSpellCard: View {
             .padding(.top, 16)
             .padding(.bottom, 12)
             
-            // Level and School badges
+            // Level and School badges - авторасширяемые
             HStack(spacing: 8) {
                 Text(spell.level == 0 ? "Заговор" : "\(spell.level) уровень")
-                    .font(.caption)
+                    .font(.caption2)
                     .fontWeight(.medium)
-                    .padding(.horizontal, 12)
+                    .padding(.horizontal, 14)
                     .padding(.vertical, 6)
                     .background(Color.blue.opacity(0.15))
                     .foregroundColor(.blue)
                     .cornerRadius(12)
+                    .fixedSize(horizontal: true, vertical: false)
                 
                 Text(getSchoolName(spell.school))
-                    .font(.caption)
+                    .font(.caption2)
                     .fontWeight(.medium)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 6)
                     .background(Color.purple.opacity(0.15))
                     .foregroundColor(.purple)
                     .cornerRadius(12)
+                    .fixedSize(horizontal: true, vertical: false)
                 
                 // Concentration badge
                 if spell.concentration {
                     Text("Концентрация")
-                        .font(.caption)
+                        .font(.caption2)
                         .fontWeight(.medium)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 6)
                         .background(Color.red.opacity(0.15))
                         .foregroundColor(.red)
                         .cornerRadius(12)
+                        .fixedSize(horizontal: true, vertical: false)
                 }
                 
                 // Ritual badge
                 if spell.ritual {
                     Text("Ритуал")
-                        .font(.caption)
+                        .font(.caption2)
                         .fontWeight(.medium)
-                        .padding(.horizontal, 12)
+                        .padding(.horizontal, 14)
                         .padding(.vertical, 6)
                         .background(Color.orange.opacity(0.15))
                         .foregroundColor(.orange)
                         .cornerRadius(12)
+                        .fixedSize(horizontal: true, vertical: false)
                 }
                 
-                Spacer()
+                Spacer(minLength: 0)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
@@ -818,29 +804,8 @@ struct CompendiumSpellCard: View {
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(.systemBackground),
-                            Color(.systemBackground).opacity(0.95)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .stroke(
-                    LinearGradient(
-                        colors: [.purple.opacity(0.3), .purple.opacity(0.1)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1.5
-                )
-                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
-        )
-        .padding(.horizontal, 20)
+        .compendiumCardStyle()
+        .padding(.horizontal, 4)
     }
     
     private func getSchoolName(_ school: String) -> String {

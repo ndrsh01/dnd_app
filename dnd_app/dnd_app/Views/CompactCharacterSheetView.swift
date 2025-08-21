@@ -9,14 +9,16 @@ struct CompactCharacterSheetView: View {
     let character: Character
     @ObservedObject var store: CharacterStore
     @ObservedObject var compendiumStore: CompendiumStore
+    @ObservedObject var classesStore: ClassesStore
     @State private var showingDetailSection: CharacterDetailSection?
     @Binding var isEditingMode: Bool
     let onSaveChanges: ((Character) -> Void)?
     
-    init(character: Character, store: CharacterStore, compendiumStore: CompendiumStore, isEditingMode: Binding<Bool>, onSaveChanges: ((Character) -> Void)? = nil) {
+    init(character: Character, store: CharacterStore, compendiumStore: CompendiumStore, classesStore: ClassesStore, isEditingMode: Binding<Bool>, onSaveChanges: ((Character) -> Void)? = nil) {
         self.character = character
         self.store = store
         self.compendiumStore = compendiumStore
+        self.classesStore = classesStore
         self._isEditingMode = isEditingMode
         self.onSaveChanges = onSaveChanges
     }
@@ -29,7 +31,8 @@ struct CompactCharacterSheetView: View {
                     CharacterHeaderCompactView(
                         character: current, 
                         store: store, 
-                        compendiumStore: compendiumStore, 
+                        compendiumStore: compendiumStore,
+                        classesStore: classesStore,
                         isEditingMode: isEditingMode,
                         onSaveChanges: onSaveChanges
                     )
@@ -68,6 +71,7 @@ struct CharacterHeaderCompactView: View {
     let character: Character
     @ObservedObject var store: CharacterStore
     @ObservedObject var compendiumStore: CompendiumStore
+    @ObservedObject var classesStore: ClassesStore
     let isEditingMode: Bool
     let onSaveChanges: ((Character) -> Void)?
     @State private var editingName = false
@@ -87,11 +91,15 @@ struct CharacterHeaderCompactView: View {
     @State private var showingImagePicker = false
     @State private var avatarImage: UIImage?
     @State private var availableClasses: [String] = []
+    @State private var isLoadingClassFeatures = false
+    @State private var showClassFeaturesNotification = false
+    @State private var classFeaturesNotificationText = ""
     
-    init(character: Character, store: CharacterStore, compendiumStore: CompendiumStore, isEditingMode: Bool, onSaveChanges: ((Character) -> Void)? = nil) {
+    init(character: Character, store: CharacterStore, compendiumStore: CompendiumStore, classesStore: ClassesStore, isEditingMode: Bool, onSaveChanges: ((Character) -> Void)? = nil) {
         self.character = character
         self.store = store
         self.compendiumStore = compendiumStore
+        self.classesStore = classesStore
         self.isEditingMode = isEditingMode
         self.onSaveChanges = onSaveChanges
         self._tempCharacter = State(initialValue: character)
@@ -99,19 +107,130 @@ struct CharacterHeaderCompactView: View {
     }
     
     private func loadClasses() {
-        guard let url = Bundle.main.url(forResource: "classes", withExtension: "json") else { return }
+        // Фиксированный список классов
+        availableClasses = [
+            "Варвар", "Бард", "Волшебник", "Друид", "Жрец", 
+            "Колдун", "Монах", "Паладин", "Плут", "Следопыт", "Чародей"
+        ]
+    }
+    
+    private func loadClassFeatures(for className: String, character: inout Character) {
+        // Получаем slug класса
+        let classSlug = getClassSlug(for: className)
         
-        do {
-            let data = try Data(contentsOf: url)
-            let classes = try JSONDecoder().decode([GameClass].self, from: data)
-            availableClasses = classes.compactMap { $0.name != "Class" ? $0.name : nil }
-        } catch {
-            print("Error loading classes: \(error)")
-            // Fallback to default classes
-            availableClasses = [
-                "Варвар", "Бард", "Волшебник", "Друид", "Жрец", 
-                "Колдун", "Монах", "Паладин", "Плут", "Следопыт", "Чародей"
-            ]
+        // Загружаем данные классов если еще не загружены
+        if classesStore.classesBySlug.isEmpty {
+            classesStore.loadClasses()
+        }
+        
+        // Загружаем таблицы классов если еще не загружены
+        if classesStore.classTablesBySlug.isEmpty {
+            classesStore.loadClassTables()
+        }
+        
+        // Проверяем, есть ли уже загруженные умения для этого класса
+        if let existingFeatures = character.classFeatures[classSlug] {
+            // Если умения уже загружены, просто обновляем особенности
+            updateFeaturesAndTraits(character: &character, features: existingFeatures, className: className)
+            return
+        }
+        
+        // Получаем умения для всех уровней до текущего
+        if let gameClass = classesStore.classesBySlug[classSlug] {
+            let currentLevel = character.level
+            var allFeatures: [String: [ClassFeature]] = [:]
+            var totalFeaturesCount = 0
+            
+            // Загружаем умения для всех уровней от 1 до 20
+            for level in 1...20 {
+                let levelString = String(level)
+                if let featuresForLevel = gameClass.featuresByLevel[levelString] {
+                    allFeatures[levelString] = featuresForLevel
+                    totalFeaturesCount += featuresForLevel.count
+                }
+            }
+            
+            if !allFeatures.isEmpty {
+                // Обновляем классовые умения персонажа
+                character.classFeatures[classSlug] = allFeatures
+                
+                // Обновляем особенности и черты персонажа
+                updateFeaturesAndTraits(character: &character, features: allFeatures, className: className)
+                
+                // Показываем уведомление об успешной загрузке
+                classFeaturesNotificationText = "✅ Загружено \(totalFeaturesCount) умений для \(className) (все уровни)"
+                showClassFeaturesNotification = true
+                
+                // Скрываем уведомление через 3 секунды
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    showClassFeaturesNotification = false
+                }
+            } else {
+                // Показываем уведомление если умения не найдены
+                classFeaturesNotificationText = "⚠️ Умения для \(className) не найдены"
+                showClassFeaturesNotification = true
+                
+                // Скрываем уведомление через 3 секунды
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    showClassFeaturesNotification = false
+                }
+            }
+        } else {
+            // Показываем уведомление если класс не найден
+            classFeaturesNotificationText = "❌ Класс \(className) не найден в базе данных"
+            showClassFeaturesNotification = true
+            
+            // Скрываем уведомление через 3 секунды
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                showClassFeaturesNotification = false
+            }
+        }
+        
+        // Получаем таблицу прогрессии класса
+        if let classTable = classesStore.classTablesBySlug[classSlug] {
+            character.classProgression[classSlug] = classTable
+        }
+    }
+    
+    private func updateFeaturesAndTraits(character: inout Character, features: [String: [ClassFeature]], className: String) {
+        var featuresText = ""
+        let currentLevel = character.level
+        
+        for level in 1...currentLevel {
+            let levelString = String(level)
+            if let featuresForLevel = features[levelString] {
+                if !featuresText.isEmpty {
+                    featuresText += "\n\n"
+                }
+                featuresText += "**Уровень \(level):**\n"
+                for feature in featuresForLevel {
+                    featuresText += "\n**\(feature.name)**\n\(feature.text)\n"
+                }
+            }
+        }
+        
+        // Добавляем к существующим особенностям
+        if !character.featuresAndTraits.isEmpty {
+            character.featuresAndTraits += "\n\n" + featuresText
+        } else {
+            character.featuresAndTraits = featuresText
+        }
+    }
+    
+    private func getClassSlug(for className: String) -> String {
+        switch className.lowercased() {
+        case "варвар": return "barbarian"
+        case "бард": return "bard"
+        case "волшебник": return "wizard"
+        case "друид": return "druid"
+        case "жрец": return "cleric"
+        case "колдун": return "warlock"
+        case "монах": return "monk"
+        case "паладин": return "paladin"
+        case "плут": return "rogue"
+        case "следопыт": return "ranger"
+        case "чародей": return "sorcerer"
+        default: return "fighter"
         }
     }
     
@@ -223,36 +342,6 @@ struct CharacterHeaderCompactView: View {
                                     }
                             }
                         }
-                        
-                        HStack(spacing: 4) {
-                            Image(systemName: "shield.fill")
-                                .font(.caption)
-                                .foregroundColor(.green)
-                            if isEditingMode {
-                                Picker("Класс", selection: $selectedClass) {
-                                    Text("Выберите класс").tag("")
-                                    ForEach(availableClasses, id: \.self) { className in
-                                        Text(className).tag(className)
-                                    }
-                                }
-                                .pickerStyle(MenuPickerStyle())
-                                .accentColor(.primary)
-                                .onAppear {
-                                    selectedClass = character.displayClassName
-                                    if availableClasses.isEmpty {
-                                        loadClasses()
-                                    }
-                                }
-                            } else {
-                                Text(character.displayClassName)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                                    .onLongPressGesture(minimumDuration: 0.5) {
-                                        newClass = character.characterClass
-                                        editingClass = true
-                                    }
-                            }
-                        }
                     }
                     
                     // Уровень в красивом badge
@@ -260,9 +349,23 @@ struct CharacterHeaderCompactView: View {
                         if isEditingMode {
                             HStack(spacing: 8) {
                                 Button(action: {
+                                    isLoadingClassFeatures = true
+                                    
                                     var updatedCharacter = character
                                     updatedCharacter.level = max(1, character.level - 1)
+                                    updatedCharacter.proficiencyBonus = (updatedCharacter.level - 1) / 4 + 2
+                                    
+                                    // Обновляем классовые умения при изменении уровня
+                                    if !updatedCharacter.characterClass.isEmpty {
+                                        loadClassFeatures(for: updatedCharacter.characterClass, character: &updatedCharacter)
+                                    }
+                                    
                                     store.update(updatedCharacter)
+                                    
+                                    // Скрываем индикатор загрузки через небольшую задержку
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        isLoadingClassFeatures = false
+                                    }
                                 }) {
                                     Image(systemName: "minus.circle.fill")
                                         .foregroundColor(.orange)
@@ -287,9 +390,23 @@ struct CharacterHeaderCompactView: View {
                                     )
                                 
                                 Button(action: {
+                                    isLoadingClassFeatures = true
+                                    
                                     var updatedCharacter = character
                                     updatedCharacter.level = min(20, character.level + 1)
+                                    updatedCharacter.proficiencyBonus = (updatedCharacter.level - 1) / 4 + 2
+                                    
+                                    // Обновляем классовые умения при изменении уровня
+                                    if !updatedCharacter.characterClass.isEmpty {
+                                        loadClassFeatures(for: updatedCharacter.characterClass, character: &updatedCharacter)
+                                    }
+                                    
                                     store.update(updatedCharacter)
+                                    
+                                    // Скрываем индикатор загрузки через небольшую задержку
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        isLoadingClassFeatures = false
+                                    }
                                 }) {
                                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.orange)
@@ -348,6 +465,45 @@ struct CharacterHeaderCompactView: View {
                             store.update(updatedCharacter)
                         }
                     )
+                    VStack(spacing: 4) {
+                        PickerModernInfoItem(
+                            icon: "shield.fill", 
+                            title: "Класс", 
+                            value: character.displayClassName, 
+                            color: .green,
+                            isEditing: isEditingMode,
+                            selectedValue: $selectedClass,
+                            options: [
+                                ("", "Выберите класс"),
+                                ("Варвар", "Варвар"),
+                                ("Бард", "Бард"),
+                                ("Волшебник", "Волшебник"),
+                                ("Друид", "Друид"),
+                                ("Жрец", "Жрец"),
+                                ("Колдун", "Колдун"),
+                                ("Монах", "Монах"),
+                                ("Паладин", "Паладин"),
+                                ("Плут", "Плут"),
+                                ("Следопыт", "Следопыт"),
+                                ("Чародей", "Чародей")
+                            ]
+                        )
+                        
+                        if isLoadingClassFeatures {
+                            HStack(spacing: 4) {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .green))
+                                Text("Загрузка умений...")
+                                    .font(.caption2)
+                                    .foregroundColor(.green)
+                            }
+                            .padding(.top, 4)
+                        }
+                    }
+                }
+                
+                HStack(spacing: 16) {
                     PickerModernInfoItem(
                         icon: "book.closed", 
                         title: "Предыстория", 
@@ -369,11 +525,8 @@ struct CharacterHeaderCompactView: View {
                             ("Мудрец", "Мудрец")
                         ]
                     )
-                }
-                
-                HStack(spacing: 16) {
                     PickerModernInfoItem(
-                        icon: "balance.scale", 
+                        icon: "scalemass.fill", 
                         title: "Мировоззрение", 
                         value: character.alignment, 
                         color: .indigo,
@@ -392,21 +545,9 @@ struct CharacterHeaderCompactView: View {
                             ("Хаотично-злой", "Хаотично-злой")
                         ]
                     )
-                    EditableModernInfoItem(
-                        icon: "star.circle", 
-                        title: "Опыт", 
-                        value: "\(character.experience)", 
-                        color: .yellow,
-                        isEditing: isEditingMode,
-                        onValueChange: { newValue in
-                            if let exp = Int(newValue) {
-                                var updatedCharacter = character
-                                updatedCharacter.experience = exp
-                                store.update(updatedCharacter)
-                            }
-                        }
-                    )
                 }
+                
+
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
@@ -455,26 +596,30 @@ struct CharacterHeaderCompactView: View {
                 }
             }
         }
-        .alert("Редактировать класс", isPresented: $editingClass) {
-            TextField("Класс", text: $newClass)
-            Button("Отмена", role: .cancel) { }
-            Button("Сохранить") {
-                if !newClass.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    var updatedCharacter = character
-                    updatedCharacter.characterClass = newClass
-                    store.update(updatedCharacter)
-                }
-            }
-        }
+
         .alert("Редактировать уровень", isPresented: $editingLevel) {
             TextField("Уровень", text: $newLevel)
                 .keyboardType(.numberPad)
             Button("Отмена", role: .cancel) { }
             Button("Сохранить") {
                 if let level = Int(newLevel), level > 0, level <= 20 {
+                    isLoadingClassFeatures = true
+                    
                     var updatedCharacter = character
                     updatedCharacter.level = level
+                    updatedCharacter.proficiencyBonus = (updatedCharacter.level - 1) / 4 + 2
+                    
+                    // Обновляем классовые умения при изменении уровня
+                    if !updatedCharacter.characterClass.isEmpty {
+                        loadClassFeatures(for: updatedCharacter.characterClass, character: &updatedCharacter)
+                    }
+                    
                     store.update(updatedCharacter)
+                    
+                    // Скрываем индикатор загрузки через небольшую задержку
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        isLoadingClassFeatures = false
+                    }
                 }
             }
         }
@@ -483,10 +628,35 @@ struct CharacterHeaderCompactView: View {
             selectedClass = newCharacter.displayClassName
             selectedBackground = newCharacter.background
             selectedAlignment = newCharacter.alignment
+            
+            // Автоматически загружаем классовые умения при первом открытии персонажа
+            if !newCharacter.characterClass.isEmpty && newCharacter.classFeatures.isEmpty {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    var updatedCharacter = newCharacter
+                    loadClassFeatures(for: newCharacter.characterClass, character: &updatedCharacter)
+                    store.update(updatedCharacter)
+                    store.selectedCharacter = updatedCharacter
+                }
+            }
         }
         .onChange(of: selectedClass) { newClass in
             if !newClass.isEmpty {
-                tempCharacter.characterClass = newClass
+                isLoadingClassFeatures = true
+                
+                var updatedCharacter = character
+                updatedCharacter.characterClass = newClass
+                
+                // Загружаем классовые умения для нового класса
+                loadClassFeatures(for: newClass, character: &updatedCharacter)
+                
+                store.update(updatedCharacter)
+                // Немедленно обновляем выбранного персонажа
+                store.selectedCharacter = updatedCharacter
+                
+                // Скрываем индикатор загрузки через небольшую задержку
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    isLoadingClassFeatures = false
+                }
             }
         }
         .onChange(of: selectedBackground) { newBackground in
@@ -501,6 +671,49 @@ struct CharacterHeaderCompactView: View {
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $avatarImage)
         }
+        .overlay(
+            // Toast уведомление о загрузке классовых умений
+            VStack {
+                Spacer()
+                
+                if showClassFeaturesNotification {
+                    HStack(spacing: 12) {
+                        Text(classFeaturesNotificationText)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.leading)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            showClassFeaturesNotification = false
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.white.opacity(0.8))
+                                .font(.caption)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.green.opacity(0.9), .green.opacity(0.8)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 100)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .animation(.easeInOut(duration: 0.3), value: showClassFeaturesNotification)
+                }
+            }
+        )
     }
 }
 
@@ -554,6 +767,8 @@ struct EditableModernInfoItem: View {
     let color: Color
     let isEditing: Bool
     let onValueChange: (String) -> Void
+    @State private var showingEditAlert = false
+    @State private var editingValue = ""
     
     var body: some View {
         VStack(spacing: 8) {
@@ -592,6 +807,10 @@ struct EditableModernInfoItem: View {
                         .foregroundColor(.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
+                        .onLongPressGesture(minimumDuration: 0.5) {
+                            editingValue = value
+                            showingEditAlert = true
+                        }
                 }
             }
         }
@@ -601,6 +820,15 @@ struct EditableModernInfoItem: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemGray6).opacity(0.5))
         )
+        .alert("Редактировать \(title)", isPresented: $showingEditAlert) {
+            TextField(title, text: $editingValue)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if !editingValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    onValueChange(editingValue)
+                }
+            }
+        }
     }
 }
 
@@ -612,6 +840,7 @@ struct PickerModernInfoItem: View {
     let isEditing: Bool
     @Binding var selectedValue: String
     let options: [(String, String)]
+    @State private var showingPickerAlert = false
     
     var body: some View {
         VStack(spacing: 8) {
@@ -651,6 +880,9 @@ struct PickerModernInfoItem: View {
                         .foregroundColor(.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
+                        .onLongPressGesture(minimumDuration: 0.5) {
+                            showingPickerAlert = true
+                        }
                 }
             }
         }
@@ -660,6 +892,14 @@ struct PickerModernInfoItem: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemGray6).opacity(0.5))
         )
+        .alert("Выбрать \(title)", isPresented: $showingPickerAlert) {
+            ForEach(options, id: \.0) { option in
+                Button(option.1) {
+                    selectedValue = option.0
+                }
+            }
+            Button("Отмена", role: .cancel) { }
+        }
     }
 }
 
@@ -728,6 +968,8 @@ struct HitPointsView: View {
     let isEditingMode: Bool
     @State private var showingHPEditor = false
     @State private var newHP = ""
+    @State private var showingMaxHPEditor = false
+    @State private var newMaxHP = ""
     
     private var character: Character? { store.selectedCharacter }
     
@@ -787,6 +1029,10 @@ struct HitPointsView: View {
                             Text("\(character?.maxHitPoints ?? 0)")
                                 .font(.title2)
                                 .foregroundColor(.secondary)
+                                .onLongPressGesture(minimumDuration: 0.5) {
+                                    newMaxHP = "\(character?.maxHitPoints ?? 0)"
+                                    showingMaxHPEditor = true
+                                }
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
@@ -924,6 +1170,24 @@ struct HitPointsView: View {
             }
         } message: {
             Text("Введите новое значение хитов (0-\(character?.maxHitPoints ?? 0))")
+        }
+        .alert("Изменить максимальные хиты", isPresented: $showingMaxHPEditor) {
+            TextField("Максимальные хиты", text: $newMaxHP)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if let c = character, let maxHP = Int(newMaxHP), maxHP > 0 {
+                    var updatedCharacter = c
+                    updatedCharacter.maxHitPoints = maxHP
+                    // Убеждаемся, что текущие хиты не превышают максимальные
+                    if updatedCharacter.currentHitPoints > maxHP {
+                        updatedCharacter.currentHitPoints = maxHP
+                    }
+                    store.update(updatedCharacter)
+                }
+            }
+        } message: {
+            Text("Введите новое значение максимальных хитов")
         }
     }
 }
@@ -1169,6 +1433,8 @@ struct EditableModernStatItem: View {
     let color: Color
     let isEditing: Bool
     let onScoreChange: (Int) -> Void
+    @State private var showingEditAlert = false
+    @State private var editingValue = ""
     
     var body: some View {
         VStack(spacing: 8) {
@@ -1236,6 +1502,10 @@ struct EditableModernStatItem: View {
                         RoundedRectangle(cornerRadius: 6)
                             .fill(Color(.systemGray6))
                     )
+                    .onLongPressGesture(minimumDuration: 0.5) {
+                        editingValue = "\(score)"
+                        showingEditAlert = true
+                    }
             }
         }
         .frame(maxWidth: .infinity)
@@ -1245,6 +1515,16 @@ struct EditableModernStatItem: View {
                 .fill(color.opacity(0.06))
                 .stroke(color.opacity(0.2), lineWidth: 1)
         )
+        .alert("Редактировать \(name)", isPresented: $showingEditAlert) {
+            TextField("Значение", text: $editingValue)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if let newScore = Int(editingValue), newScore >= 1, newScore <= 30 {
+                    onScoreChange(newScore)
+                }
+            }
+        }
     }
 }
 

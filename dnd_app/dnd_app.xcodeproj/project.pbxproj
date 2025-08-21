@@ -24,6 +24,10 @@
 		272ADF6F2E53C2DB007AF452 /* ClassAbilitiesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF6E2E53C2DB007AF452 /* ClassAbilitiesSection.swift */; };
 		272ADF712E53C2E2007AF452 /* InteractiveComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF702E53C2E2007AF452 /* InteractiveComponents.swift */; };
 		272ADF732E53C3B1007AF452 /* CharacterClassesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272ADF722E53C3B1007AF452 /* CharacterClassesSection.swift */; };
+		2739106B2E5609D7008BDA90 /* ClassFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2739106A2E5609D7008BDA90 /* ClassFeaturesView.swift */; };
+		2739106D2E560B6F008BDA90 /* ClassProgressionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2739106C2E560B6F008BDA90 /* ClassProgressionView.swift */; };
+		2739106F2E560BB3008BDA90 /* ClassStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2739106E2E560BB3008BDA90 /* ClassStatsView.swift */; };
+		273910712E5610E0008BDA90 /* ClassExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 273910702E5610E0008BDA90 /* ClassExportView.swift */; };
 		275B2C182E4E2F89008AA77B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 275B2C172E4E2F89008AA77B /* Assets.xcassets */; };
 		275B2C1C2E4F666F008AA77B /* backgrounds.json in Resources */ = {isa = PBXBuildFile; fileRef = 275B2C1B2E4F666E008AA77B /* backgrounds.json */; };
 		275B2C1E2E4F68E9008AA77B /* CompendiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */; };
@@ -88,6 +92,10 @@
 		272ADF6E2E53C2DB007AF452 /* ClassAbilitiesSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassAbilitiesSection.swift; sourceTree = "<group>"; };
 		272ADF702E53C2E2007AF452 /* InteractiveComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InteractiveComponents.swift; sourceTree = "<group>"; };
 		272ADF722E53C3B1007AF452 /* CharacterClassesSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterClassesSection.swift; sourceTree = "<group>"; };
+		2739106A2E5609D7008BDA90 /* ClassFeaturesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassFeaturesView.swift; sourceTree = "<group>"; };
+		2739106C2E560B6F008BDA90 /* ClassProgressionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassProgressionView.swift; sourceTree = "<group>"; };
+		2739106E2E560BB3008BDA90 /* ClassStatsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassStatsView.swift; sourceTree = "<group>"; };
+		273910702E5610E0008BDA90 /* ClassExportView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassExportView.swift; sourceTree = "<group>"; };
 		275B2C172E4E2F89008AA77B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		275B2C1B2E4F666E008AA77B /* backgrounds.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = backgrounds.json; sourceTree = "<group>"; };
 		275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompendiumView.swift; sourceTree = "<group>"; };
@@ -180,9 +188,13 @@
 				27D304A42E4DBD9800CEDEF1 /* CharacterSheetView.swift */,
 				272ADF682E533F3E007AF452 /* ClassAbilitiesSection.swift */,
 				272ADF4E2E51D306007AF452 /* CompactCharacterSheetView.swift */,
+				2739106A2E5609D7008BDA90 /* ClassFeaturesView.swift */,
+				2739106E2E560BB3008BDA90 /* ClassStatsView.swift */,
 				272ADF722E53C3B1007AF452 /* CharacterClassesSection.swift */,
+				273910702E5610E0008BDA90 /* ClassExportView.swift */,
 				275B2C1D2E4F68E9008AA77B /* CompendiumView.swift */,
 				272ADF502E51D327007AF452 /* DetailSectionView.swift */,
+				2739106C2E560B6F008BDA90 /* ClassProgressionView.swift */,
 				272ADF702E53C2E2007AF452 /* InteractiveComponents.swift */,
 				27D304A62E4DF91200CEDEF1 /* JSONQuoteView.swift */,
 				27D1A0102E4700000042C0AB /* NotesView.swift */,
@@ -400,6 +412,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				27D304A32E4DBD9100CEDEF1 /* CacheManager.swift in Sources */,
+				2739106F2E560BB3008BDA90 /* ClassStatsView.swift in Sources */,
 				27D1A0012E4700000042C0AB /* tabaxiApp.swift in Sources */,
 				272ADF4F2E51D307007AF452 /* CompactCharacterSheetView.swift in Sources */,
 				275B2C1E2E4F68E9008AA77B /* CompendiumView.swift in Sources */,
@@ -409,9 +422,11 @@
 				272ADF712E53C2E2007AF452 /* InteractiveComponents.swift in Sources */,
 				272ADF732E53C3B1007AF452 /* CharacterClassesSection.swift in Sources */,
 				27D1A0072E4700000042C0AB /* SpellsView.swift in Sources */,
+				273910712E5610E0008BDA90 /* ClassExportView.swift in Sources */,
 				272ADF582E51E207007AF452 /* DetailSection.swift in Sources */,
 				275B2C202E4F68EF008AA77B /* CompendiumStore.swift in Sources */,
 				27D1A00B2E4700000042C0AB /* FavoritesManager.swift in Sources */,
+				2739106D2E560B6F008BDA90 /* ClassProgressionView.swift in Sources */,
 				272ADF532E51D346007AF452 /* CharacterCreationView.swift in Sources */,
 				27D304AB2E4DF92000CEDEF1 /* CommonStyles.swift in Sources */,
 				272ADF6F2E53C2DB007AF452 /* ClassAbilitiesSection.swift in Sources */,
@@ -426,6 +441,7 @@
 				27D1A0132E4700000042C0AB /* RelationshipView.swift in Sources */,
 				27D1A0152E4700000042C0AB /* SettingsView.swift in Sources */,
 				272ADF4D2E516017007AF452 /* CharacterSelectionView.swift in Sources */,
+				2739106B2E5609D7008BDA90 /* ClassFeaturesView.swift in Sources */,
 				27D1A0172E4700000042C0AB /* ThemeManager.swift in Sources */,
 				272ADF512E51D327007AF452 /* DetailSectionView.swift in Sources */,
 				272ADF692E533F3E007AF452 /* ClassAbilitiesSection.swift in Sources */,

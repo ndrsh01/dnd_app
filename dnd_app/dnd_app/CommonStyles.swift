@@ -231,6 +231,66 @@ struct CommonFonts {
     static let caption = Font.system(.caption, design: .rounded)
 }
 
+// MARK: - Compendium Styles
+
+struct CompendiumBackgroundStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.988, green: 0.933, blue: 0.855),
+                    Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                    Color(red: 0.988, green: 0.933, blue: 0.855)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            content
+        }
+    }
+}
+
+struct CompendiumCardStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(.systemBackground),
+                                Color(.systemBackground).opacity(0.95)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .stroke(
+                        LinearGradient(
+                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            )
+    }
+}
+
+struct CompendiumSearchFieldStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
+            .padding(.horizontal)
+            .padding(.top)
+    }
+}
+
 // MARK: - Extensions
 
 extension View {
@@ -248,6 +308,18 @@ extension View {
     
     func commonSectionHeader() -> some View {
         self.modifier(SectionHeaderStyle())
+    }
+    
+    func compendiumBackground() -> some View {
+        self.modifier(CompendiumBackgroundStyle())
+    }
+    
+    func compendiumCardStyle() -> some View {
+        self.modifier(CompendiumCardStyle())
+    }
+    
+    func compendiumSearchField() -> some View {
+        self.modifier(CompendiumSearchFieldStyle())
     }
 }
 
