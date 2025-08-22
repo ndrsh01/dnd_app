@@ -223,13 +223,13 @@ struct SearchPanel: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            // Поиск
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                
-                TextField("Поиск заметок...", text: $searchText)
-                    .textFieldStyle(PlainTextFieldStyle())
+                    // Поиск
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                        
+                        TextField("Поиск заметок...", text: $searchText)
+                            .textFieldStyle(PlainTextFieldStyle())
                 
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
@@ -240,26 +240,26 @@ struct SearchPanel: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(
+                    .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color(.systemBackground))
-                    .stroke(
-                        LinearGradient(
-                            colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ),
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ),
                         lineWidth: 1.5
-                    )
+                            )
                     .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
-            )
-            .padding(.horizontal)
-            .padding(.top)
-            
+                    )
+                    .padding(.horizontal)
+                    .padding(.top)
+                    
             // Фильтры и сортировка
             HStack {
-                // Категории
-                ScrollView(.horizontal, showsIndicators: false) {
+                    // Категории
+                    ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         CategoryButton(
                             title: "Все",
@@ -267,17 +267,17 @@ struct SearchPanel: View {
                             color: .orange,
                             isSelected: selectedCategory == nil
                         ) {
-                            selectedCategory = nil
+                                selectedCategory = nil
                         }
                         
-                        ForEach(NoteCategory.allCases, id: \.self) { category in
+                            ForEach(NoteCategory.allCases, id: \.self) { category in
                             CategoryButton(
                                 title: category.rawValue,
                                 icon: category.icon,
                                 color: category.color,
                                 isSelected: selectedCategory == category
                             ) {
-                                selectedCategory = selectedCategory == category ? nil : category
+                                    selectedCategory = selectedCategory == category ? nil : category
                             }
                         }
                     }
@@ -309,8 +309,8 @@ struct CategoryButton: View {
                     .fontWeight(.medium)
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
+                                    .padding(.vertical, 8)
+                                    .background(
                 RoundedRectangle(cornerRadius: 20)
                     .fill(
                         isSelected ? 
@@ -346,21 +346,21 @@ struct EmptyStateView: View {
                 
                 Image(systemName: searchText.isEmpty ? "note.text" : "magnifyingglass")
                     .font(.system(size: 50))
-                    .foregroundColor(.orange)
+                                .foregroundColor(.orange)
             }
-            
+                            
             // Текст
             VStack(spacing: 8) {
                 Text(searchText.isEmpty ? "Нет заметок" : "Ничего не найдено")
-                    .font(.title2)
+                                .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
-                
+                            
                 Text(searchText.isEmpty ? 
                      "Добавьте свою первую заметку для отслеживания важной информации" :
                      "Попробуйте изменить поисковый запрос или фильтры")
-                    .font(.body)
-                    .foregroundColor(.secondary)
+                                .font(.body)
+                                .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -515,7 +515,7 @@ struct NoteDetailView: View {
                                     .font(.subheadline)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                        .background(
+                            .background(
                             RoundedRectangle(cornerRadius: 10)
                                             .fill(note.category.color.opacity(0.15))
                         )
@@ -556,7 +556,7 @@ struct NoteDetailView: View {
                             .foregroundColor(.primary)
                         
                         VStack(spacing: 8) {
-                            HStack {
+                                        HStack {
                                 Image(systemName: "calendar.badge.plus")
                                     .foregroundColor(.orange)
                                 Text("Создано:")
@@ -565,18 +565,18 @@ struct NoteDetailView: View {
                                     .foregroundColor(.secondary)
                             }
                             
-                            HStack {
+                                HStack {
                                 Image(systemName: "calendar.badge.clock")
                                     .foregroundColor(.orange)
                                 Text("Изменено:")
-                                Spacer()
+                                    Spacer()
                                 Text(note.dateModified, style: .date)
                                     .foregroundColor(.secondary)
-                            }
+                                }
                         }
                         .font(.subheadline)
                         .padding(16)
-                        .background(
+                                .background(
                             RoundedRectangle(cornerRadius: 12)
                                 .fill(Color(.systemGray6))
                         )
@@ -642,7 +642,7 @@ struct EditNoteView: View {
                 VStack(alignment: .leading, spacing: 12) {
                         Text("Название")
                             .font(.headline)
-                            .fontWeight(.semibold)
+                                .fontWeight(.semibold)
                             .foregroundColor(.primary)
                         
                         TextField("Введите название заметки", text: $title)
@@ -650,7 +650,7 @@ struct EditNoteView: View {
                             .fontWeight(.medium)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 14)
-                            .background(
+                        .background(
                                 RoundedRectangle(cornerRadius: 12)
                                     .fill(Color(.systemBackground))
                                     .stroke(Color.orange.opacity(0.3), lineWidth: 1)
@@ -661,7 +661,7 @@ struct EditNoteView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Описание")
                             .font(.headline)
-                            .fontWeight(.semibold)
+                                    .fontWeight(.semibold)
                             .foregroundColor(.primary)
                         
                         TextEditor(text: $description)
@@ -698,7 +698,7 @@ struct EditNoteView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
-                                    .background(
+                    .background(
                                         RoundedRectangle(cornerRadius: 12)
                                             .fill(selectedCategory == category ? 
                                                   LinearGradient(colors: [category.color, category.color.opacity(0.8)], startPoint: .leading, endPoint: .trailing) :
@@ -717,7 +717,7 @@ struct EditNoteView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
             }
-            .background(
+        .background(
                 LinearGradient(
                     colors: [
                         Color(red: 0.988, green: 0.933, blue: 0.855),

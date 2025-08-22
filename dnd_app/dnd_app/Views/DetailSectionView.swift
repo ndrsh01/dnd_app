@@ -6,6 +6,7 @@ struct DetailSectionView: View {
     @ObservedObject var store: CharacterStore
     @ObservedObject var compendiumStore: CompendiumStore
     @ObservedObject var classesStore: ClassesStore
+    let onSaveChanges: ((Character) -> Void)?
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -14,21 +15,21 @@ struct DetailSectionView: View {
                 VStack(spacing: 20) {
                     switch section {
                     case .abilities:
-                        AbilitiesDetailView(character: character)
+                        AbilitiesDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
                     case .combat:
-                        CombatDetailView(character: character, store: store)
-                    case .skills:
-                        SkillsDetailView(character: character)
+                        CombatDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
+                                case .skills:
+                SkillsDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
                     case .spells:
-                        ClassAbilitiesDetailView(character: character, compendiumStore: compendiumStore, classesStore: classesStore)
+                        ClassAbilitiesDetailView(character: character, compendiumStore: compendiumStore, classesStore: classesStore, onSaveChanges: onSaveChanges)
                     case .equipment:
-                        EquipmentDetailView(character: character, store: store)
+                        EquipmentDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
                     case .treasure:
-                        TreasureDetailView(character: character, store: store)
+                        TreasureDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
                     case .personality:
-                        PersonalityDetailView(character: character, store: store)
+                        PersonalityDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
                     case .features:
-                        FeaturesDetailView(character: character, store: store)
+                        FeaturesDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
                     }
                 }
                 .padding()
@@ -64,6 +65,8 @@ struct DetailSectionView: View {
 // MARK: - Abilities Detail View
 struct AbilitiesDetailView: View {
     let character: Character
+    @ObservedObject var store: CharacterStore
+    let onSaveChanges: ((Character) -> Void)?
     
     var body: some View {
         VStack(spacing: 20) {
@@ -149,7 +152,14 @@ struct AbilitiesDetailView: View {
                         SaveThrowRow(
                             ability: ability,
                             modifier: character.savingThrowModifier(for: ability),
-                            isProficient: character.savingThrows[ability] == true
+                            isProficient: character.savingThrows[ability] == true,
+                            onToggleProficiency: {
+                                var updatedCharacter = character
+                                updatedCharacter.savingThrows[ability] = !(character.savingThrows[ability] == true)
+                                store.update(updatedCharacter)
+                                store.selectedCharacter = updatedCharacter
+                                onSaveChanges?(updatedCharacter)
+                            }
                         )
                     }
                 }
@@ -238,6 +248,7 @@ struct SaveThrowRow: View {
     let ability: String
     let modifier: Int
     let isProficient: Bool
+    let onToggleProficiency: () -> Void
     
     private var abilityName: String {
         switch ability {
@@ -260,20 +271,23 @@ struct SaveThrowRow: View {
             
             Spacer()
             
-            if isProficient {
-                HStack(spacing: 4) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.orange)
-                    .font(.caption)
+            HStack(spacing: 4) {
+                if isProficient {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.orange)
+                        .font(.caption)
                     Text("Проф.")
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.orange)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.orange.opacity(0.1))
-                .cornerRadius(8)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(isProficient ? Color.orange.opacity(0.1) : Color.clear)
+            .cornerRadius(8)
+            .onTapGesture {
+                onToggleProficiency()
             }
             
             Text(modifier >= 0 ? "+\(modifier)" : "\(modifier)")
@@ -295,6 +309,19 @@ struct SaveThrowRow: View {
 struct CombatDetailView: View {
     let character: Character
     @ObservedObject var store: CharacterStore
+    let onSaveChanges: ((Character) -> Void)?
+    @State private var editingMaxHP = false
+    @State private var editingCurrentHP = false
+    @State private var editingTempHP = false
+    @State private var editingHitDiceTotal = false
+    @State private var editingHitDiceUsed = false
+    @State private var editingHitDiceType = false
+    @State private var newMaxHP = ""
+    @State private var newCurrentHP = ""
+    @State private var newTempHP = ""
+    @State private var newHitDiceTotal = ""
+    @State private var newHitDiceUsed = ""
+    @State private var newHitDiceType = ""
     
     var body: some View {
         VStack(spacing: 20) {
@@ -357,22 +384,36 @@ struct CombatDetailView: View {
                     HStack {
                         Text("Максимум хитов:")
                         Spacer()
-                        Text("\(character.maxHitPoints)")
-                            .fontWeight(.semibold)
+                        Button(action: {
+                            newMaxHP = String(character.maxHitPoints)
+                            editingMaxHP = true
+                        }) {
+                            Text("\(character.maxHitPoints)")
+                                .fontWeight(.semibold)
+                                .foregroundColor(.blue)
+                        }
                     }
                     
                     HStack {
                         Text("Текущие хиты:")
                         Spacer()
-                        Text("\(character.currentHitPoints)")
-                            .fontWeight(.semibold)
-                            .foregroundColor(.red)
+                        Button(action: {
+                            newCurrentHP = String(character.currentHitPoints)
+                            editingCurrentHP = true
+                        }) {
+                            Text("\(character.currentHitPoints)")
+                                .fontWeight(.semibold)
+                                .foregroundColor(.red)
+                        }
                     }
                     
-                    if character.temporaryHitPoints > 0 {
-                        HStack {
-                            Text("Временные хиты:")
-                            Spacer()
+                    HStack {
+                        Text("Временные хиты:")
+                        Spacer()
+                        Button(action: {
+                            newTempHP = String(character.temporaryHitPoints)
+                            editingTempHP = true
+                        }) {
                             Text("\(character.temporaryHitPoints)")
                                 .fontWeight(.semibold)
                                 .foregroundColor(.blue)
@@ -380,10 +421,50 @@ struct CombatDetailView: View {
                     }
                     
                     HStack {
-                        Text("Кости хитов:")
+                        Text("Кости хитов (всего):")
+                        Spacer()
+                        Button(action: {
+                            newHitDiceTotal = String(character.hitDiceTotal)
+                            editingHitDiceTotal = true
+                        }) {
+                            Text("\(character.hitDiceTotal)")
+                                .fontWeight(.semibold)
+                                .foregroundColor(.green)
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Кости хитов (использовано):")
+                        Spacer()
+                        Button(action: {
+                            newHitDiceUsed = String(character.hitDiceUsed)
+                            editingHitDiceUsed = true
+                        }) {
+                            Text("\(character.hitDiceUsed)")
+                                .fontWeight(.semibold)
+                                .foregroundColor(.orange)
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Тип костей хитов:")
+                        Spacer()
+                        Button(action: {
+                            newHitDiceType = character.hitDiceType
+                            editingHitDiceType = true
+                        }) {
+                            Text("d\(character.hitDiceType)")
+                                .fontWeight(.semibold)
+                                .foregroundColor(.purple)
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Доступные кости:")
                         Spacer()
                         Text("\(character.hitDiceTotal - character.hitDiceUsed)d\(character.hitDiceType)")
                             .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
@@ -440,6 +521,8 @@ struct CombatDetailView: View {
                                             updatedCharacter.deathSaveSuccesses = index + 1
                                         }
                                         store.update(updatedCharacter)
+                                        store.selectedCharacter = updatedCharacter
+                                        onSaveChanges?(updatedCharacter)
                                     }
                                 }) {
                                 Circle()
@@ -467,6 +550,8 @@ struct CombatDetailView: View {
                                             updatedCharacter.deathSaveFailures = index + 1
                                         }
                                         store.update(updatedCharacter)
+                                        store.selectedCharacter = updatedCharacter
+                                        onSaveChanges?(updatedCharacter)
                                     }
                                 }) {
                                 Circle()
@@ -554,6 +639,90 @@ struct CombatDetailView: View {
                     .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
         }
+        .alert("Редактировать максимум хитов", isPresented: $editingMaxHP) {
+            TextField("Максимум хитов", text: $newMaxHP)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if let newValue = Int(newMaxHP) {
+                    var updatedCharacter = character
+                    updatedCharacter.maxHitPoints = newValue
+                    store.update(updatedCharacter)
+                    store.selectedCharacter = updatedCharacter
+                    onSaveChanges?(updatedCharacter)
+                }
+            }
+        }
+        .alert("Редактировать текущие хиты", isPresented: $editingCurrentHP) {
+            TextField("Текущие хиты", text: $newCurrentHP)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if let newValue = Int(newCurrentHP) {
+                    var updatedCharacter = character
+                    updatedCharacter.currentHitPoints = newValue
+                    store.update(updatedCharacter)
+                    store.selectedCharacter = updatedCharacter
+                    onSaveChanges?(updatedCharacter)
+                }
+            }
+        }
+        .alert("Редактировать временные хиты", isPresented: $editingTempHP) {
+            TextField("Временные хиты", text: $newTempHP)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if let newValue = Int(newTempHP) {
+                    var updatedCharacter = character
+                    updatedCharacter.temporaryHitPoints = newValue
+                    store.update(updatedCharacter)
+                    store.selectedCharacter = updatedCharacter
+                    onSaveChanges?(updatedCharacter)
+                }
+            }
+        }
+        .alert("Редактировать общее количество костей хитов", isPresented: $editingHitDiceTotal) {
+            TextField("Общее количество костей", text: $newHitDiceTotal)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if let newValue = Int(newHitDiceTotal) {
+                    var updatedCharacter = character
+                    updatedCharacter.hitDiceTotal = newValue
+                    store.update(updatedCharacter)
+                    store.selectedCharacter = updatedCharacter
+                    onSaveChanges?(updatedCharacter)
+                }
+            }
+        }
+        .alert("Редактировать использованные кости хитов", isPresented: $editingHitDiceUsed) {
+            TextField("Использованные кости", text: $newHitDiceUsed)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if let newValue = Int(newHitDiceUsed) {
+                    var updatedCharacter = character
+                    updatedCharacter.hitDiceUsed = newValue
+                    store.update(updatedCharacter)
+                    store.selectedCharacter = updatedCharacter
+                    onSaveChanges?(updatedCharacter)
+                }
+            }
+        }
+        .alert("Редактировать тип костей хитов", isPresented: $editingHitDiceType) {
+            TextField("Тип костей (например: 6, 8, 10, 12, 20)", text: $newHitDiceType)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if !newHitDiceType.isEmpty {
+                    var updatedCharacter = character
+                    updatedCharacter.hitDiceType = newHitDiceType
+                    store.update(updatedCharacter)
+                    store.selectedCharacter = updatedCharacter
+                    onSaveChanges?(updatedCharacter)
+                }
+            }
+        }
     }
 }
 
@@ -614,6 +783,8 @@ struct ExhaustionLevelCard: View {
 // MARK: - Skills Detail View
 struct SkillsDetailView: View {
     let character: Character
+    @ObservedObject var store: CharacterStore
+    let onSaveChanges: ((Character) -> Void)?
     
     private let skillNames = [
         "acrobatics": ("Акробатика", "ЛОВ"),
@@ -662,10 +833,13 @@ struct SkillsDetailView: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 1), spacing: 12) {
                     ForEach(skillNames.sorted(by: { $0.value.0 < $1.value.0 }), id: \.key) { skillKey, skillData in
                         SkillDetailRow(
+                            skillKey: skillKey,
                             skillName: skillData.0,
                             ability: skillData.1,
                             modifier: character.skillModifier(for: skillKey),
-                            isProficient: character.skills[skillKey] == true
+                            isProficient: character.skills[skillKey] == true,
+                            store: store,
+                            onSaveChanges: onSaveChanges
                         )
                     }
                 }
@@ -698,10 +872,13 @@ struct SkillsDetailView: View {
 }
 
 struct SkillDetailRow: View {
+    let skillKey: String
     let skillName: String
     let ability: String
     let modifier: Int
     let isProficient: Bool
+    @ObservedObject var store: CharacterStore
+    let onSaveChanges: ((Character) -> Void)?
     
     var body: some View {
         HStack(spacing: 16) {
@@ -747,6 +924,22 @@ struct SkillDetailRow: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemGray6))
         )
+        .onTapGesture {
+            toggleProficiency()
+        }
+    }
+    
+    private func toggleProficiency() {
+        if let selectedCharacter = store.selectedCharacter {
+            var updatedCharacter = selectedCharacter
+            
+            // Переключаем владение навыком
+            updatedCharacter.skills[skillKey] = !isProficient
+            
+            store.update(updatedCharacter)
+            store.selectedCharacter = updatedCharacter
+            onSaveChanges?(updatedCharacter)
+        }
     }
 }
 
@@ -755,29 +948,77 @@ struct ClassAbilitiesDetailView: View {
     let character: Character
     @ObservedObject var compendiumStore: CompendiumStore
     @ObservedObject var classesStore: ClassesStore
+    let onSaveChanges: ((Character) -> Void)?
     @StateObject private var favorites = Favorites()
     @State private var favoriteSpells: [Spell] = []
     
     private var hasSpellcasters: Bool {
-        return character.characterClasses.contains { characterClass in
+        // Check multi-class characters
+        let multiClassHasSpellcasters = character.characterClasses.contains { characterClass in
             classesStore.isSpellcaster(slug: characterClass.slug)
+        }
+        
+        // Check legacy single class characters
+        let legacyHasSpellcasters = !character.characterClass.isEmpty && 
+            classesStore.isSpellcaster(slug: getClassSlug(for: character.characterClass))
+        
+        return multiClassHasSpellcasters || legacyHasSpellcasters
+    }
+    
+
+    
+    private func getClassSlug(for className: String) -> String {
+        switch className.lowercased() {
+        case "варвар": return "barbarian"
+        case "бард": return "bard"
+        case "волшебник": return "wizard"
+        case "друид": return "druid"
+        case "жрец": return "cleric"
+        case "колдун": return "warlock"
+        case "монах": return "monk"
+        case "паладин": return "paladin"
+        case "плут": return "rogue"
+        case "следопыт": return "ranger"
+        case "чародей": return "sorcerer"
+        default: return "fighter"
         }
     }
     
     var body: some View {
         VStack(spacing: 20) {
-            // Class abilities for each class
+            // Class abilities for each class (new multi-class system)
             ForEach(character.characterClasses, id: \.id) { characterClass in
                 ClassAbilitiesCard(
                     characterClass: characterClass,
                     classFeatures: character.classFeatures[characterClass.slug] ?? [:],
                     classTable: character.classProgression[characterClass.slug],
-                    classesStore: classesStore
+                    classesStore: classesStore,
+                    onSaveChanges: onSaveChanges,
+                    character: character
                 )
             }
             
-            // Legacy message if no classes
-            if character.characterClasses.isEmpty {
+            // Legacy support for single class characters
+            if character.characterClasses.isEmpty && !character.characterClass.isEmpty {
+                let legacyClass = CharacterClass(
+                    slug: getClassSlug(for: character.characterClass),
+                    name: character.characterClass,
+                    level: character.level,
+                    subclass: character.subclass.isEmpty ? nil : character.subclass
+                )
+                
+                ClassAbilitiesCard(
+                    characterClass: legacyClass,
+                    classFeatures: character.classFeatures[legacyClass.slug] ?? [:],
+                    classTable: character.classProgression[legacyClass.slug],
+                    classesStore: classesStore,
+                    onSaveChanges: onSaveChanges,
+                    character: character
+                )
+            }
+            
+            // Message if no classes at all
+            if character.characterClasses.isEmpty && character.characterClass.isEmpty {
         VStack(spacing: 16) {
                     HStack {
                         ZStack {
@@ -812,9 +1053,9 @@ struct ClassAbilitiesDetailView: View {
                 )
             }
             
-            // Ячейки заклинаний (только для заклинательных классов)
-            if hasSpellcasters {
-                VStack(alignment: .leading, spacing: 16) {
+            // Ячейки заклинаний (только для заклинательных классов с ячейками)
+            if hasSpellcasters && character.spellSlots.values.contains(where: { $0 > 0 }) {
+                // Заголовок ячеек заклинаний
                 HStack {
                     ZStack {
                         Circle()
@@ -826,155 +1067,106 @@ struct ClassAbilitiesDetailView: View {
                             .foregroundColor(.purple)
                     }
                     
-                Text("Ячейки заклинаний")
+                    Text("Ячейки заклинаний")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
                     Spacer()
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
                 
+                // Ячейки заклинаний на всю ширину
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 12) {
-                    ForEach(1...5, id: \.self) { level in
-                        SpellSlotCard(level: level, slots: character.spellSlots[level] ?? 0)
+                    ForEach(1...9, id: \.self) { level in
+                        if let slots = character.spellSlots[level], slots > 0 {
+                            SpellSlotCard(level: level, slots: slots)
+                        }
                     }
                 }
-            }
-                .padding(24)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(.systemBackground),
-                                    Color(.systemBackground).opacity(0.95)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .stroke(
-                            LinearGradient(
-                                colors: [.purple.opacity(0.3), .purple.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1.5
-                        )
-                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
-                )
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
             }
             
-            // Избранные заклинания
+            // Заклинания (только если есть избранные)
             if !favoriteSpells.isEmpty {
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        ZStack {
-                            Circle()
-                                .fill(Color.red.opacity(0.2))
-                                .frame(width: 32, height: 32)
-                            
-                            Image(systemName: "heart.fill")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.red)
-                        }
+                // Заголовок заклинаний
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.blue.opacity(0.2))
+                            .frame(width: 32, height: 32)
                         
-                        Text("Избранные заклинания")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.blue)
                     }
                     
-                    LazyVStack(spacing: 12) {
-                        ForEach(favoriteSpells) { spell in
-                            CompendiumSpellCard(spell: spell, favorites: favorites)
-                                .frame(maxWidth: .infinity)
-                                .padding(.horizontal, 20)
-                        }
+                    Text("Заклинания")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                
+                // Карточки заклинаний на всю ширину экрана
+                LazyVStack(spacing: 12) {
+                    ForEach(favoriteSpells) { spell in
+                        CompendiumSpellCard(spell: spell, favorites: favorites)
+                            .frame(maxWidth: .infinity)
                     }
                 }
-                .padding(24)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(.systemBackground),
-                                    Color(.systemBackground).opacity(0.95)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .stroke(
-                            LinearGradient(
-                                colors: [.red.opacity(0.3), .red.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1.5
-                        )
-                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
-                )
+                .padding(.bottom, 16)
             }
             
             // This section is now handled by ClassAbilitiesCard components above
 
             // Список заклинаний персонажа (только для заклинательных классов)
-            if hasSpellcasters, !character.spells.isEmpty {
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        ZStack {
-                            Circle()
-                                .fill(Color.blue.opacity(0.2))
-                                .frame(width: 32, height: 32)
-                            
-                            Image(systemName: "list.bullet")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.blue)
-                        }
+            let availableSpells = character.spells.filter { spell in
+                // Проверяем, есть ли ячейки для уровня заклинания
+                guard spell.level > 0 else {
+                    return false
+                }
+                let slots = character.spellSlots[spell.level]
+                // Проверяем, что ячейки есть и они больше 0
+                return slots != nil && slots! > 0
+            }
+            
+            if hasSpellcasters, !availableSpells.isEmpty {
+                // Заголовок заклинаний
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color.blue.opacity(0.2))
+                            .frame(width: 32, height: 32)
                         
-                        Text("Заклинания персонажа")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.blue)
                     }
                     
-                    LazyVStack(spacing: 12) {
-                        ForEach(character.spells) { spell in
-                            SpellCard(spell: spell)
-                                .frame(maxWidth: .infinity)
-                                .padding(.horizontal, 20)
-                        }
+                    Text("Заклинания")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                
+                // Карточки заклинаний на всю ширину экрана
+                LazyVStack(spacing: 12) {
+                    ForEach(availableSpells) { spell in
+                        SpellCard(spell: spell)
+                            .frame(maxWidth: .infinity)
                     }
                 }
-                .padding(24)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(.systemBackground),
-                                    Color(.systemBackground).opacity(0.95)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .stroke(
-                            LinearGradient(
-                                colors: [.blue.opacity(0.3), .blue.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1.5
-                        )
-                        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
-                )
+                .padding(.bottom, 16)
             } else if favoriteSpells.isEmpty {
                 VStack(spacing: 16) {
                     ZStack {
@@ -1110,6 +1302,7 @@ struct SpellCard: View {
 struct EquipmentDetailView: View {
     let character: Character
     @ObservedObject var store: CharacterStore
+    let onSaveChanges: ((Character) -> Void)?
     
     var body: some View {
         VStack(spacing: 20) {
@@ -1139,7 +1332,9 @@ struct EquipmentDetailView: View {
                         set: { newValue in
                             var updatedCharacter = character
                             updatedCharacter.equipment = newValue
+                            store.update(updatedCharacter)
                             store.selectedCharacter = updatedCharacter
+                            onSaveChanges?(updatedCharacter)
                         }
                     ),
                     placeholder: "Снаряжение не указано"
@@ -1263,6 +1458,7 @@ struct AttackCard: View {
 struct TreasureDetailView: View {
     let character: Character
     @ObservedObject var store: CharacterStore
+    let onSaveChanges: ((Character) -> Void)?
     
     var body: some View {
         VStack(spacing: 20) {
@@ -1292,7 +1488,9 @@ struct TreasureDetailView: View {
                         set: { newValue in
                             var updatedCharacter = character
                             updatedCharacter.treasure = newValue
+                            store.update(updatedCharacter)
                             store.selectedCharacter = updatedCharacter
+                            onSaveChanges?(updatedCharacter)
                         }
                     ),
                     placeholder: "Сокровища не указаны"
@@ -1348,7 +1546,9 @@ struct TreasureDetailView: View {
                         set: { newValue in
                             var updatedCharacter = character
                             updatedCharacter.specialResources = newValue
+                            store.update(updatedCharacter)
                             store.selectedCharacter = updatedCharacter
+                            onSaveChanges?(updatedCharacter)
                         }
                     ),
                     placeholder: "Особые ресурсы не указаны"
@@ -1385,6 +1585,7 @@ struct TreasureDetailView: View {
 struct PersonalityDetailView: View {
     let character: Character
     @ObservedObject var store: CharacterStore
+    let onSaveChanges: ((Character) -> Void)?
     @StateObject private var favorites = Favorites()
     @StateObject private var compendiumStore = CompendiumStore()
     @State private var favoriteBackgrounds: [Background] = []
@@ -1470,7 +1671,9 @@ struct PersonalityDetailView: View {
                         set: { newValue in
                             var updatedCharacter = character
                             updatedCharacter.personalityTraits = newValue
+                            store.update(updatedCharacter)
                             store.selectedCharacter = updatedCharacter
+                            onSaveChanges?(updatedCharacter)
                         }
                     ),
                     placeholder: "Черты характера не указаны"
@@ -1526,7 +1729,9 @@ struct PersonalityDetailView: View {
                         set: { newValue in
                             var updatedCharacter = character
                             updatedCharacter.ideals = newValue
+                            store.update(updatedCharacter)
                             store.selectedCharacter = updatedCharacter
+                            onSaveChanges?(updatedCharacter)
                         }
                     ),
                     placeholder: "Идеалы не указаны"
@@ -1582,7 +1787,9 @@ struct PersonalityDetailView: View {
                         set: { newValue in
                             var updatedCharacter = character
                             updatedCharacter.bonds = newValue
+                            store.update(updatedCharacter)
                             store.selectedCharacter = updatedCharacter
+                            onSaveChanges?(updatedCharacter)
                         }
                     ),
                     placeholder: "Привязанности не указаны"
@@ -1638,7 +1845,9 @@ struct PersonalityDetailView: View {
                         set: { newValue in
                             var updatedCharacter = character
                             updatedCharacter.flaws = newValue
+                            store.update(updatedCharacter)
                             store.selectedCharacter = updatedCharacter
+                            onSaveChanges?(updatedCharacter)
                         }
                     ),
                     placeholder: "Слабости не указаны"
@@ -1686,6 +1895,7 @@ struct PersonalityDetailView: View {
 struct FeaturesDetailView: View {
     let character: Character
     @ObservedObject var store: CharacterStore
+    let onSaveChanges: ((Character) -> Void)?
     @StateObject private var favorites = Favorites()
     @StateObject private var compendiumStore = CompendiumStore()
     @State private var favoriteFeats: [Feat] = []
@@ -1771,7 +1981,9 @@ struct FeaturesDetailView: View {
                         set: { newValue in
                             var updatedCharacter = character
                             updatedCharacter.featuresAndTraits = newValue
+                            store.update(updatedCharacter)
                             store.selectedCharacter = updatedCharacter
+                            onSaveChanges?(updatedCharacter)
                         }
                     ),
                     placeholder: "Умения и способности не указаны"

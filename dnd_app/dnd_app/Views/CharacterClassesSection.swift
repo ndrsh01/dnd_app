@@ -63,9 +63,64 @@ struct CharacterClassesSection: View {
                                 character.proficiencyBonus = (character.totalLevel - 1) / 4 + 2
                             },
                             onUpdate: {
+                                print("🔍 === DEBUG: ОБНОВЛЕНИЕ КЛАССА В CharacterClassesSection ===")
+                                print("🔍 Индекс класса: \(index)")
+                                
                                 // Update character's total level and proficiency bonus
                                 character.level = character.totalLevel
                                 character.proficiencyBonus = (character.totalLevel - 1) / 4 + 2
+                                
+                                // Update cached class features for the updated class
+                                let updatedClass = character.characterClasses[index]
+                                print("🔍 Обновляемый класс: \(updatedClass.name) (slug: \(updatedClass.slug))")
+                                print("🔍 Уровень класса: \(updatedClass.level)")
+                                print("🔍 ClassesStore состояние:")
+                                print("  - classesBySlug пустой: \(classesStore.classesBySlug.isEmpty)")
+                                print("  - Доступные классы: \(classesStore.classesBySlug.keys.sorted())")
+                                
+                                if let gameClass = classesStore.classesBySlug[updatedClass.slug] {
+                                    print("✅ Класс найден в данных!")
+                                    var updatedFeatures: [String: [ClassFeature]] = [:]
+                                    
+                                    // Add features for all levels up to the current level
+                                    for levelNum in 1...updatedClass.level {
+                                        let levelString = String(levelNum)
+                                        if let features = gameClass.featuresByLevel[levelString] {
+                                            updatedFeatures[levelString] = features
+                                            print("🔍 Уровень \(levelNum): \(features.count) умений")
+                                        } else {
+                                            print("⚠️ Уровень \(levelNum): нет умений")
+                                        }
+                                    }
+                                    
+                                    character.classFeatures[updatedClass.slug] = updatedFeatures
+                                    print("✅ Умения обновлены для класса \(updatedClass.slug)")
+                                } else {
+                                    print("❌ Класс НЕ найден в данных!")
+                                    print("❌ Доступные классы: \(classesStore.classesBySlug.keys.sorted())")
+                                }
+                                
+                                // Update class progression table
+                                if let classTable = classesStore.classTablesBySlug[updatedClass.slug] {
+                                    character.classProgression[updatedClass.slug] = classTable
+                                    print("✅ Таблица прогрессии обновлена")
+                                } else {
+                                    print("⚠️ Таблица прогрессии не найдена в кэше, пытаемся загрузить...")
+                                    // Try to load the table if it's not in cache
+                                    classesStore.loadClassTables()
+                                    
+                                    // Check again after a short delay
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        if let classTable = classesStore.classTablesBySlug[updatedClass.slug] {
+                                            character.classProgression[updatedClass.slug] = classTable
+                                            print("✅ Таблица прогрессии загружена и обновлена")
+                                        } else {
+                                            print("❌ Таблица прогрессии все еще не найдена")
+                                        }
+                                    }
+                                }
+                                
+                                print("🔍 === КОНЕЦ ОТЛАДКИ ===")
                             }
                         )
                     }
@@ -118,6 +173,7 @@ struct CharacterClassCard: View {
     @Binding var characterClass: CharacterClass
     let onDelete: () -> Void
     let onUpdate: () -> Void
+    @StateObject private var classesStore = ClassesStore()
     @State private var showingEdit = false
     
     var body: some View {
@@ -197,7 +253,7 @@ struct CharacterClassCard: View {
                 .stroke(Color.blue.opacity(0.2), lineWidth: 1)
         )
         .sheet(isPresented: $showingEdit) {
-            EditClassView(characterClass: $characterClass, onUpdate: onUpdate)
+            EditClassView(characterClass: $characterClass, onUpdate: onUpdate, classesStore: classesStore)
         }
     }
 }
@@ -349,14 +405,16 @@ struct AddClassView: View {
 struct EditClassView: View {
     @Binding var characterClass: CharacterClass
     let onUpdate: () -> Void
+    @ObservedObject var classesStore: ClassesStore
     @Environment(\.dismiss) private var dismiss
     
     @State private var level: Int
     @State private var subclass: String
     
-    init(characterClass: Binding<CharacterClass>, onUpdate: @escaping () -> Void) {
+    init(characterClass: Binding<CharacterClass>, onUpdate: @escaping () -> Void, classesStore: ClassesStore) {
         self._characterClass = characterClass
         self.onUpdate = onUpdate
+        self.classesStore = classesStore
         self._level = State(initialValue: characterClass.wrappedValue.level)
         self._subclass = State(initialValue: characterClass.wrappedValue.subclass ?? "")
     }
@@ -450,16 +508,47 @@ struct EditClassView: View {
     }
     
     private func saveChanges() {
+        print("🔍 === DEBUG: СОХРАНЕНИЕ ИЗМЕНЕНИЙ КЛАССА ===")
+        print("🔍 Класс: \(characterClass.name) (slug: \(characterClass.slug))")
+        print("🔍 Новый уровень: \(level)")
+        print("🔍 Новый подкласс: \(subclass)")
+        
         characterClass.level = level
         characterClass.subclass = subclass.isEmpty ? nil : subclass
         
         // Update character's total level and proficiency bonus
         onUpdate()
         
-        // Update cached data if needed
-        // Note: This would need access to ClassesStore, but for now we'll rely on the cached data
-        // being updated when the class was first added
+        // Update cached class features and progression data
+        print("🔍 ClassesStore состояние:")
+        print("  - classesBySlug пустой: \(classesStore.classesBySlug.isEmpty)")
+        print("  - classTablesBySlug пустой: \(classesStore.classTablesBySlug.isEmpty)")
         
+        if let gameClass = classesStore.classesBySlug[characterClass.slug] {
+            print("✅ Класс найден в данных!")
+            print("🔍 Доступные уровни: \(gameClass.featuresByLevel.keys.sorted())")
+            
+            // Update features for the new level
+            var updatedFeatures: [String: [ClassFeature]] = [:]
+            
+            // Add features for all levels up to the new level
+            for levelNum in 1...level {
+                let levelString = String(levelNum)
+                if let features = gameClass.featuresByLevel[levelString] {
+                    updatedFeatures[levelString] = features
+                    print("🔍 Уровень \(levelNum): \(features.count) умений")
+                } else {
+                    print("⚠️ Уровень \(levelNum): нет умений")
+                }
+            }
+            
+            print("🔍 Всего обновлено уровней: \(updatedFeatures.count)")
+        } else {
+            print("❌ Класс НЕ найден в данных!")
+            print("❌ Доступные классы: \(classesStore.classesBySlug.keys.sorted())")
+        }
+        
+        print("🔍 === КОНЕЦ ОТЛАДКИ ===")
         dismiss()
     }
 }

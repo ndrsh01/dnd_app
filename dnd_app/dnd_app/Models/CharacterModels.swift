@@ -327,6 +327,7 @@ struct Character: Identifiable, Codable, Equatable {
     // Class Features and Abilities (cached from JSON)
     var classFeatures: [String: [String: [ClassFeature]]] = [:] // [classSlug: [level: [features]]]
     var classProgression: [String: ClassTable] = [:] // [classSlug: progressionTable]
+    var modifiedClassStats: [String: [String: [String: String]]] = [:] // [classSlug: [level: [statName: value]]]
     
     // Equipment and Features
     var equipment: String = ""
@@ -367,7 +368,7 @@ struct Character: Identifiable, Codable, Equatable {
         case strength, dexterity, constitution, intelligence, wisdom, charisma
         case savingThrows, skills, skillAbilities
         case personalityTraits, ideals, bonds, flaws
-        case classFeatures, classProgression
+        case classFeatures, classProgression, modifiedClassStats
         case equipment, featuresAndTraits, otherProficiencies
         case attacks, spellSlots, spells
         case treasure, specialResources, languages, hitDiceUsed
@@ -421,6 +422,7 @@ struct Character: Identifiable, Codable, Equatable {
         
         classFeatures = try container.decodeIfPresent([String: [String: [ClassFeature]]].self, forKey: .classFeatures) ?? [:]
         classProgression = try container.decodeIfPresent([String: ClassTable].self, forKey: .classProgression) ?? [:]
+        modifiedClassStats = try container.decodeIfPresent([String: [String: [String: String]]].self, forKey: .modifiedClassStats) ?? [:]
         
         equipment = try container.decode(String.self, forKey: .equipment)
         featuresAndTraits = try container.decode(String.self, forKey: .featuresAndTraits)
@@ -486,6 +488,7 @@ struct Character: Identifiable, Codable, Equatable {
         
         try container.encode(classFeatures, forKey: .classFeatures)
         try container.encode(classProgression, forKey: .classProgression)
+        try container.encode(modifiedClassStats, forKey: .modifiedClassStats)
         
         try container.encode(equipment, forKey: .equipment)
         try container.encode(featuresAndTraits, forKey: .featuresAndTraits)

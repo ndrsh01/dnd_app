@@ -360,3 +360,4 @@ struct InlineRichTextEditor: View {
         }
     }
 }
+

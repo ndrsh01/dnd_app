@@ -6,6 +6,7 @@ struct CharacterCreationView: View {
     @State private var character = Character()
     @State private var currentStep = 0
     @State private var showingImport = false
+    @State private var formVersion = 0 // Для принудительного обновления формы
     
     private let steps = [
         "Основная информация",
@@ -111,6 +112,7 @@ struct CharacterCreationView: View {
                         }
                         .padding()
                     }
+                    .id(formVersion) // Принудительное обновление при изменении formVersion
                     .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(Color("CardBackground"))
@@ -230,6 +232,8 @@ struct CharacterCreationView: View {
                     character = importedCharacter
                     // Переходим к последнему шагу для проверки
                     currentStep = steps.count - 1
+                    // Принудительно обновляем форму
+                    formVersion += 1
                 }
             }
         }
@@ -239,6 +243,13 @@ struct CharacterCreationView: View {
         character.dateCreated = Date()
         character.dateModified = Date()
         characterStore.add(character)
+        
+        // Автоматически выбираем созданного персонажа
+        characterStore.selectedCharacter = character
+        
+        // Принудительно обновляем форму
+        formVersion += 1
+        
         dismiss()
     }
 }

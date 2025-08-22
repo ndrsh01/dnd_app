@@ -21,7 +21,9 @@ struct CharacterEditorView: View {
 				LazyVStack(spacing: 24) {
 					GroupBox { BasicInfoSection(character: $editedCharacter) }
 					GroupBox { CharacterClassesSection(character: $editedCharacter, classesStore: classesStore) }
-					GroupBox { ClassAbilitiesSection(character: $editedCharacter) }
+					GroupBox { ClassAbilitiesSection(character: $editedCharacter, onSaveChanges: { updatedCharacter in
+						editedCharacter = updatedCharacter
+					}) }
 					GroupBox { CombatStatsSection(character: $editedCharacter) }
 					GroupBox { AbilityScoresSection(character: $editedCharacter) }
 					GroupBox { SkillsSection(character: $editedCharacter) }

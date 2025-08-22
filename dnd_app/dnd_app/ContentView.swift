@@ -2,10 +2,8 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var manager = QuoteManager()
-    @StateObject private var spells = CompendiumStore()
     @StateObject private var favorites = Favorites()
     @StateObject private var themeManager = ThemeManager()
-    @StateObject private var characterStore = CharacterStore()
 
     var body: some View {
         TabView {
@@ -28,16 +26,11 @@ struct ContentView: View {
                 .tabItem {
                     Label("Заметки", systemImage: "note.text")
                 }
-
-            CharacterSheetView(characterStore: characterStore)
+            
+            CharacterView()
                 .tabItem {
-                    Label("Персонаж", systemImage: "person.text.rectangle")
+                    Label("Персонаж", systemImage: "person.text.rectangle.fill")
                 }
-
-            // SettingsView(themeManager: themeManager)
-            //     .tabItem {
-            //         Label("Настройки", systemImage: "gearshape.fill")
-            //     }
         }
         .background(
             LinearGradient(
@@ -52,6 +45,5 @@ struct ContentView: View {
         )
         .preferredColorScheme(themeManager.preferredColorScheme)
         .accentColor(.orange)
-
     }
 }
