@@ -284,6 +284,18 @@ struct ClassAbilitiesSection: View {
                 .stroke(LinearGradient(colors: [.purple.opacity(0.3), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.5)
                 .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
         )
+        .onChange(of: character.subclass) { _ in
+            print("🔍 [ClassAbilitiesSection] Подкласс изменился, обновляем таблицу прогрессии")
+            reloadClassFeatures()
+        }
+        .onChange(of: character.characterClass) { _ in
+            print("🔍 [ClassAbilitiesSection] Класс изменился, обновляем таблицу прогрессии")
+            reloadClassFeatures()
+        }
+        .onChange(of: character.level) { _ in
+            print("🔍 [ClassAbilitiesSection] Уровень изменился, обновляем таблицу прогрессии")
+            reloadClassFeatures()
+        }
     }
 }
 
@@ -656,7 +668,7 @@ struct ClassFeaturesView: View {
                 .foregroundColor(.primary)
             
 
-                
+            
             // Main class features
             ForEach(1...characterClass.level, id: \.self) { level in
                 let features = classFeatures["\(level)"] ?? []
@@ -729,7 +741,7 @@ struct ClassFeaturesView: View {
                                         .padding(.top, 8)
                                         .padding(.bottom, 8)
                                         .padding(.trailing, 8)
-                                    }
+                                }
                             }
                             .padding(8)
                             .background(

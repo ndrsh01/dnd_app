@@ -189,6 +189,19 @@ struct CharacterSelectionView: View {
         .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
             do {
                 let url = try result.get()
+                
+                // Начинаем доступ к безопасности
+                guard url.startAccessingSecurityScopedResource() else {
+                    print("❌ Не удалось получить доступ к файлу")
+                    showImportError = true
+                    importMessage = "Не удалось получить доступ к файлу"
+                    return
+                }
+                
+                defer {
+                    url.stopAccessingSecurityScopedResource()
+                }
+                
                 let data = try Data(contentsOf: url)
                 let jsonString = String(data: data, encoding: .utf8) ?? ""
                 
@@ -227,7 +240,22 @@ struct CharacterSelectionView: View {
             } catch {
                 print("❌ Ошибка импорта: \(error)")
                 showImportError = true
-                importMessage = "Ошибка чтения файла: \(error.localizedDescription)"
+                
+                // Более подробное сообщение об ошибке
+                if let nsError = error as NSError? {
+                    switch nsError.code {
+                    case NSFileReadNoPermissionError:
+                        importMessage = "Нет прав доступа к файлу. Попробуйте выбрать файл из другого места."
+                    case NSFileReadNoSuchFileError:
+                        importMessage = "Файл не найден."
+                    case NSFileReadCorruptFileError:
+                        importMessage = "Файл поврежден или имеет неверный формат."
+                    default:
+                        importMessage = "Ошибка чтения файла: \(error.localizedDescription)"
+                    }
+                } else {
+                    importMessage = "Ошибка чтения файла: \(error.localizedDescription)"
+                }
             }
         }
         .alert("Импорт успешен", isPresented: $showImportSuccess) {

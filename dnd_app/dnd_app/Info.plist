@@ -51,5 +51,11 @@
 	<true/>
 	<key>UIFileSharingEnabled</key>
 	<true/>
+	<key>NSFileProviderDomainUsageDescription</key>
+	<string>Приложению необходим доступ к файлам для импорта и экспорта персонажей</string>
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 </dict>
 </plist>

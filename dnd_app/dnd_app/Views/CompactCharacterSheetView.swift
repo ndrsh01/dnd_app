@@ -41,7 +41,7 @@ struct CompactCharacterSheetView: View {
                     HitPointsView(store: store, isEditingMode: isEditingMode)
                 
                 // Основные характеристики (компактно)
-                    CompactStatsView(character: current, store: store, isEditingMode: isEditingMode, onSaveChanges: onSaveChanges)
+                    CompactStatsView(character: current, store: store, isEditingMode: isEditingMode)
                 
                 // Ссылки на детальные разделы
                 DetailSectionsView(showingDetailSection: $showingDetailSection)
@@ -86,7 +86,6 @@ struct CharacterHeaderCompactView: View {
     // Временные значения для редактирования
     @State private var tempCharacter: Character
     @State private var selectedClass = ""
-    @State private var selectedSubclass = ""
     @State private var selectedBackground = ""
     @State private var selectedAlignment = ""
     @State private var showingImagePicker = false
@@ -95,9 +94,6 @@ struct CharacterHeaderCompactView: View {
     @State private var isLoadingClassFeatures = false
     @State private var showClassFeaturesNotification = false
     @State private var classFeaturesNotificationText = ""
-    @State private var showEditAlert = false
-    @State private var editingField = ""
-    @State private var editingValue = ""
     
     init(character: Character, store: CharacterStore, compendiumStore: CompendiumStore, classesStore: ClassesStore, isEditingMode: Bool, onSaveChanges: ((Character) -> Void)? = nil) {
         self.character = character
@@ -119,100 +115,47 @@ struct CharacterHeaderCompactView: View {
     }
     
     private func loadClassFeatures(for className: String, character: inout Character) {
-        print("🔍 === DEBUG: loadClassFeatures ===")
-        print("🔍 Входные параметры:")
-        print("  - className: \(className)")
-        print("  - character.name: \(character.name)")
-        print("  - character.level: \(character.level)")
-        print("  - character.subclass: \(character.subclass)")
+        // Получаем slug класса
+        let classSlug = getClassSlug(for: className)
         
-        // Принудительно загружаем классы если они еще не загружены
+        // Загружаем данные классов если еще не загружены
         if classesStore.classesBySlug.isEmpty {
-            print("🔍 ClassesStore пустой, загружаем данные классов...")
             classesStore.loadClasses()
-            return
         }
-        
-        // Получаем slug класса используя ClassesStore
-        guard let classSlug = classesStore.slug(for: className) else {
-            print("❌ [loadClassFeatures] Не удалось получить slug для класса: \(className)")
-            return
-        }
-        print("🔍 Получен slug класса: \(classSlug)")
-        
-        print("🔍 ClassesStore уже загружен, классов: \(classesStore.classesBySlug.count)")
         
         // Загружаем таблицы классов если еще не загружены
         if classesStore.classTablesBySlug.isEmpty {
-            print("🔍 Таблицы классов пустые, загружаем...")
             classesStore.loadClassTables()
-        } else {
-            print("🔍 Таблицы классов уже загружены, таблиц: \(classesStore.classTablesBySlug.count)")
         }
         
         // Проверяем, есть ли уже загруженные умения для этого класса
         if let existingFeatures = character.classFeatures[classSlug] {
-            // Если умения уже загружены, просто возвращаемся
-            print("🔍 Debug: Умения для \(className) уже загружены")
-            print("🔍 Количество уровней с умениями: \(existingFeatures.count)")
+            // Если умения уже загружены, просто обновляем особенности
+            updateFeaturesAndTraits(character: &character, features: existingFeatures, className: className)
             return
         }
         
-        print("🔍 Умения для \(className) не найдены, загружаем...")
-        
         // Получаем умения для всех уровней до текущего
         if let gameClass = classesStore.classesBySlug[classSlug] {
-            print("🔍 Класс найден в ClassesStore!")
-            print("🔍 Название класса: \(gameClass.name)")
-            print("🔍 Slug класса: \(gameClass.slug)")
-            print("🔍 Количество подклассов: \(gameClass.subclasses.count)")
-            print("🔍 Доступные уровни в данных: \(gameClass.featuresByLevel.keys.sorted())")
-            
             let currentLevel = character.level
             var allFeatures: [String: [ClassFeature]] = [:]
             var totalFeaturesCount = 0
             
-            // Загружаем базовые умения класса для всех уровней от 1 до 20
+            // Загружаем умения для всех уровней от 1 до 20
             for level in 1...20 {
                 let levelString = String(level)
                 if let featuresForLevel = gameClass.featuresByLevel[levelString] {
                     allFeatures[levelString] = featuresForLevel
                     totalFeaturesCount += featuresForLevel.count
-                    print("🔍 Debug: Загружено \(featuresForLevel.count) базовых умений для уровня \(level)")
-                } else {
-                    print("🔍 Debug: Для уровня \(level) базовых умений нет")
                 }
-            }
-            
-            // Загружаем умения только выбранного подкласса
-            if !character.subclass.isEmpty {
-                let selectedSubclass = character.subclass
-                if let subclass = gameClass.subclasses.first(where: { $0.name_ru.lowercased() == selectedSubclass.lowercased() }) {
-                    print("🔍 Debug: Загружаем умения выбранного подкласса '\(subclass.name_ru)'")
-                    
-                    // Добавляем умения подкласса к соответствующим уровням
-                    for (levelString, subclassFeatures) in subclass.featuresByLevel {
-                        if allFeatures[levelString] != nil {
-                            allFeatures[levelString]?.append(contentsOf: subclassFeatures)
-                        } else {
-                            allFeatures[levelString] = subclassFeatures
-                        }
-                        totalFeaturesCount += subclassFeatures.count
-                        print("🔍 Debug: Добавлено \(subclassFeatures.count) умений подкласса '\(subclass.name_ru)' для уровня \(levelString)")
-                    }
-                } else {
-                    print("🔍 Debug: Выбранный подкласс '\(selectedSubclass)' не найден в классе '\(gameClass.name)'")
-                }
-            } else {
-                print("🔍 Debug: Подкласс не выбран, загружаем только базовые умения класса")
             }
             
             if !allFeatures.isEmpty {
-                print("🔍 ✅ Успешно загружено \(totalFeaturesCount) умений для \(className)")
-                print("🔍 Уровни с умениями: \(allFeatures.keys.sorted())")
-                
                 // Обновляем классовые умения персонажа
                 character.classFeatures[classSlug] = allFeatures
+                
+                // Обновляем особенности и черты персонажа
+                updateFeaturesAndTraits(character: &character, features: allFeatures, className: className)
                 
                 // Показываем уведомление об успешной загрузке
                 classFeaturesNotificationText = "✅ Загружено \(totalFeaturesCount) умений для \(className) (все уровни)"
@@ -223,8 +166,6 @@ struct CharacterHeaderCompactView: View {
                     showClassFeaturesNotification = false
                 }
             } else {
-                print("🔍 ❌ Умения для \(className) не найдены!")
-                
                 // Показываем уведомление если умения не найдены
                 classFeaturesNotificationText = "⚠️ Умения для \(className) не найдены"
                 showClassFeaturesNotification = true
@@ -235,9 +176,6 @@ struct CharacterHeaderCompactView: View {
                 }
             }
         } else {
-            print("🔍 ❌ Класс \(className) не найден в ClassesStore!")
-            print("🔍 Доступные классы: \(classesStore.classesBySlug.keys)")
-            
             // Показываем уведомление если класс не найден
             classFeaturesNotificationText = "❌ Класс \(className) не найден в базе данных"
             showClassFeaturesNotification = true
@@ -247,8 +185,6 @@ struct CharacterHeaderCompactView: View {
                 showClassFeaturesNotification = false
             }
         }
-        
-        print("🔍 === КОНЕЦ loadClassFeatures ===")
         
         // Получаем таблицу прогрессии класса
         if let classTable = classesStore.classTablesBySlug[classSlug] {
@@ -282,152 +218,24 @@ struct CharacterHeaderCompactView: View {
     }
     
     private func getClassSlug(for className: String) -> String {
-        return classesStore.slug(for: className) ?? "fighter"
-    }
-    
-
-    
-    private func getSubclassOptions(for className: String) -> [(String, String)] {
-        var options = [("", "Не выбран")]
-        
-        print("🔍 [getSubclassOptions] Ищем подклассы для класса: '\(className)'")
-        
-        // Принудительно загружаем классы если они еще не загружены
-        if classesStore.classesBySlug.isEmpty {
-            print("🔍 [getSubclassOptions] ClassesStore пустой, загружаем классы...")
-            classesStore.loadClasses()
-            
-            // Ждем немного для загрузки
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                // Обновляем UI после загрузки
-                if let current = store.selectedCharacter {
-                    store.selectedCharacter = current
-                }
-            }
+        switch className.lowercased() {
+        case "варвар": return "barbarian"
+        case "бард": return "bard"
+        case "волшебник": return "wizard"
+        case "друид": return "druid"
+        case "жрец": return "cleric"
+        case "колдун": return "warlock"
+        case "монах": return "monk"
+        case "паладин": return "paladin"
+        case "плут": return "rogue"
+        case "следопыт": return "ranger"
+        case "чародей": return "sorcerer"
+        default: return "fighter"
         }
-        
-        print("🔍 [getSubclassOptions] Доступные классы: \(classesStore.classesBySlug.keys.sorted())")
-        
-        // Используем функцию slug из ClassesStore для получения правильного slug
-        if let classSlug = classesStore.slug(for: className),
-           let gameClass = classesStore.classesBySlug[classSlug] {
-            print("🔍 [getSubclassOptions] Найден класс: \(gameClass.name) (slug: \(classSlug))")
-            print("🔍 [getSubclassOptions] Количество подклассов: \(gameClass.subclasses.count)")
-            
-            for (index, subclass) in gameClass.subclasses.enumerated() {
-                print("🔍 [getSubclassOptions] Подкласс \(index + 1): \(subclass.name_ru)")
-                options.append((subclass.name_ru, subclass.name_ru))
-            }
-        } else {
-            print("❌ [getSubclassOptions] Класс '\(className)' не найден")
-            print("❌ [getSubclassOptions] Полученный slug: \(classesStore.slug(for: className) ?? "nil")")
-        }
-        
-        print("🔍 [getSubclassOptions] Итоговые опции: \(options)")
-        return options
     }
     
     var body: some View {
-        mainContentView
-    }
-    
-    @ViewBuilder
-    private var mainContentView: some View {
         VStack(spacing: 0) {
-            headerSection
-            characterInfoSection
-            classSelectionSection
-            abilitiesSection
-            combatSection
-            skillsSection
-            spellsSection
-            notesSection
-        }
-        .onChange(of: character) { newCharacter in
-            print("🔍 [character onChange] Загружаем персонажа: \(newCharacter.name)")
-            print("🔍 [character onChange] Класс: '\(newCharacter.characterClass)'")
-            print("🔍 [character onChange] Подкласс: '\(newCharacter.subclass)'")
-            
-            tempCharacter = newCharacter
-            selectedClass = newCharacter.displayClassName
-            selectedSubclass = newCharacter.subclass
-            selectedBackground = newCharacter.background
-            selectedAlignment = newCharacter.alignment
-            
-            print("🔍 [character onChange] Установлен selectedSubclass: '\(selectedSubclass)'")
-            
-            // Автоматически загружаем классовые умения при открытии персонажа
-            if !newCharacter.characterClass.isEmpty {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    var updatedCharacter = newCharacter
-                    loadClassFeatures(for: newCharacter.characterClass, character: &updatedCharacter)
-                    store.update(updatedCharacter)
-                    store.selectedCharacter = updatedCharacter
-                }
-            }
-        }
-        .onChange(of: selectedClass) { newClass in
-            if !newClass.isEmpty {
-                isLoadingClassFeatures = true
-                
-                var updatedCharacter = character
-                updatedCharacter.characterClass = newClass
-                
-                // Очищаем подкласс при смене класса
-                updatedCharacter.subclass = ""
-                selectedSubclass = ""
-                
-                // Очищаем старые умения класса
-                let classSlug = getClassSlug(for: newClass)
-                updatedCharacter.classFeatures[classSlug] = [:]
-                
-                // Загружаем классовые умения для нового класса
-                loadClassFeatures(for: newClass, character: &updatedCharacter)
-                
-                store.update(updatedCharacter)
-                // Немедленно обновляем выбранного персонажа
-                store.selectedCharacter = updatedCharacter
-                
-                // Скрываем индикатор загрузки через небольшую задержку
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    isLoadingClassFeatures = false
-                }
-            }
-        }
-        .onChange(of: selectedSubclass) { newSubclass in
-            print("🔍 [selectedSubclass onChange] Новый подкласс: '\(newSubclass)'")
-            var updatedCharacter = character
-            updatedCharacter.subclass = newSubclass
-            
-            print("🔍 [selectedSubclass onChange] Обновляем персонажа с подклассом: '\(updatedCharacter.subclass)'")
-            
-            // Перезагружаем классовые умения с учетом нового подкласса
-            if !updatedCharacter.characterClass.isEmpty {
-                loadClassFeatures(for: updatedCharacter.characterClass, character: &updatedCharacter)
-            }
-            
-            store.update(updatedCharacter)
-            store.selectedCharacter = updatedCharacter
-            onSaveChanges?(updatedCharacter)
-        }
-        .onChange(of: selectedBackground) { newBackground in
-            var updatedCharacter = character
-            updatedCharacter.background = newBackground
-            store.update(updatedCharacter)
-            store.selectedCharacter = updatedCharacter
-            onSaveChanges?(updatedCharacter)
-        }
-        .onChange(of: selectedAlignment) { newAlignment in
-            var updatedCharacter = character
-            updatedCharacter.alignment = newAlignment
-            store.update(updatedCharacter)
-            store.selectedCharacter = updatedCharacter
-            onSaveChanges?(updatedCharacter)
-        }
-    }
-    
-    @ViewBuilder
-    private var headerSection: some View {
             // Главная секция с аватаром и именем
             HStack(spacing: 20) {
                 // Современный аватар с градиентом
@@ -645,6 +453,18 @@ struct CharacterHeaderCompactView: View {
             // Дополнительная информация в современном стиле
             VStack(spacing: 12) {
                 HStack(spacing: 16) {
+                    EditableModernInfoItem(
+                        icon: "person.circle", 
+                        title: "Игрок", 
+                        value: character.playerName, 
+                        color: .blue,
+                        isEditing: isEditingMode,
+                        onValueChange: { newValue in
+                            var updatedCharacter = character
+                            updatedCharacter.playerName = newValue
+                            store.update(updatedCharacter)
+                        }
+                    )
                     VStack(spacing: 4) {
                         PickerModernInfoItem(
                             icon: "shield.fill", 
@@ -681,16 +501,6 @@ struct CharacterHeaderCompactView: View {
                             .padding(.top, 4)
                         }
                     }
-                    
-                    PickerModernInfoItem(
-                        icon: "star.circle", 
-                        title: "Подкласс", 
-                        value: character.subclass.isEmpty ? "Не выбран" : character.subclass, 
-                        color: .purple,
-                        isEditing: isEditingMode,
-                        selectedValue: $selectedSubclass,
-                        options: getSubclassOptions(for: character.characterClass)
-                    )
                 }
                 
                 HStack(spacing: 16) {
@@ -706,7 +516,6 @@ struct CharacterHeaderCompactView: View {
                             ("Аколит", "Аколит"),
                             ("Благородный", "Благородный"),
                             ("Гильдейский ремесленник", "Гильдейский ремесленник"),
-                            ("Моряк", "Моряк"),
                             ("Отшельник", "Отшельник"),
                             ("Пират", "Пират"),
                             ("Преступник", "Преступник"),
@@ -743,49 +552,170 @@ struct CharacterHeaderCompactView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
         }
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(.systemBackground),
+                            Color(.systemBackground).opacity(0.95)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .stroke(
+                    LinearGradient(
+                        colors: [.orange.opacity(0.3), .orange.opacity(0.1)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.5
+                )
+                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+        )
+        .alert("Редактировать имя", isPresented: $editingName) {
+            TextField("Имя персонажа", text: $newName)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if !newName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    var updatedCharacter = character
+                    updatedCharacter.name = newName
+                    store.update(updatedCharacter)
+                }
+            }
+        }
+        .alert("Редактировать расу", isPresented: $editingRace) {
+            TextField("Раса", text: $newRace)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if !newRace.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    var updatedCharacter = character
+                    updatedCharacter.race = newRace
+                    store.update(updatedCharacter)
+                }
+            }
+        }
+
+        .alert("Редактировать уровень", isPresented: $editingLevel) {
+            TextField("Уровень", text: $newLevel)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if let level = Int(newLevel), level > 0, level <= 20 {
+                    isLoadingClassFeatures = true
+                    
+                    var updatedCharacter = character
+                    updatedCharacter.level = level
+                    updatedCharacter.proficiencyBonus = (updatedCharacter.level - 1) / 4 + 2
+                    
+                    // Обновляем классовые умения при изменении уровня
+                    if !updatedCharacter.characterClass.isEmpty {
+                        loadClassFeatures(for: updatedCharacter.characterClass, character: &updatedCharacter)
+                    }
+                    
+                    store.update(updatedCharacter)
+                    
+                    // Скрываем индикатор загрузки через небольшую задержку
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        isLoadingClassFeatures = false
+                    }
+                }
+            }
+        }
+        .onChange(of: character) { newCharacter in
+            tempCharacter = newCharacter
+            selectedClass = newCharacter.displayClassName
+            selectedBackground = newCharacter.background
+            selectedAlignment = newCharacter.alignment
+            
+            // Автоматически загружаем классовые умения при первом открытии персонажа
+            if !newCharacter.characterClass.isEmpty && newCharacter.classFeatures.isEmpty {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    var updatedCharacter = newCharacter
+                    loadClassFeatures(for: newCharacter.characterClass, character: &updatedCharacter)
+                    store.update(updatedCharacter)
+                    store.selectedCharacter = updatedCharacter
+                }
+            }
+        }
+        .onChange(of: selectedClass) { newClass in
+            if !newClass.isEmpty {
+                isLoadingClassFeatures = true
+                
+                var updatedCharacter = character
+                updatedCharacter.characterClass = newClass
+                
+                // Загружаем классовые умения для нового класса
+                loadClassFeatures(for: newClass, character: &updatedCharacter)
+                
+                store.update(updatedCharacter)
+                // Немедленно обновляем выбранного персонажа
+                store.selectedCharacter = updatedCharacter
+                
+                // Скрываем индикатор загрузки через небольшую задержку
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    isLoadingClassFeatures = false
+                }
+            }
+        }
+        .onChange(of: selectedBackground) { newBackground in
+            tempCharacter.background = newBackground
+        }
+        .onChange(of: selectedAlignment) { newAlignment in
+            tempCharacter.alignment = newAlignment
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .saveCharacterChanges)) { _ in
+            onSaveChanges?(tempCharacter)
+        }
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(image: $avatarImage)
+        }
+        .overlay(
+            // Toast уведомление о загрузке классовых умений
+            VStack {
+                Spacer()
+                
+                if showClassFeaturesNotification {
+                    HStack(spacing: 12) {
+                        Text(classFeaturesNotificationText)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.leading)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            showClassFeaturesNotification = false
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.white.opacity(0.8))
+                                .font(.caption)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.green.opacity(0.9), .green.opacity(0.8)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 100)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .animation(.easeInOut(duration: 0.3), value: showClassFeaturesNotification)
+                }
+            }
+        )
     }
-    
-    @ViewBuilder
-    private var characterInfoSection: some View {
-        // Здесь будет секция с информацией о персонаже
-        EmptyView()
-    }
-    
-    @ViewBuilder
-    private var classSelectionSection: some View {
-        // Здесь будет секция выбора класса
-        EmptyView()
-    }
-    
-    @ViewBuilder
-    private var abilitiesSection: some View {
-        // Здесь будет секция характеристик
-        EmptyView()
-    }
-    
-    @ViewBuilder
-    private var combatSection: some View {
-        // Здесь будет секция боевых характеристик
-        EmptyView()
-    }
-    
-    @ViewBuilder
-    private var skillsSection: some View {
-        // Здесь будет секция навыков
-        EmptyView()
-    }
-    
-    @ViewBuilder
-    private var spellsSection: some View {
-        // Здесь будет секция заклинаний
-        EmptyView()
-    }
-    
-    @ViewBuilder
-    private var notesSection: some View {
-        // Здесь будет секция заметок
-        EmptyView()
-    }
+}
 
 struct ModernInfoItem: View {
     let icon: String
@@ -933,26 +863,14 @@ struct PickerModernInfoItem: View {
                     .fontWeight(.medium)
                 
                 if isEditing {
-                    Button(action: {
-                        showingPickerAlert = true
-                    }) {
-                        HStack {
-                            Text(selectedValue.isEmpty ? "Выбрать" : selectedValue)
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.down")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                    Picker(title, selection: $selectedValue) {
+                        ForEach(options, id: \.0) { option in
+                            Text(option.1).tag(option.0)
                         }
                     }
+                    .pickerStyle(MenuPickerStyle())
+                    .accentColor(.primary)
                     .onAppear {
-                        print("🔍 [PickerModernInfoItem] onAppear - title: \(title), value: \(value), selectedValue: \(selectedValue)")
                         selectedValue = value
                     }
                 } else {
@@ -977,7 +895,6 @@ struct PickerModernInfoItem: View {
         .alert("Выбрать \(title)", isPresented: $showingPickerAlert) {
             ForEach(options, id: \.0) { option in
                 Button(option.1) {
-                    print("🔍 [PickerModernInfoItem] Выбран: \(option.1) (значение: \(option.0))")
                     selectedValue = option.0
                 }
             }
@@ -1279,10 +1196,6 @@ struct CompactStatsView: View {
     let character: Character
     let store: CharacterStore
     let isEditingMode: Bool
-    let onSaveChanges: ((Character) -> Void)?
-    @State private var showEditAlert = false
-    @State private var editingField = ""
-    @State private var editingValue = ""
     
     var body: some View {
         VStack(spacing: 20) {
@@ -1312,8 +1225,6 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.strength = newScore
                         store.update(updatedCharacter)
-                        store.selectedCharacter = updatedCharacter
-                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1327,8 +1238,6 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.dexterity = newScore
                         store.update(updatedCharacter)
-                        store.selectedCharacter = updatedCharacter
-                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1342,8 +1251,6 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.constitution = newScore
                         store.update(updatedCharacter)
-                        store.selectedCharacter = updatedCharacter
-                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1357,8 +1264,6 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.intelligence = newScore
                         store.update(updatedCharacter)
-                        store.selectedCharacter = updatedCharacter
-                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1372,8 +1277,6 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.wisdom = newScore
                         store.update(updatedCharacter)
-                        store.selectedCharacter = updatedCharacter
-                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1387,8 +1290,6 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.charisma = newScore
                         store.update(updatedCharacter)
-                        store.selectedCharacter = updatedCharacter
-                        onSaveChanges?(updatedCharacter)
                     }
                 )
             }
@@ -1409,39 +1310,9 @@ struct CompactStatsView: View {
                 }
                 
                 HStack(spacing: 12) {
-                    ModernCombatStat(
-                        title: "КЗ", 
-                        value: "\(character.armorClass)", 
-                        icon: "shield.fill", 
-                        color: .blue,
-                        onLongPress: {
-                            showEditAlert = true
-                            editingField = "armorClass"
-                            editingValue = String(character.armorClass)
-                        }
-                    )
-                    ModernCombatStat(
-                        title: "Инициатива", 
-                        value: character.initiative >= 0 ? "+\(character.initiative)" : "\(character.initiative)", 
-                        icon: "bolt.fill", 
-                        color: .yellow,
-                        onLongPress: {
-                            showEditAlert = true
-                            editingField = "initiative"
-                            editingValue = String(character.initiative)
-                        }
-                    )
-                    ModernCombatStat(
-                        title: "Скорость", 
-                        value: "\(character.effectiveSpeed) фт.", 
-                        icon: "figure.walk", 
-                        color: .green,
-                        onLongPress: {
-                            showEditAlert = true
-                            editingField = "speed"
-                            editingValue = String(character.speed)
-                        }
-                    )
+                    ModernCombatStat(title: "КЗ", value: "\(character.armorClass)", icon: "shield.fill", color: .blue)
+                    ModernCombatStat(title: "Инициатива", value: character.initiative >= 0 ? "+\(character.initiative)" : "\(character.initiative)", icon: "bolt.fill", color: .yellow)
+                    ModernCombatStat(title: "Скорость", value: "\(character.effectiveSpeed) фт.", icon: "figure.walk", color: .green)
                 }
             }
         }
@@ -1468,29 +1339,6 @@ struct CompactStatsView: View {
                 )
                 .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
         )
-        .alert("Редактировать", isPresented: $showEditAlert) {
-            TextField("Значение", text: $editingValue)
-                .keyboardType(.numberPad)
-            Button("Отмена", role: .cancel) { }
-            Button("Сохранить") {
-                if let newValue = Int(editingValue) {
-                    var updatedCharacter = character
-                    switch editingField {
-                    case "armorClass":
-                        updatedCharacter.armorClass = newValue
-                    case "initiative":
-                        updatedCharacter.initiative = newValue
-                    case "speed":
-                        updatedCharacter.speed = newValue
-                    default:
-                        break
-                    }
-                    store.update(updatedCharacter)
-                }
-            }
-        } message: {
-            Text("Введите новое значение для \(editingField == "armorClass" ? "КЗ" : editingField == "initiative" ? "Инициативы" : "Скорости")")
-        }
     }
 }
 
@@ -1685,15 +1533,6 @@ struct ModernCombatStat: View {
     let value: String
     let icon: String
     let color: Color
-    let onLongPress: (() -> Void)?
-    
-    init(title: String, value: String, icon: String, color: Color, onLongPress: (() -> Void)? = nil) {
-        self.title = title
-        self.value = value
-        self.icon = icon
-        self.color = color
-        self.onLongPress = onLongPress
-    }
     
     var body: some View {
         VStack(spacing: 6) {
@@ -1720,9 +1559,6 @@ struct ModernCombatStat: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(color.opacity(0.08))
         )
-        .onLongPressGesture {
-            onLongPress?()
-        }
     }
 }
 

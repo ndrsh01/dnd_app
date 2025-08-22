@@ -18,7 +18,7 @@ struct DetailSectionView: View {
                         AbilitiesDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
                     case .combat:
                         CombatDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
-                                case .skills:
+                    case .skills:
                 SkillsDetailView(character: character, store: store, onSaveChanges: onSaveChanges)
                     case .spells:
                         ClassAbilitiesDetailView(character: character, compendiumStore: compendiumStore, classesStore: classesStore, onSaveChanges: onSaveChanges)
@@ -154,8 +154,11 @@ struct AbilitiesDetailView: View {
                             modifier: character.savingThrowModifier(for: ability),
                             isProficient: character.savingThrows[ability] == true,
                             onToggleProficiency: {
+                                print("🔍 [SaveThrowRow] Переключаем владение для \(ability)")
                                 var updatedCharacter = character
-                                updatedCharacter.savingThrows[ability] = !(character.savingThrows[ability] == true)
+                                let currentValue = updatedCharacter.savingThrows[ability] ?? false
+                                updatedCharacter.savingThrows[ability] = !currentValue
+                                print("🔍 [SaveThrowRow] Новое значение для \(ability): \(updatedCharacter.savingThrows[ability] ?? false)")
                                 store.update(updatedCharacter)
                                 store.selectedCharacter = updatedCharacter
                                 onSaveChanges?(updatedCharacter)
@@ -271,23 +274,26 @@ struct SaveThrowRow: View {
             
             Spacer()
             
-            HStack(spacing: 4) {
-                if isProficient {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.orange)
-                        .font(.caption)
+            if isProficient {
+                HStack(spacing: 4) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.orange)
+                    .font(.caption)
                     Text("Проф.")
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.orange)
                 }
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(isProficient ? Color.orange.opacity(0.1) : Color.clear)
-            .cornerRadius(8)
-            .onTapGesture {
-                onToggleProficiency()
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(8)
+            } else {
+                // Пустая кликабельная область для добавления владения
+                HStack {
+                    Spacer()
+                }
+                .frame(minWidth: 50, minHeight: 20)
             }
             
             Text(modifier >= 0 ? "+\(modifier)" : "\(modifier)")
@@ -302,6 +308,10 @@ struct SaveThrowRow: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemGray6))
         )
+        .onTapGesture(count: 2) {
+            print("🔍 [SaveThrowRow] Двойной клик по всей строке для \(abilityName) (isProficient: \(isProficient))")
+            onToggleProficiency()
+        }
     }
 }
 
@@ -388,8 +398,8 @@ struct CombatDetailView: View {
                             newMaxHP = String(character.maxHitPoints)
                             editingMaxHP = true
                         }) {
-                            Text("\(character.maxHitPoints)")
-                                .fontWeight(.semibold)
+                        Text("\(character.maxHitPoints)")
+                            .fontWeight(.semibold)
                                 .foregroundColor(.blue)
                         }
                     }
@@ -401,15 +411,15 @@ struct CombatDetailView: View {
                             newCurrentHP = String(character.currentHitPoints)
                             editingCurrentHP = true
                         }) {
-                            Text("\(character.currentHitPoints)")
-                                .fontWeight(.semibold)
-                                .foregroundColor(.red)
+                        Text("\(character.currentHitPoints)")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.red)
                         }
                     }
                     
-                    HStack {
-                        Text("Временные хиты:")
-                        Spacer()
+                        HStack {
+                            Text("Временные хиты:")
+                            Spacer()
                         Button(action: {
                             newTempHP = String(character.temporaryHitPoints)
                             editingTempHP = true
@@ -924,7 +934,8 @@ struct SkillDetailRow: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemGray6))
         )
-        .onTapGesture {
+        .onTapGesture(count: 2) {
+            print("🔍 [SkillDetailRow] Двойной клик по навыку \(skillName)")
             toggleProficiency()
         }
     }
@@ -1067,7 +1078,7 @@ struct ClassAbilitiesDetailView: View {
                             .foregroundColor(.purple)
                     }
                     
-                    Text("Ячейки заклинаний")
+                Text("Ячейки заклинаний")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
@@ -1092,32 +1103,32 @@ struct ClassAbilitiesDetailView: View {
             // Заклинания (только если есть избранные)
             if !favoriteSpells.isEmpty {
                 // Заголовок заклинаний
-                HStack {
-                    ZStack {
-                        Circle()
+                    HStack {
+                        ZStack {
+                            Circle()
                             .fill(Color.blue.opacity(0.2))
-                            .frame(width: 32, height: 32)
-                        
+                                .frame(width: 32, height: 32)
+                            
                         Image(systemName: "sparkles")
-                            .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.blue)
-                    }
-                    
+                        }
+                        
                     Text("Заклинания")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                }
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                    }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
-                
+                    
                 // Карточки заклинаний на всю ширину экрана
-                LazyVStack(spacing: 12) {
-                    ForEach(favoriteSpells) { spell in
-                        CompendiumSpellCard(spell: spell, favorites: favorites)
-                            .frame(maxWidth: .infinity)
+                    LazyVStack(spacing: 12) {
+                        ForEach(favoriteSpells) { spell in
+                            CompendiumSpellCard(spell: spell, favorites: favorites)
+                                .frame(maxWidth: .infinity)
                     }
                 }
                 .padding(.bottom, 16)
@@ -1138,32 +1149,32 @@ struct ClassAbilitiesDetailView: View {
             
             if hasSpellcasters, !availableSpells.isEmpty {
                 // Заголовок заклинаний
-                HStack {
-                    ZStack {
-                        Circle()
-                            .fill(Color.blue.opacity(0.2))
-                            .frame(width: 32, height: 32)
-                        
+                    HStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color.blue.opacity(0.2))
+                                .frame(width: 32, height: 32)
+                            
                         Image(systemName: "sparkles")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.blue)
-                    }
-                    
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.blue)
+                        }
+                        
                     Text("Заклинания")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                }
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                    }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
-                
+                    
                 // Карточки заклинаний на всю ширину экрана
-                LazyVStack(spacing: 12) {
+                    LazyVStack(spacing: 12) {
                     ForEach(availableSpells) { spell in
-                        SpellCard(spell: spell)
-                            .frame(maxWidth: .infinity)
+                            SpellCard(spell: spell)
+                                .frame(maxWidth: .infinity)
                     }
                 }
                 .padding(.bottom, 16)
@@ -2269,15 +2280,15 @@ struct BackgroundCard: View {
                                 .foregroundColor(.indigo)
                                 .font(.caption)
                             Text(background.description.parseMarkdown())
-                                .font(.body)
-                                .foregroundColor(.primary)
-                                .multilineTextAlignment(.leading)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
                             Spacer()
                         }
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 16)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
             }
         }
         .background(Color(.systemBackground))
