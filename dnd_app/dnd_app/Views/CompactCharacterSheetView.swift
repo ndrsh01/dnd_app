@@ -41,19 +41,6 @@ struct CompactCharacterSheetView: View {
                 
                 // Ссылки на детальные разделы
                 DetailSectionsView(showingDetailSection: $showingDetailSection)
-                
-                // Классовые умения с таблицей прогрессии
-                ClassAbilitiesSection(
-                    character: Binding(
-                        get: { current },
-                        set: { newCharacter in
-                            store.update(newCharacter)
-                            store.selectedCharacter = newCharacter
-                            onSaveChanges?(newCharacter)
-                        }
-                    ),
-                    onSaveChanges: onSaveChanges
-                )
                 }
             }
             .padding()
