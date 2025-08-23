@@ -41,10 +41,23 @@ struct CompactCharacterSheetView: View {
                     HitPointsView(store: store, isEditingMode: isEditingMode)
                 
                 // Основные характеристики (компактно)
-                    CompactStatsView(character: current, store: store, isEditingMode: isEditingMode)
+                    CompactStatsView(character: current, store: store, isEditingMode: isEditingMode, onSaveChanges: onSaveChanges)
                 
                 // Ссылки на детальные разделы
                 DetailSectionsView(showingDetailSection: $showingDetailSection)
+                
+                // Классовые умения с таблицей прогрессии
+                ClassAbilitiesSection(
+                    character: Binding(
+                        get: { current },
+                        set: { newCharacter in
+                            store.update(newCharacter)
+                            store.selectedCharacter = newCharacter
+                            onSaveChanges?(newCharacter)
+                        }
+                    ),
+                    onSaveChanges: onSaveChanges
+                )
                 }
             }
             .padding()
@@ -86,6 +99,7 @@ struct CharacterHeaderCompactView: View {
     // Временные значения для редактирования
     @State private var tempCharacter: Character
     @State private var selectedClass = ""
+    @State private var selectedSubclass = ""
     @State private var selectedBackground = ""
     @State private var selectedAlignment = ""
     @State private var showingImagePicker = false
@@ -233,6 +247,26 @@ struct CharacterHeaderCompactView: View {
         default: return "fighter"
         }
     }
+    
+    private func getSubclassOptions() -> [(String, String)] {
+        var options = [("", "Выберите подкласс")]
+        
+        // Загружаем данные классов если нужно
+        if classesStore.classesBySlug.isEmpty {
+            classesStore.loadClasses()
+        }
+        
+        let classSlug = getClassSlug(for: character.characterClass)
+        if let gameClass = classesStore.classesBySlug[classSlug] {
+            for subclass in gameClass.subclasses {
+                options.append((subclass.name, subclass.name))
+            }
+        }
+        
+        return options
+    }
+    
+
     
     var body: some View {
         VStack(spacing: 0) {
@@ -453,54 +487,53 @@ struct CharacterHeaderCompactView: View {
             // Дополнительная информация в современном стиле
             VStack(spacing: 12) {
                 HStack(spacing: 16) {
-                    EditableModernInfoItem(
-                        icon: "person.circle", 
-                        title: "Игрок", 
-                        value: character.playerName, 
-                        color: .blue,
+                    PickerModernInfoItem(
+                        icon: "shield.fill", 
+                        title: "Класс", 
+                        value: character.displayClassName, 
+                        color: .green,
                         isEditing: isEditingMode,
-                        onValueChange: { newValue in
-                            var updatedCharacter = character
-                            updatedCharacter.playerName = newValue
-                            store.update(updatedCharacter)
-                        }
+                        selectedValue: $selectedClass,
+                        options: [
+                            ("", "Выберите класс"),
+                            ("Варвар", "Варвар"),
+                            ("Бард", "Бард"),
+                            ("Волшебник", "Волшебник"),
+                            ("Друид", "Друид"),
+                            ("Жрец", "Жрец"),
+                            ("Колдун", "Колдун"),
+                            ("Монах", "Монах"),
+                            ("Паладин", "Паладин"),
+                            ("Плут", "Плут"),
+                            ("Следопыт", "Следопыт"),
+                            ("Чародей", "Чародей")
+                        ]
                     )
-                    VStack(spacing: 4) {
+                    
+                    // Выбор подкласса (если есть класс)
+                    if !character.characterClass.isEmpty {
                         PickerModernInfoItem(
-                            icon: "shield.fill", 
-                            title: "Класс", 
-                            value: character.displayClassName, 
-                            color: .green,
+                            icon: "star.fill", 
+                            title: "Подкласс", 
+                            value: character.subclass.isEmpty ? "Нет подкласса" : character.subclass, 
+                            color: .orange,
                             isEditing: isEditingMode,
-                            selectedValue: $selectedClass,
-                            options: [
-                                ("", "Выберите класс"),
-                                ("Варвар", "Варвар"),
-                                ("Бард", "Бард"),
-                                ("Волшебник", "Волшебник"),
-                                ("Друид", "Друид"),
-                                ("Жрец", "Жрец"),
-                                ("Колдун", "Колдун"),
-                                ("Монах", "Монах"),
-                                ("Паладин", "Паладин"),
-                                ("Плут", "Плут"),
-                                ("Следопыт", "Следопыт"),
-                                ("Чародей", "Чародей")
-                            ]
+                            selectedValue: $selectedSubclass,
+                            options: getSubclassOptions()
                         )
-                        
-                        if isLoadingClassFeatures {
-                            HStack(spacing: 4) {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .green))
-                                Text("Загрузка умений...")
-                                    .font(.caption2)
-                                    .foregroundColor(.green)
-                            }
-                            .padding(.top, 4)
-                        }
                     }
+                }
+                
+                if isLoadingClassFeatures {
+                    HStack(spacing: 4) {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .progressViewStyle(CircularProgressViewStyle(tint: .green))
+                        Text("Загрузка умений...")
+                            .font(.caption2)
+                            .foregroundColor(.green)
+                    }
+                    .padding(.top, 4)
                 }
                 
                 HStack(spacing: 16) {
@@ -626,6 +659,7 @@ struct CharacterHeaderCompactView: View {
         .onChange(of: character) { newCharacter in
             tempCharacter = newCharacter
             selectedClass = newCharacter.displayClassName
+            selectedSubclass = newCharacter.subclass
             selectedBackground = newCharacter.background
             selectedAlignment = newCharacter.alignment
             
@@ -657,6 +691,22 @@ struct CharacterHeaderCompactView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     isLoadingClassFeatures = false
                 }
+            }
+        }
+        .onChange(of: selectedSubclass) { newSubclass in
+            if !newSubclass.isEmpty {
+                var updatedCharacter = character
+                updatedCharacter.subclass = newSubclass
+                
+                // Обновляем классовые умения при изменении подкласса
+                if !updatedCharacter.characterClass.isEmpty {
+                    loadClassFeatures(for: updatedCharacter.characterClass, character: &updatedCharacter)
+                }
+                
+                store.update(updatedCharacter)
+                // Немедленно обновляем выбранного персонажа
+                store.selectedCharacter = updatedCharacter
+                onSaveChanges?(updatedCharacter)
             }
         }
         .onChange(of: selectedBackground) { newBackground in
@@ -1196,6 +1246,7 @@ struct CompactStatsView: View {
     let character: Character
     let store: CharacterStore
     let isEditingMode: Bool
+    let onSaveChanges: ((Character) -> Void)?
     
     var body: some View {
         VStack(spacing: 20) {
@@ -1225,6 +1276,8 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.strength = newScore
                         store.update(updatedCharacter)
+                        store.selectedCharacter = updatedCharacter
+                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1238,6 +1291,8 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.dexterity = newScore
                         store.update(updatedCharacter)
+                        store.selectedCharacter = updatedCharacter
+                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1251,6 +1306,8 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.constitution = newScore
                         store.update(updatedCharacter)
+                        store.selectedCharacter = updatedCharacter
+                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1264,6 +1321,8 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.intelligence = newScore
                         store.update(updatedCharacter)
+                        store.selectedCharacter = updatedCharacter
+                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1277,6 +1336,8 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.wisdom = newScore
                         store.update(updatedCharacter)
+                        store.selectedCharacter = updatedCharacter
+                        onSaveChanges?(updatedCharacter)
                     }
                 )
                 EditableModernStatItem(
@@ -1290,6 +1351,8 @@ struct CompactStatsView: View {
                         var updatedCharacter = character
                         updatedCharacter.charisma = newScore
                         store.update(updatedCharacter)
+                        store.selectedCharacter = updatedCharacter
+                        onSaveChanges?(updatedCharacter)
                     }
                 )
             }
@@ -1310,9 +1373,51 @@ struct CompactStatsView: View {
                 }
                 
                 HStack(spacing: 12) {
-                    ModernCombatStat(title: "КЗ", value: "\(character.armorClass)", icon: "shield.fill", color: .blue)
-                    ModernCombatStat(title: "Инициатива", value: character.initiative >= 0 ? "+\(character.initiative)" : "\(character.initiative)", icon: "bolt.fill", color: .yellow)
-                    ModernCombatStat(title: "Скорость", value: "\(character.effectiveSpeed) фт.", icon: "figure.walk", color: .green)
+                    ModernCombatStat(
+                        title: "КЗ", 
+                        value: "\(character.armorClass)", 
+                        icon: "shield.fill", 
+                        color: .blue,
+                        onValueChange: { newValue in
+                            if let newAC = Int(newValue) {
+                                var updatedCharacter = character
+                                updatedCharacter.armorClass = newAC
+                                store.update(updatedCharacter)
+                                store.selectedCharacter = updatedCharacter
+                                onSaveChanges?(updatedCharacter)
+                            }
+                        }
+                    )
+                    ModernCombatStat(
+                        title: "Инициатива", 
+                        value: character.initiative >= 0 ? "+\(character.initiative)" : "\(character.initiative)", 
+                        icon: "bolt.fill", 
+                        color: .yellow,
+                        onValueChange: { newValue in
+                            if let newInitiative = Int(newValue) {
+                                var updatedCharacter = character
+                                updatedCharacter.initiative = newInitiative
+                                store.update(updatedCharacter)
+                                store.selectedCharacter = updatedCharacter
+                                onSaveChanges?(updatedCharacter)
+                            }
+                        }
+                    )
+                    ModernCombatStat(
+                        title: "Скорость", 
+                        value: "\(character.effectiveSpeed) фт.", 
+                        icon: "figure.walk", 
+                        color: .green,
+                        onValueChange: { newValue in
+                            if let newSpeed = Int(newValue) {
+                                var updatedCharacter = character
+                                updatedCharacter.speed = newSpeed
+                                store.update(updatedCharacter)
+                                store.selectedCharacter = updatedCharacter
+                                onSaveChanges?(updatedCharacter)
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -1533,6 +1638,10 @@ struct ModernCombatStat: View {
     let value: String
     let icon: String
     let color: Color
+    let onValueChange: ((String) -> Void)?
+    
+    @State private var showingEditAlert = false
+    @State private var editingValue = ""
     
     var body: some View {
         VStack(spacing: 6) {
@@ -1546,6 +1655,10 @@ struct ModernCombatStat: View {
                 .font(.subheadline)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
+                .onLongPressGesture(minimumDuration: 0.5) {
+                    editingValue = value
+                    showingEditAlert = true
+                }
             
             // Название
             Text(title)
@@ -1559,6 +1672,14 @@ struct ModernCombatStat: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(color.opacity(0.08))
         )
+        .alert("Редактировать \(title)", isPresented: $showingEditAlert) {
+            TextField("Значение", text: $editingValue)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                onValueChange?(editingValue)
+            }
+        }
     }
 }
 

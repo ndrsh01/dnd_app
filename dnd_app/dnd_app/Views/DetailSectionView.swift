@@ -1399,7 +1399,18 @@ struct EquipmentDetailView: View {
                     
                     VStack(spacing: 12) {
                         ForEach(character.attacks) { attack in
-                            AttackCard(attack: attack)
+                            AttackCard(
+                                attack: attack,
+                                onUpdate: { updatedAttack in
+                                    var updatedCharacter = character
+                                    if let index = updatedCharacter.attacks.firstIndex(where: { $0.id == attack.id }) {
+                                        updatedCharacter.attacks[index] = updatedAttack
+                                        store.update(updatedCharacter)
+                                        store.selectedCharacter = updatedCharacter
+                                        onSaveChanges?(updatedCharacter)
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -1433,18 +1444,70 @@ struct EquipmentDetailView: View {
 
 struct AttackCard: View {
     let attack: Attack
+    let onUpdate: ((Attack) -> Void)?
+    
+    @State private var editingName = false
+    @State private var editingBonus = false
+    @State private var editingDamage = false
+    @State private var newName = ""
+    @State private var newBonus = ""
+    @State private var newDamage = ""
     
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(attack.name)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                if editingName {
+                    TextField("Название атаки", text: $newName)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .onSubmit {
+                            var updatedAttack = attack
+                            updatedAttack.name = newName
+                            onUpdate?(updatedAttack)
+                            editingName = false
+                        }
+                } else {
+                    Text(attack.name)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                        .onLongPressGesture(minimumDuration: 0.5) {
+                            newName = attack.name
+                            editingName = true
+                        }
+                }
                 
-                Text("Бонус атаки: \(attack.attackBonus)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                if editingBonus {
+                    HStack {
+                        Text("Бонус атаки: ")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        HStack {
+                            TextField("Бонус", text: $newBonus)
+                                .font(.subheadline)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.numberPad)
+                            
+                            Button("Готово") {
+                                var updatedAttack = attack
+                                updatedAttack.attackBonus = newBonus
+                                onUpdate?(updatedAttack)
+                                editingBonus = false
+                            }
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                        }
+                    }
+                } else {
+                    Text("Бонус атаки: \(attack.attackBonus)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .onLongPressGesture(minimumDuration: 0.5) {
+                            newBonus = String(attack.attackBonus)
+                            editingBonus = true
+                        }
+                }
             }
             
             Spacer()
@@ -1453,10 +1516,29 @@ struct AttackCard: View {
                 Text("Урон")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                Text(attack.damageType)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.orange)
+                
+                if editingDamage {
+                    TextField("Урон", text: $newDamage)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.orange)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .onSubmit {
+                            var updatedAttack = attack
+                            updatedAttack.damageType = newDamage
+                            onUpdate?(updatedAttack)
+                            editingDamage = false
+                        }
+                } else {
+                    Text(attack.damageType)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.orange)
+                        .onLongPressGesture(minimumDuration: 0.5) {
+                            newDamage = attack.damageType
+                            editingDamage = true
+                        }
+                }
             }
         }
         .padding()
