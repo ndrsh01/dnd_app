@@ -15,25 +15,36 @@ struct CharacterEditorView: View {
 		self._editedCharacter = State(initialValue: character ?? Character())
 	}
 
-	var body: some View {
-		NavigationStack {
-			ScrollView {
-				LazyVStack(spacing: 24) {
-					GroupBox { BasicInfoSection(character: $editedCharacter) }
-					GroupBox { CharacterClassesSection(character: $editedCharacter, classesStore: classesStore) }
-					GroupBox { ClassAbilitiesSection(character: $editedCharacter, onSaveChanges: { updatedCharacter in
-						editedCharacter = updatedCharacter
-					}) }
-					GroupBox { CombatStatsSection(character: $editedCharacter) }
-					GroupBox { AbilityScoresSection(character: $editedCharacter) }
-					GroupBox { SkillsSection(character: $editedCharacter) }
-					GroupBox { PersonalitySection(character: $editedCharacter) }
-					GroupBox { EquipmentSection(character: $editedCharacter) }
-					GroupBox { AttacksSection(character: $editedCharacter) }
-				}
-				.padding(16)
-			}
-		}
+        var body: some View {
+                NavigationStack {
+                        Form {
+                                Section { BasicInfoSection(character: $editedCharacter) }
+                                Section { CharacterClassesSection(character: $editedCharacter, classesStore: classesStore) }
+                                Section { ClassAbilitiesSection(character: $editedCharacter, onSaveChanges: { updatedCharacter in
+                                                editedCharacter = updatedCharacter
+                                        }) }
+                                Section { CombatStatsSection(character: $editedCharacter) }
+                                Section { AbilityScoresSection(character: $editedCharacter) }
+                                Section { SkillsSection(character: $editedCharacter) }
+                                Section { PersonalitySection(character: $editedCharacter) }
+                                Section { EquipmentSection(character: $editedCharacter) }
+                                Section { AttacksSection(character: $editedCharacter) }
+                        }
+                        .formStyle(.grouped)
+                        .scrollContentBackground(.hidden)
+                        .background(
+                                LinearGradient(
+                                        colors: [
+                                                Color(red: 0.988, green: 0.933, blue: 0.855),
+                                                Color(red: 0.988, green: 0.933, blue: 0.855).opacity(0.9),
+                                                Color(red: 0.988, green: 0.933, blue: 0.855)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                )
+                                .ignoresSafeArea()
+                        )
+                }
 		.navigationTitle(character == nil ? "Новый персонаж" : "Редактирование")
 		.navigationBarTitleDisplayMode(.inline)
 		.toolbar {

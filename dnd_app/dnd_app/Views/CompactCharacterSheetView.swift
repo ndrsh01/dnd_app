@@ -1,10 +1,6 @@
 import SwiftUI
 import PhotosUI
 
-extension Notification.Name {
-    static let saveCharacterChanges = Notification.Name("saveCharacterChanges")
-}
-
 struct CompactCharacterSheetView: View {
     let character: Character
     @ObservedObject var store: CharacterStore
@@ -715,8 +711,10 @@ struct CharacterHeaderCompactView: View {
         .onChange(of: selectedAlignment) { newAlignment in
             tempCharacter.alignment = newAlignment
         }
-        .onReceive(NotificationCenter.default.publisher(for: .saveCharacterChanges)) { _ in
-            onSaveChanges?(tempCharacter)
+        .onChange(of: tempCharacter) { updatedCharacter in
+            store.update(updatedCharacter)
+            store.selectedCharacter = updatedCharacter
+            onSaveChanges?(updatedCharacter)
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $avatarImage)
