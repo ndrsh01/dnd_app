@@ -45,6 +45,19 @@ struct CompactCharacterSheetView: View {
                 
                 // Ссылки на детальные разделы
                 DetailSectionsView(showingDetailSection: $showingDetailSection)
+                
+                // Классовые умения с таблицей прогрессии
+                ClassAbilitiesSection(
+                    character: Binding(
+                        get: { current },
+                        set: { newCharacter in
+                            store.update(newCharacter)
+                            store.selectedCharacter = newCharacter
+                            onSaveChanges?(newCharacter)
+                        }
+                    ),
+                    onSaveChanges: onSaveChanges
+                )
                 }
             }
             .padding()
@@ -1405,6 +1418,11 @@ struct CompactStatsView: View {
                             }
                         }
                     )
+                    SpellSaveDCStat(
+                        character: character,
+                        store: store,
+                        onSaveChanges: onSaveChanges
+                    )
                 }
             }
         }
@@ -1769,6 +1787,82 @@ struct CollapsibleSectionCard: View {
         .buttonStyle(PlainButtonStyle())
         .onTapGesture {
             onToggle()
+        }
+    }
+}
+
+struct SpellSaveDCStat: View {
+    let character: Character
+    let store: CharacterStore
+    let onSaveChanges: ((Character) -> Void)?
+    
+    @State private var showingEditAlert = false
+    @State private var editingValue = ""
+    
+    private var displayValue: String {
+        // Если есть ручное значение, используем его, иначе автоматически рассчитанное
+        if character.spellSaveDC != 8 { // 8 - значение по умолчанию
+            return "\(character.spellSaveDC)"
+        } else {
+            return "\(character.calculatedSpellSaveDC)"
+        }
+    }
+    
+    private var isAutoCalculated: Bool {
+        return character.spellSaveDC == 8 // 8 - значение по умолчанию
+    }
+    
+    var body: some View {
+        VStack(spacing: 6) {
+            // Иконка
+            Image(systemName: "sparkles")
+                .font(.caption)
+                .foregroundColor(.purple)
+            
+            // Значение
+            Text(displayValue)
+                .font(.subheadline)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+            .onLongPressGesture(minimumDuration: 0.5) {
+                editingValue = displayValue
+                showingEditAlert = true
+            }
+            
+            // Название
+            Text("Спасбросок")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .fontWeight(.medium)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.purple.opacity(0.08))
+        )
+        .alert("Редактировать сложность спасброска", isPresented: $showingEditAlert) {
+            TextField("Значение", text: $editingValue)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Авто") {
+                var updatedCharacter = character
+                updatedCharacter.spellSaveDC = 8 // Сброс к автоматическому расчету
+                store.update(updatedCharacter)
+                store.selectedCharacter = updatedCharacter
+                onSaveChanges?(updatedCharacter)
+            }
+            Button("Сохранить") {
+                if let newDC = Int(editingValue), newDC > 0 {
+                    var updatedCharacter = character
+                    updatedCharacter.spellSaveDC = newDC
+                    store.update(updatedCharacter)
+                    store.selectedCharacter = updatedCharacter
+                    onSaveChanges?(updatedCharacter)
+                }
+            }
+        } message: {
+            Text("Введите новое значение сложности спасброска или нажмите 'Авто' для автоматического расчета")
         }
     }
 }

@@ -241,6 +241,7 @@ struct Character: Identifiable, Codable, Equatable {
     var armorClass: Int = 10
     var initiative: Int = 0
     var speed: Int = 30
+    var spellSaveDC: Int = 8
     var maxHitPoints: Int = 0
     var currentHitPoints: Int = 0
     var temporaryHitPoints: Int = 0
@@ -362,7 +363,7 @@ struct Character: Identifiable, Codable, Equatable {
     // MARK: - Codable Implementation
     enum CodingKeys: String, CodingKey {
         case id, name, playerName, race, characterClass, characterClasses, background, alignment, experience, level
-        case armorClass, initiative, speed, maxHitPoints, currentHitPoints, temporaryHitPoints
+        case armorClass, initiative, speed, spellSaveDC, maxHitPoints, currentHitPoints, temporaryHitPoints
         case hitDiceTotal, hitDiceType, proficiencyBonus, inspiration
         case deathSaveSuccesses, deathSaveFailures, exhaustionLevel
         case strength, dexterity, constitution, intelligence, wisdom, charisma
@@ -392,6 +393,7 @@ struct Character: Identifiable, Codable, Equatable {
         armorClass = try container.decode(Int.self, forKey: .armorClass)
         initiative = try container.decode(Int.self, forKey: .initiative)
         speed = try container.decode(Int.self, forKey: .speed)
+        spellSaveDC = try container.decodeIfPresent(Int.self, forKey: .spellSaveDC) ?? 8
         maxHitPoints = try container.decode(Int.self, forKey: .maxHitPoints)
         currentHitPoints = try container.decode(Int.self, forKey: .currentHitPoints)
         temporaryHitPoints = try container.decode(Int.self, forKey: .temporaryHitPoints)
@@ -458,6 +460,7 @@ struct Character: Identifiable, Codable, Equatable {
         try container.encode(armorClass, forKey: .armorClass)
         try container.encode(initiative, forKey: .initiative)
         try container.encode(speed, forKey: .speed)
+        try container.encode(spellSaveDC, forKey: .spellSaveDC)
         try container.encode(maxHitPoints, forKey: .maxHitPoints)
         try container.encode(currentHitPoints, forKey: .currentHitPoints)
         try container.encode(temporaryHitPoints, forKey: .temporaryHitPoints)
@@ -534,6 +537,25 @@ struct Character: Identifiable, Codable, Equatable {
     
     // Скорость с учетом истощения
     var effectiveSpeed: Int { max(0, speed - (exhaustionLevel * 5)) }
+    
+    // Автоматический расчет сложности спасброска
+    var calculatedSpellSaveDC: Int {
+        // Определяем основную характеристику заклинателя на основе класса
+        let spellcastingAbility: String
+        if characterClasses.contains(where: { $0.name.lowercased().contains("волшебник") || $0.name.lowercased().contains("wizard") }) {
+            spellcastingAbility = "intelligence"
+        } else if characterClasses.contains(where: { $0.name.lowercased().contains("жрец") || $0.name.lowercased().contains("cleric") || $0.name.lowercased().contains("друид") || $0.name.lowercased().contains("druid") || $0.name.lowercased().contains("следопыт") || $0.name.lowercased().contains("ranger") }) {
+            spellcastingAbility = "wisdom"
+        } else if characterClasses.contains(where: { $0.name.lowercased().contains("бард") || $0.name.lowercased().contains("bard") || $0.name.lowercased().contains("колдун") || $0.name.lowercased().contains("warlock") || $0.name.lowercased().contains("чародей") || $0.name.lowercased().contains("sorcerer") || $0.name.lowercased().contains("паладин") || $0.name.lowercased().contains("paladin") }) {
+            spellcastingAbility = "charisma"
+        } else {
+            // По умолчанию используем интеллект
+            spellcastingAbility = "intelligence"
+        }
+        
+        let abilityModifier = abilityCheckModifier(for: spellcastingAbility)
+        return 8 + proficiencyBonus + abilityModifier
+    }
     
     // Ability checks with exhaustion penalty (ability checks include skills)
     func abilityCheckModifier(for ability: String) -> Int {
